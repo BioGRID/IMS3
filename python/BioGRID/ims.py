@@ -27,11 +27,16 @@ class Config:
 class _Table(object):
     """The class-wide variable _Table.config must be set with an
     instance of the Config class."""
+    _rename={}
     def __init__(self,row):
         self.row=row
 #    def __repr__(self):
 #        return '%s:%s' % (self.id_column(),self.id())
     def __getitem__(self,name):
+        try:
+            name=self._rename[name]
+        except KeyError:
+            pass
         return self.row[name]
     def __eq__(self,other):
         """This is a deep equals, it does more then just just the id,
@@ -69,6 +74,7 @@ class _Table(object):
         for column in self._columns:
             vals.append(self[column])
         vals.append(self.id())
+        #print vals
         cur.execute(self.insert_sql(), vals)
 
         #raise NotImplementedError(
@@ -98,4 +104,6 @@ class Project(_Table):
 
 class User(_Table):
     """Stores a row from the person table."""
-    pass
+    _columns=['user_name','user_password','user_cookie','user_firstname',
+              'user_lastname','user_email','user_addeddate','user_lastaccess',
+              'user_role','project_id']

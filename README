@@ -1,0 +1,6 @@
+Source Code for future versions of BioGRID IMS, see:
+
+       http://wiki.thebiogrid.org/doku.php/interaction_management_system
+
+For now mainly concerned in porting the IMS2 database schema to the
+IMS3 schema.
