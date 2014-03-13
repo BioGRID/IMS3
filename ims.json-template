@@ -1,0 +1,15 @@
+{
+    "dbs":
+	{
+	    "ims":{
+		"user":"imsadmin",
+		"passwd":"your password here",
+		"db":"sven"
+	},
+	    "ims2":{
+		"user":"imsadmin",
+		"passwd":"your password here",
+		"db":"biogrid_ims_snapshot"
+		    }
+	}
+}

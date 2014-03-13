@@ -1,0 +1,2 @@
+Lines in *.sql files that start withe "CREATE TABLE" will be parsed
+for a table name to be remove in thie ims2.py script.
