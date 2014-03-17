@@ -8,7 +8,12 @@ IMS_CONFIG=ims.json
 .PHONY:python ims3
 
 IMS2=$(PYTHON) -m BioGRID.ims2 --conf=$(IMS_CONFIG) --sql=$(SQL_DIR)
-TABLE_DEPENDS=Project User
+
+USER_TABLES=Project User
+# Project_user
+INTERACTION_TABLES=Interaction_source
+
+TABLE_DEPENDS=$(USER_TABLES) $(INTERACTION_TABLES)
 TABLE_RDEPENDS=$(call reverse,$(TABLE_DEPENDS))
 
 ims3:
@@ -17,6 +22,8 @@ ims3:
 clean:
 	$(IMS2) --clean $(TABLE_RDEPENDS)
 
+distclean:
+	find $(PYTHON_PREFIX) -name \*.pyc | xargs $(RM)
 
 python:
 	$(PYTHON)

@@ -12,7 +12,6 @@ class Project(BioGRID.ims.Project):
     _rename={'project_addeddate':'project_timestamp'}
 
     def __getitem__(self,name):
-        """Overloaded to convert IMS3 names to IMS2 names."""
         if 'project_status'==name:
             status=self.row[name]
             if('open'==status):
@@ -20,8 +19,7 @@ class Project(BioGRID.ims.Project):
             else:
                 return 'private'
         return super(Project,self).__getitem__(name)
-        
-        
+
 class User(BioGRID.ims.User):
     _rename={
         'user_password':'password',
@@ -41,6 +39,19 @@ class User(BioGRID.ims.User):
                 adddate=strftime("%Y-%m-%d %H:%M:%S")
             return adddate
         return super(User,self).__getitem__(name)
+
+class Project_user(BioGRID.ims.Project_user):
+    _rename={'project_user_addeddate':'project_users_timestamp'}
+    def __getitem__(self,name):
+        if 'project_user_status'==name:
+            return 'inactive'
+        return super(Project_user,self).__getitem__(name)
+    def id(self):
+        return None
+
+class Interaction_source(BioGRID.ims.Interaction_source):
+    def id(self):
+        return None
 
 if __name__ == '__main__':
     import sys
@@ -94,10 +105,19 @@ if __name__ == '__main__':
 
             c=ims2.cursor(MySQLdb.cursors.DictCursor)
 
-            # there doesn't really seem to be secure way to have dynamic
-            # table names
-            table_name='%ss' % job.lower()
-            c.execute('SELECT * FROM %s' % table_name)
+            if('Interaction_source'==job):
+                c.execute('''SELECT tag_name AS interaction_source_name,
+tag_added_date AS interaction_source_addeddate,
+tag_status AS interaction_source_status
+FROM tag_categories JOIN tags USING(tag_category_id)
+WHERE tag_category_name='Source'
+''')
+            else:
+                # there doesn't really seem to be secure way to have dynamic
+                # table names
+                table_name='%ss' % job.lower()
+                c.execute('SELECT * FROM %s' % table_name)
+
 
             raw=c.fetchone()
             Table=eval(job)

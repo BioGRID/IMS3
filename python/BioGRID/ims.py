@@ -3,6 +3,7 @@ import sys
 import MySQLdb
 import MySQLdb.cursors
 import warnings
+from copy import copy
  
 class Config:
     """Loads stuff from JSON configure file and provides access."""
@@ -33,11 +34,17 @@ class _Table(object):
 #    def __repr__(self):
 #        return '%s:%s' % (self.id_column(),self.id())
     def __getitem__(self,name):
+        # Rename items as needed, mainly for IMS2 conversion, bit I
+        # thought it might come in handy for other things too.
         try:
             name=self._rename[name]
         except KeyError:
             pass
-        return self.row[name]
+
+        try:
+            return self.row[name]
+        except KeyError:
+            return None
     def __eq__(self,other):
         """This is a deep equals, it does more then just just the id,
         it checks the elements too."""
@@ -73,9 +80,10 @@ class _Table(object):
         vals=[]
         for column in self._columns:
             vals.append(self[column])
-        vals.append(self.id())
-        #print vals
-        cur.execute(self.insert_sql(), vals)
+        primary_id=self.id()
+        if primary_id:
+            vals.append(self.id())
+        cur.execute(self.insert_sql(include_id_column=primary_id),vals)
 
         #raise NotImplementedError(
         #'insert not implemented for %s' % self.__class__.__name__)
@@ -90,12 +98,15 @@ class _Table(object):
             # A version of abrt older 2.0.8-21.el6 made this not work
             # correctly
             raise NotImplementedError('No updating parts!')
-    def insert_sql(self):
-        a='INSERT INTO %s(' % (self.table(),)
-        b=','.join(self._columns)
-        c=',%s'*len(self._columns)
-        return '%s%s,%s)VALUES(%%s%s)' % (a,b,self.id_column(),c)
-
+    def insert_sql(self,include_id_column=True):
+        if(include_id_column):
+            cols=copy(self._columns)
+            cols.append(self.id_column())
+        else:
+            cols=self._columns
+        return 'INSERT INTO %s(%s)VALUES(%s)' % (
+            self.table(),','.join(cols),('%s,'*len(cols)).strip(',')
+            )
 
 class Project(_Table):
     """Stores a row from the PROJECT table."""
@@ -103,7 +114,17 @@ class Project(_Table):
               ,'organism_id','project_status']
 
 class User(_Table):
-    """Stores a row from the person table."""
+    """Stores a row from the USERS table."""
     _columns=['user_name','user_password','user_cookie','user_firstname',
               'user_lastname','user_email','user_addeddate','user_lastaccess',
               'user_role','project_id']
+
+class Project_user(_Table):
+    """Stores a row from the PROJECT_USERS table."""
+    _columns=['project_id','user_id','project_user_status',
+              'project_user_addeddate']
+
+class Interaction_source(_Table):
+    _columns=['interaction_source_name','interaction_source_url',
+              'interaction_source_baseurl','interaction_source_addeddate',
+              'interaction_source_status']

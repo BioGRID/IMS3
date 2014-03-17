@@ -6,20 +6,9 @@ CREATE TABLE IF NOT EXISTS users(
        user_firstname	VARCHAR(255) NOT NULL,
        user_lastname	VARCHAR(255) NOT NULL,
        user_email	VARCHAR(255) NULL,
-       user_addeddate	DATETIME NOT NULL,
-       user_lastaccess	DATETIME NULL,
+       user_addeddate	TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+       user_lastaccess	TIMESTAMP NULL, -- NULL meant never accessed
        user_role	ENUM('curator','admin','observer') NOT NULL,
        project_id	BIGINT(10) NOT NULL,
        FOREIGN KEY(project_id)REFERENCES projects(project_id)
 );
-
--- CREATE TABLE IF NOT EXISTS project_users(
---        project_user_id		BIGINT(10) PRIMARY KEY,
---        project_id		BIGINT(10) NOT NULL,
---        user_id			BIGINT(10) NOT NULL,
---        project_user_status	ENUM('active','inactive') NOT NULL,
---        project_user_addeddate	DATETIME,
---        FOREIGN KEY(project_id)REFERENCES projects(project_id),
---        FOREIGN KEY(user_id)REFERENCES users(user_id),
---        UNIQUE KEY(project_id,user_id)
--- );
