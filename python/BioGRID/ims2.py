@@ -53,6 +53,16 @@ class Interaction_source(BioGRID.ims.Interaction_source):
     def id(self):
         return None
 
+class Interaction_quantitation_type(BioGRID.ims.Interaction_quantitation_type):
+    def __getitem__(self,name):
+        if 'interaction_quantitation_type_addeddate'==name:
+            return '%s %s' % (
+                self.row['interaction_quantitation_type_date_added'],
+                self.row['interaction_quantitation_type_time_added'])
+        elif 'interaction_quantitation_type_status'==name:
+            return 'active'
+        return super(Interaction_quantitation_type,self).__getitem__(name)
+
 if __name__ == '__main__':
     import sys
     from optparse import OptionParser
@@ -105,7 +115,7 @@ if __name__ == '__main__':
 
             c=ims2.cursor(MySQLdb.cursors.DictCursor)
 
-            if('Interaction_source'==job):
+            if 'Interaction_source'==job:
                 c.execute('''SELECT tag_name AS interaction_source_name,
 tag_added_date AS interaction_source_addeddate,
 tag_status AS interaction_source_status
@@ -115,7 +125,10 @@ WHERE tag_category_name='Source'
             else:
                 # there doesn't really seem to be secure way to have dynamic
                 # table names
-                table_name='%ss' % job.lower()
+                if 'Interaction_quantitation_type'==job:
+                    table_name=job.lower()
+                else:
+                    table_name='%ss' % job.lower()
                 c.execute('SELECT * FROM %s' % table_name)
 
 

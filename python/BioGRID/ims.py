@@ -128,3 +128,9 @@ class Interaction_source(_Table):
     _columns=['interaction_source_name','interaction_source_url',
               'interaction_source_baseurl','interaction_source_addeddate',
               'interaction_source_status']
+
+class Interaction_quantitation_type(_Table):
+    _columns=['interaction_quantitation_type_name',
+              'interaction_quantitation_type_desc',
+              'interaction_quantitation_type_addeddate',
+              'interaction_quantitation_type_status']

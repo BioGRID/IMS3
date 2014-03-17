@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS users(
-       user_id		BIGINT(10) PRIMARY KEY,
+       user_id		BIGINT(10) PRIMARY KEY AUTO_INCREMENT,
        user_name	VARCHAR(255) UNIQUE NOT NULL,
        user_password	VARCHAR(64) NOT NULL,
        user_cookie	VARCHAR(64) NULL,

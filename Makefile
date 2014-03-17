@@ -11,7 +11,7 @@ IMS2=$(PYTHON) -m BioGRID.ims2 --conf=$(IMS_CONFIG) --sql=$(SQL_DIR)
 
 USER_TABLES=Project User
 # Project_user
-INTERACTION_TABLES=Interaction_source
+INTERACTION_TABLES=Interaction_source Interaction_quantitation_type
 
 TABLE_DEPENDS=$(USER_TABLES) $(INTERACTION_TABLES)
 TABLE_RDEPENDS=$(call reverse,$(TABLE_DEPENDS))
