@@ -1,4 +1,3 @@
-
 CREATE TABLE IF NOT EXISTS project_users(
        project_user_id		BIGINT(10) PRIMARY KEY AUTO_INCREMENT,
        project_id		BIGINT(10) NOT NULL,

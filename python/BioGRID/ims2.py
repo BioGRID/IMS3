@@ -63,6 +63,24 @@ class Interaction_quantitation_type(BioGRID.ims.Interaction_quantitation_type):
             return 'active'
         return super(Interaction_quantitation_type,self).__getitem__(name)
 
+# class Iplex_project(BioGRID.ims.Iplex_project):
+#     _rename={'iplex_project_name':'iplex_name',
+#              'iplex_project_description':'iplex_description',
+#              'iplex_project_addeddate':'iplex_createddate',
+#              'iplex_project_status':'iplex_status'}
+
+class Publication_query(BioGRID.ims.Publication_query):
+    _rename={'publication_query_value':'pubmed_query_value',
+             'publication_query_addeddate':'pubmed_query_added_date',
+             'publication_query_lastrun':'pubmed_query_last_run',
+             'publication_query_type':'pubmed_query_type',
+             'publication_query_status':'pubmed_query_status'}
+    def id(self):
+        """Overloaded because the table name is different between IMS2
+        and IMS3."""
+        return self.row['pubmed_query_id']
+    
+
 if __name__ == '__main__':
     import sys
     from optparse import OptionParser
@@ -127,6 +145,8 @@ WHERE tag_category_name='Source'
                 # table names
                 if 'Interaction_quantitation_type'==job:
                     table_name=job.lower()
+                elif 'Publication_query'==job:
+                    table_name='pubmed_queries'
                 else:
                     table_name='%ss' % job.lower()
                 c.execute('SELECT * FROM %s' % table_name)

@@ -12,8 +12,10 @@ IMS2=$(PYTHON) -m BioGRID.ims2 --conf=$(IMS_CONFIG) --sql=$(SQL_DIR)
 USER_TABLES=Project User
 # Project_user
 INTERACTION_TABLES=Interaction_source Interaction_quantitation_type
+IPLEX_TABLES=Iplex_project
+PUB_TABLES=Publication_query
 
-TABLE_DEPENDS=$(USER_TABLES) $(INTERACTION_TABLES)
+TABLE_DEPENDS=$(USER_TABLES) $(INTERACTION_TABLES) $(PUB_TABLES)
 TABLE_RDEPENDS=$(call reverse,$(TABLE_DEPENDS))
 
 ims3:

@@ -134,3 +134,17 @@ class Interaction_quantitation_type(_Table):
               'interaction_quantitation_type_desc',
               'interaction_quantitation_type_addeddate',
               'interaction_quantitation_type_status']
+
+class Iplex_project(_Table):
+    pass
+#    _columns=['iplex_project_name','iplex_project_fullname',
+#              'iplex_project_description','iplex_project_addeddate',
+#              'iplex_project_status']
+
+class Publication_query(_Table):
+    def table(self):
+        """Please don't use plurels when naming your SQL tables."""
+        return 'publication_queries'
+    _columns=['project_id','publication_query_value',
+              'publication_query_addeddate','publication_query_lastrun',
+              'publication_query_type','publication_query_status']
