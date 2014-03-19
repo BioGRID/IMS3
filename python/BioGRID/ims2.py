@@ -80,8 +80,9 @@ class Interaction_quantitation_type(BioGRID.ims.Interaction_quantitation_type):
 
 class Publication(BioGRID.ims.Publication):
     _rename={'publication_addeddate':'publication_modified'}
-    _use=['publication_pubmed_id','publication_addeddate']
-    def __getitem(self,name):
+    _use=['publication_pubmed_id','publication_addeddate',
+          'publication_status']
+    def __getitem__(self,name):
         try:
             self._use.index(name)
             return super(Publication,self).__getitem__(name)
@@ -89,6 +90,23 @@ class Publication(BioGRID.ims.Publication):
             # for most things we wast to populate this with NULLs,
             # will fill directly from PubMed.
             return None
+    def store(self):
+        try:
+            pmid=int(self['publication_pubmed_id'])
+        except ValueError:
+            print(
+                'publication_id=%s skipped since PubmedID is %s' %
+                (self.id(),self['publication_pubmed_id']))
+            return
+        if 0==pmid:
+            print(
+                'publication_id=%s skipped since PubmedID is %d' %
+                (self.id(),pmid))
+        else:
+            try:
+                super(Publication,self).store()
+            except _mysql_exceptions.IntegrityError:
+                print 'Skipping dup entry where publication_pubmed_id=%d' % pmid
 
 class Publication_query(BioGRID.ims.Publication_query):
     _rename={'publication_query_value':'pubmed_query_value',
