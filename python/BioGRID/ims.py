@@ -84,9 +84,6 @@ class _Table(object):
         if primary_id:
             vals.append(self.id())
         cur.execute(self.insert_sql(include_id_column=primary_id),vals)
-
-        #raise NotImplementedError(
-        #'insert not implemented for %s' % self.__class__.__name__)
     def store(self):
         """Store stuff if it doesen't exist, or if it's modified."""
         saved=self.saved_self()
@@ -140,6 +137,18 @@ class Iplex_project(_Table):
 #    _columns=['iplex_project_name','iplex_project_fullname',
 #              'iplex_project_description','iplex_project_addeddate',
 #              'iplex_project_status']
+
+class Publication(_Table):
+    _columns=[
+        'publication_pubmed_id','publication_article_title',
+        'publication_abstract','publication_author_short',
+        'publication_author_full','publication_volumne',
+        'publication_issue','publication_date',
+        'publication_journal','publication_pagination',
+        'publication_affiliation','publication_meshterms',
+        'publication_status','publication_addeddate',
+        'publication_lastupdated']
+
 
 class Publication_query(_Table):
     def table(self):

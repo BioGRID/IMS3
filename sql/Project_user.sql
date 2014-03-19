@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS project_users(
        project_id		BIGINT(10) NOT NULL,
        user_id			BIGINT(10) NOT NULL,
        project_user_status	ENUM('active','inactive') NOT NULL,
-       project_user_addeddate	DATETIME,
+       project_user_addeddate	TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
        FOREIGN KEY(project_id)REFERENCES projects(project_id),
        FOREIGN KEY(user_id)REFERENCES users(user_id),
        UNIQUE KEY(project_id,user_id)

@@ -2,6 +2,7 @@
 be the only files with IMS2 information in it."""
 import BioGRID.ims
 from time import strftime
+import warnings
 
 class Config(BioGRID.ims.Config):
     def ims2db(self):
@@ -48,6 +49,14 @@ class Project_user(BioGRID.ims.Project_user):
         return super(Project_user,self).__getitem__(name)
     def id(self):
         return None
+    def store(self):
+        try:
+            return super(Project_user,self).store()
+        except _mysql_exceptions.IntegrityError as x:
+            if 0==str(x).count("REFERENCES `users` (`user_id`)"):
+                raise
+            else:
+                warnings.warn('user_id %s not in users' % self['user_id'])
 
 class Interaction_source(BioGRID.ims.Interaction_source):
     def id(self):
@@ -68,6 +77,18 @@ class Interaction_quantitation_type(BioGRID.ims.Interaction_quantitation_type):
 #              'iplex_project_description':'iplex_description',
 #              'iplex_project_addeddate':'iplex_createddate',
 #              'iplex_project_status':'iplex_status'}
+
+class Publication(BioGRID.ims.Publication):
+    _rename={'publication_addeddate':'publication_modified'}
+    _use=['publication_pubmed_id','publication_addeddate']
+    def __getitem(self,name):
+        try:
+            self._use.index(name)
+            return super(Publication,self).__getitem__(name)
+        except ValueError:
+            # for most things we wast to populate this with NULLs,
+            # will fill directly from PubMed.
+            return None
 
 class Publication_query(BioGRID.ims.Publication_query):
     _rename={'publication_query_value':'pubmed_query_value',
@@ -99,6 +120,8 @@ if __name__ == '__main__':
     ims3=cfg.imsdb()
 
     for job in jobs:
+        print 'starting %s' % job
+
         # First check for SQL files containing IMS3 schema
         file=open('%s/%s.sql' % (opts.sql_dir,job))
         if opts.clean:
