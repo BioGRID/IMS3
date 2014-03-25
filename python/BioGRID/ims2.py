@@ -94,19 +94,20 @@ class Publication(BioGRID.ims.Publication):
         try:
             pmid=int(self['publication_pubmed_id'])
         except ValueError:
-            print(
+            warnings.warn(
                 'publication_id=%s skipped since PubmedID is %s' %
                 (self.id(),self['publication_pubmed_id']))
             return
         if 0==pmid:
-            print(
+            warnings.warn(
                 'publication_id=%s skipped since PubmedID is %d' %
                 (self.id(),pmid))
         else:
             try:
                 super(Publication,self).store()
             except _mysql_exceptions.IntegrityError:
-                print 'Skipping dup entry where publication_pubmed_id=%d' % pmid
+                warnings.warn(
+                    'Skipping dup entry where publication_pubmed_id=%d' % pmid)
 
 class Publication_query(BioGRID.ims.Publication_query):
     _rename={'publication_query_value':'pubmed_query_value',
@@ -118,13 +119,56 @@ class Publication_query(BioGRID.ims.Publication_query):
         """Overloaded because the table name is different between IMS2
         and IMS3."""
         return self.row['pubmed_query_id']
-    
+
+class Project_publication(BioGRID.ims.Project_publication):
+    """Make sure the Publicatin table is loaded before this!"""
+    _rename={'project_publication_addeddate':'project_pubmed_timestamp',
+             'project_publication_status':'project_pubmed_status',
+             'publication_query_id':'pubmed_query_id'}
+    def id(self):
+        return self.row['project_pubmed_id']
+    def __getitem__(self,name):
+        if 'publication_id'==name:
+            c=self.ims_cursor()
+            pmid=self.row['pubmed_id']
+            c.execute('SELECT publication_id FROM publications WHERE publication_pubmed_id=%s', (pmid,))
+            row=c.fetchone()
+            if row:
+                pub_id=row['publication_id']
+                if c.fetchone():
+                    raise StandardError("Where PubMed ID is %d, got multiple replies" % pmid)    
+            else:
+                return None
+            return pub_id
+
+        out=super(Project_publication,self).__getitem__(name)
+        if ('publication_query_id'==name)and(0==out):
+            return None
+        return out
+    def store(self):
+        try:
+            super(Project_publication,self).store()
+        except _mysql_exceptions.OperationalError as (errno,msg):
+            if 1048==errno and msg=="Column 'publication_id' cannot be null":
+                pmid=self.row['pubmed_id']
+                warnings.warn('PubMed ID %d not in publications table' % pmid)
+            else:
+                raise
+
+
+            
 
 if __name__ == '__main__':
     import sys
     from optparse import OptionParser
     import MySQLdb.cursors
     import _mysql_exceptions
+
+
+    def warn_fmt(message,category,filename,lineno,line=None):
+        return "%s\n" % message
+    warnings.formatwarning=warn_fmt
+
     p=OptionParser()
     p.add_option('-c','--config',metavar='JSON')
     p.add_option('-s','--sql-dir',metavar='PATH')
@@ -133,12 +177,15 @@ if __name__ == '__main__':
     
     cfg=Config(opts.config)
     BioGRID.ims._Table.config=cfg
-    if not(opts.clean):
+    if opts.clean:
+        msg_fmt='removing %s'
+    else:
         ims2=cfg.ims2db() # not needed in --clean
+        msg_fmt='starting %s'
     ims3=cfg.imsdb()
 
     for job in jobs:
-        print 'starting %s' % job
+        warnings.warn(msg_fmt % job)
 
         # First check for SQL files containing IMS3 schema
         file=open('%s/%s.sql' % (opts.sql_dir,job))
@@ -184,10 +231,13 @@ WHERE tag_category_name='Source'
             else:
                 # there doesn't really seem to be secure way to have dynamic
                 # table names
+
                 if 'Interaction_quantitation_type'==job:
                     table_name=job.lower()
                 elif 'Publication_query'==job:
                     table_name='pubmed_queries'
+                elif 'Project_publication'==job:
+                    table_name='project_pubmeds'
                 else:
                     table_name='%ss' % job.lower()
                 c.execute('SELECT * FROM %s' % table_name)

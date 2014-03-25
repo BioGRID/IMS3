@@ -157,3 +157,8 @@ class Publication_query(_Table):
     _columns=['project_id','publication_query_value',
               'publication_query_addeddate','publication_query_lastrun',
               'publication_query_type','publication_query_status']
+
+class Project_publication(_Table):
+    _columns=['project_id','publication_id',
+              'project_publication_addeddate',
+              'project_publication_status','publication_query_id']
