@@ -191,18 +191,22 @@ if __name__ == '__main__':
         file=open('%s/%s.sql' % (opts.sql_dir,job))
         if opts.clean:
             line=file.readline()
+            tables=[]
             while line:
                 if line.startswith('CREATE TABLE'):
                     table=line.split(' ')[-1].strip("(\n")
-                    try:
-                        ims3.query('DROP TABLE %s' % table)
-                    except _mysql_exceptions.OperationalError as(errno,msg):
-                        if 1051==errno: # Unknown table
-                            pass
-                        else:
-                            raise
+                    tables.insert(0,table)
                 line=file.readline()
             file.close()
+
+            for table in tables:
+                try:
+                    ims3.query('DROP TABLE %s' % table)
+                except _mysql_exceptions.OperationalError as(errno,msg):
+                    if 1051==errno: # Unknown table
+                        pass
+                    else:
+                        raise
 
 
         else:

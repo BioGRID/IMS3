@@ -16,3 +16,14 @@ CREATE TABLE IF NOT EXISTS publications(
        publication_addeddate	 TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
        publication_lastupdated	 TIMESTAMP NULL
 );
+
+CREATE TABLE IF NOT EXISTS publication_notes(
+       publication_note_id        BIGINT(10) PRIMARY KEY AUTO_INCREMENT,
+       publication_note_text      TEXT NOT NULL,
+       user_id			  BIGINT(10) NOT NULL,
+       publication_node_addeddate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+       publication_note_status	  ENUM('active','inactive'),
+       publication_id		  BIGINT(10) NOT NULL,
+       FOREIGN KEY(user_id)REFERENCES users(user_id),
+       FOREIGN KEY(publication_id)REFERENCES publications(publication_id)
+);
