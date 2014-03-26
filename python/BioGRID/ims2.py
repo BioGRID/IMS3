@@ -145,17 +145,6 @@ class Project_publication(BioGRID.ims.Project_publication):
         if ('publication_query_id'==name)and(0==out):
             return None
         return out
-    def store(self):
-        try:
-            super(Project_publication,self).store()
-        except _mysql_exceptions.OperationalError as (errno,msg):
-            if 1048==errno and msg=="Column 'publication_id' cannot be null":
-                pmid=self.row['pubmed_id']
-                warnings.warn('PubMed ID %d not in publications table' % pmid)
-            else:
-                raise
-
-
             
 
 if __name__ == '__main__':
