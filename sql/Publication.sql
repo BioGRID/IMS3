@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS publications(
        publication_pagination	 VARCHAR(255) NULL,
        publication_affiliation	 TEXT NULL,
        publication_meshterms	 TEXT NULL,
-       publication_status	 ENUM('active','inactive') NOT NULL,
+       publication_status	 ENUM('active','inactive')NOT NULL DEFAULT 'active',
        publication_addeddate	 TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
        publication_lastupdated	 TIMESTAMP NULL
 );

@@ -69,7 +69,11 @@ class _Table(object):
     def id_column(self):
         return '%s_id' % self.__class__.__name__.lower()
     def id(self):
-        return self.row[self.id_column()]
+        try:
+            return self.row[self.id_column()]
+        except KeyError:
+            # If we don't have the id we assume it's not in the database.
+            return None
     def table(self):
         """Returns the primary SQL table name of this object."""
         return '%ss' % self.__class__.__name__.lower()
@@ -84,6 +88,12 @@ class _Table(object):
         if primary_id:
             vals.append(self.id())
         cur.execute(self.insert_sql(include_id_column=primary_id),vals)
+        if primary_id:
+            return primary_id
+
+        # fetche the primary key we just got
+        cur.execute('SELECT LAST_INSERT_ID() AS id')
+        self.row[self.id_column()]=cur.fetchone()['id']
     def store(self):
         """Store stuff if it doesen't exist, or if it's modified."""
         saved=self.saved_self()
@@ -92,9 +102,10 @@ class _Table(object):
         elif self==saved:
             pass # don't need no saving
         else:
-            # A version of abrt older 2.0.8-21.el6 made this not work
-            # correctly
+            # A version of abrt older then 2.0.8-21.el6 made this not
+            # work correctly
             raise NotImplementedError('No updating parts!')
+        return self.id()
     def insert_sql(self,include_id_column=True):
         if(include_id_column):
             cols=copy(self._columns)

@@ -137,15 +137,20 @@ class Project_publication(BioGRID.ims.Project_publication):
                 pub_id=row['publication_id']
                 if c.fetchone():
                     raise StandardError("Where PubMed ID is %d, got multiple replies" % pmid)    
-            else:
-                return None
+            elif row==None:
+                # Insert a new pub into the publication table
+                pub=Publication({'publication_pubmed_id':pmid,
+                                 'publication_status':'active'})
+                pub.store() # should publication id
+                warnings.warn(
+                    "Inserting PubMed ID %d into publications" % pmid)
+                return pub.id()
             return pub_id
 
         out=super(Project_publication,self).__getitem__(name)
         if ('publication_query_id'==name)and(0==out):
             return None
         return out
-            
 
 if __name__ == '__main__':
     import sys
