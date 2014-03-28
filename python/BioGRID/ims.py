@@ -173,3 +173,11 @@ class Project_publication(_Table):
     _columns=['project_id','publication_id',
               'project_publication_addeddate',
               'project_publication_status','publication_query_id']
+
+class PTM_source(_Table):
+    _columns=['ptm_source_name','ptm_source_desc','ptm_source_addeddate',
+              'ptm_source_status']
+
+class PTM_modification(_Table):
+    _columns=['ptm_modification_name','ptm_modification_desc',
+              'ptm_modification_addeddate','ptm_modification_status']

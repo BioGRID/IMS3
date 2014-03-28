@@ -152,6 +152,21 @@ class Project_publication(BioGRID.ims.Project_publication):
             return None
         return out
 
+class PTM_source(BioGRID.ims.PTM_source):
+    def __getitem__(self,name):
+        if name==('ptm_source_status'):
+            return 'active'
+        return super(PTM_source,self).__getitem__(name)
+
+class PTM_modification(BioGRID.ims.PTM_modification):
+    _rename={'ptm_modification_name':'modification_name'}
+    def id(self):
+        return self.row['modification_id']
+    def __getitem__(self,name):
+        if name==('ptm_modification_status'):
+            return 'active'
+        return super(PTM_modification,self).__getitem__(name)
+
 if __name__ == '__main__':
     import sys
     from optparse import OptionParser
@@ -236,6 +251,8 @@ WHERE tag_category_name='Source'
                     table_name='pubmed_queries'
                 elif 'Project_publication'==job:
                     table_name='project_pubmeds'
+                elif 'PTM_modification'==job:
+                    table_name='modification'
                 else:
                     table_name='%ss' % job.lower()
                 c.execute('SELECT * FROM %s' % table_name)

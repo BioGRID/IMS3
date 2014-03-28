@@ -13,8 +13,9 @@ USER_TABLES=Project User Project_user
 INTERACTION_TABLES=Interaction_source Interaction_quantitation_type
 IPLEX_TABLES=Iplex_project
 PUB_TABLES=Publication_query Publication Project_publication
+PTM_TABLES=PTM_source PTM_modification
 
-TABLE_DEPENDS=$(USER_TABLES) $(INTERACTION_TABLES) $(PUB_TABLES)
+TABLE_DEPENDS=$(USER_TABLES) $(INTERACTION_TABLES) $(PUB_TABLES) $(PTM_TABLES)
 TABLE_RDEPENDS=$(call reverse,$(TABLE_DEPENDS))
 
 ims3:
