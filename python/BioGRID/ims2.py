@@ -4,6 +4,18 @@ import BioGRID.ims
 from time import strftime
 import warnings
 
+PARTICIPANT_TYPE=1
+
+def fetch_one(cur,get): # and only one
+    row=cur.fetchone()
+    if row:
+        out=row[get]
+        if cur.fetchone():
+            raise StandardError('Expecting 1 row got more then 1')
+    else:
+        return None
+    return out
+
 class Config(BioGRID.ims.Config):
     def ims2db(self):
         """Returns a MySQLdb pointer to the IMS2 database."""
@@ -132,12 +144,8 @@ class Project_publication(BioGRID.ims.Project_publication):
             c=self.ims_cursor()
             pmid=self.row['pubmed_id']
             c.execute('SELECT publication_id FROM publications WHERE publication_pubmed_id=%s', (pmid,))
-            row=c.fetchone()
-            if row:
-                pub_id=row['publication_id']
-                if c.fetchone():
-                    raise StandardError("Where PubMed ID is %d, got multiple replies" % pmid)    
-            elif row==None:
+            pub_id=fetch_one(c,'publication_id')
+            if pub_id==None:
                 # Insert a new pub into the publication table
                 pub=Publication({'publication_pubmed_id':pmid,
                                  'publication_status':'active'})
@@ -152,6 +160,23 @@ class Project_publication(BioGRID.ims.Project_publication):
             return None
         return out
 
+class PTM(BioGRID.ims.PTM):
+    _rename={'ptm_modification_id':'modification_id'}
+    def __getitem__(self,name):
+        if 'participant_id'==name:
+            c=self.ims_cursor()
+            c.execute('''SELECT participant_id FROM participants
+WHERE participant_value=%s AND participant_type_id=%s
+''',(self['gene_id'],PARTICIPANT_TYPE))
+            return fetch_one(c,'participant_id')
+        return super(BioGRID.ims.PTM,self).__getitem__(name)
+    def store(self):
+        try:
+            return super(BioGRID.ims.PTM,self).store()
+        except _mysql_exceptions.OperationalError:
+            warnings.warn('Skipping ptms_id=%s where gene_id=%d' %
+                          (self.id(),self['gene_id']))
+
 class PTM_source(BioGRID.ims.PTM_source):
     def __getitem__(self,name):
         if name==('ptm_source_status'):
@@ -159,9 +184,15 @@ class PTM_source(BioGRID.ims.PTM_source):
         return super(PTM_source,self).__getitem__(name)
 
 class PTM_modification(BioGRID.ims.PTM_modification):
-    _rename={'ptm_modification_name':'modification_name'}
+    _rename={'ptm_modification_name':'modification_name',
+             'ptm_modification_id':'modification_id'}
     def id(self):
-        return self.row['modification_id']
+        try:
+            return self.row['modification_id']
+        except:
+            print self
+            print self.row
+            raise
     def __getitem__(self,name):
         if name==('ptm_modification_status'):
             return 'active'
@@ -174,7 +205,7 @@ class Participant(BioGRID.ims.Participant):
         if 'participant_status'==name:
             return 'active'
         if 'participant_type_id'==name:
-            return 1 # for now assume protein
+            return PARTICIPANT_TYPE # for now assume protein
         return super(Participant,self).__getitem__(name)
 
 if __name__ == '__main__':

@@ -7,4 +7,5 @@ CREATE TABLE IF NOT EXISTS interaction_sources(
        interaction_source_status	ENUM('active','inactive')NOT NULL
 );
 
-INSERT INTO interaction_sources(interaction_source_name,interaction_source_url)VALUES('BioGRID','http://thebiogrid.org/');
+INSERT INTO interaction_sources(interaction_source_name,interaction_source_url)
+VALUES('BioGRID','http://thebiogrid.org/');
