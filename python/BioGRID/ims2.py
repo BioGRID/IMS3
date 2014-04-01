@@ -167,6 +167,16 @@ class PTM_modification(BioGRID.ims.PTM_modification):
             return 'active'
         return super(PTM_modification,self).__getitem__(name)
 
+class Participant(BioGRID.ims.Participant):
+    def id(self):
+        return None
+    def __getitem__(self,name):
+        if 'participant_status'==name:
+            return 'active'
+        if 'participant_type_id'==name:
+            return 1 # for now assume protein
+        return super(Participant,self).__getitem__(name)
+
 if __name__ == '__main__':
     import sys
     from optparse import OptionParser
@@ -241,11 +251,18 @@ tag_status AS interaction_source_status
 FROM tag_categories JOIN tags USING(tag_category_id)
 WHERE tag_category_name='Source'
 ''')
+            elif 'Participant'==job:
+                c.execute('''
+(SELECT DISTINCT interactor_A_id AS participant_value FROM interactions)
+UNION DISTINCT
+(SELECT DISTINCT interactor_B_id AS participant_value FROM interactions)
+''')
             else:
                 # there doesn't really seem to be secure way to have dynamic
                 # table names
 
                 if 'Interaction_quantitation_type'==job:
+                    # IMS2 table is not plural
                     table_name=job.lower()
                 elif 'Publication_query'==job:
                     table_name='pubmed_queries'

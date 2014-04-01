@@ -181,3 +181,7 @@ class PTM_source(_Table):
 class PTM_modification(_Table):
     _columns=['ptm_modification_name','ptm_modification_desc',
               'ptm_modification_addeddate','ptm_modification_status']
+
+class Participant(_Table):
+    _columns=['participant_id','participant_value','participant_type_id',
+              'participant_addeddate','participant_status']
