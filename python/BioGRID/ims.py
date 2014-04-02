@@ -4,6 +4,17 @@ import MySQLdb
 import MySQLdb.cursors
 import warnings
 from copy import copy
+
+def fetch_one(cur,get): # and only one
+    row=cur.fetchone()
+    if row:
+        out=row[get]
+        if cur.fetchone():
+            raise StandardError('Expecting 1 row got more then 1')
+    else:
+        return None
+    return out
+
  
 class Config:
     """Loads stuff from JSON configure file and provides access."""
@@ -115,6 +126,14 @@ class _Table(object):
         return 'INSERT INTO %s(%s)VALUES(%s)' % (
             self.table(),','.join(cols),('%s,'*len(cols)).strip(',')
             )
+
+    def get_participant_id(self,value,p_type):
+        c=self.ims_cursor()
+        c.execute('''SELECT participant_id FROM participants
+WHERE participant_value=%s AND participant_type_id=%s
+''',(value,p_type))
+        return fetch_one(c,'participant_id')
+
 
 class Project(_Table):
     """Stores a row from the PROJECT table."""

@@ -4,17 +4,9 @@ import BioGRID.ims
 from time import strftime
 import warnings
 
-PARTICIPANT_TYPE=1
 
-def fetch_one(cur,get): # and only one
-    row=cur.fetchone()
-    if row:
-        out=row[get]
-        if cur.fetchone():
-            raise StandardError('Expecting 1 row got more then 1')
-    else:
-        return None
-    return out
+
+PARTICIPANT_TYPE=1
 
 class Config(BioGRID.ims.Config):
     def ims2db(self):
@@ -144,7 +136,7 @@ class Project_publication(BioGRID.ims.Project_publication):
             c=self.ims_cursor()
             pmid=self.row['pubmed_id']
             c.execute('SELECT publication_id FROM publications WHERE publication_pubmed_id=%s', (pmid,))
-            pub_id=fetch_one(c,'publication_id')
+            pub_id=BioGRID.ims.fetch_one(c,'publication_id')
             if pub_id==None:
                 # Insert a new pub into the publication table
                 pub=Publication({'publication_pubmed_id':pmid,
@@ -166,11 +158,7 @@ class PTM(BioGRID.ims.PTM):
         if 'ptm_status'==name:
             return 'experimental' # not stored in IMS2
         if 'participant_id'==name:
-            c=self.ims_cursor()
-            c.execute('''SELECT participant_id FROM participants
-WHERE participant_value=%s AND participant_type_id=%s
-''',(self['gene_id'],PARTICIPANT_TYPE))
-            return fetch_one(c,'participant_id')
+            return self.get_participant_id(self['gene_id'],PARTICIPANT_TYPE)
         return super(BioGRID.ims.PTM,self).__getitem__(name)
     def store(self):
         try:
