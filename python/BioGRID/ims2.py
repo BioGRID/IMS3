@@ -163,6 +163,8 @@ class Project_publication(BioGRID.ims.Project_publication):
 class PTM(BioGRID.ims.PTM):
     _rename={'ptm_modification_id':'modification_id'}
     def __getitem__(self,name):
+        if 'ptm_status'==name:
+            return 'experimental' # not stored in IMS2
         if 'participant_id'==name:
             c=self.ims_cursor()
             c.execute('''SELECT participant_id FROM participants

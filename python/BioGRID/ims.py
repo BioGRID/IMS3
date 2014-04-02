@@ -177,8 +177,7 @@ class Project_publication(_Table):
 class PTM(_Table):
     _columns=['participant_id','ptm_residue_location','ptm_residue',
               'ptm_modification_id','publication_id','ptm_source_id',
-              #'ptm_status'
-              ]
+              'ptm_status']
 
 class PTM_source(_Table):
     _columns=['ptm_source_name','ptm_source_desc','ptm_source_addeddate',

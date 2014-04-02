@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS ptms(
        ptm_modification_id  BIGINT(10)NOT NULL,
        publication_id	    BIGINT(10)NOT NULL,
        ptm_source_id	    BIGINT(10)NOT NULL,
-       #ptm_status 	    ENUM('experimental','inferred')NOT NULL,
+       ptm_status 	    ENUM('experimental','inferred')NOT NULL,
        FOREIGN KEY(participant_id)REFERENCES participants(participant_id),
        FOREIGN KEY(ptm_modification_id)REFERENCES ptm_modifications(ptm_modification_id),
        FOREIGN KEY(publication_id)REFERENCES publications(publication_id),
