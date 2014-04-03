@@ -13,7 +13,7 @@ INTERACTION_TABLES=Interaction_source Interaction_quantitation_type
 PART_TABLES=Participant
 #IPLEX_TABLES=Iplex_project
 USER_TABLES=Project User Project_user
-PTM_TABLES=PTM_source PTM_modification PTM
+PTM_TABLES= PTM_source PTM_modification PTM PTM_relationship PTM_history
 PUB_TABLES=Publication_query Publication Project_publication
 
 

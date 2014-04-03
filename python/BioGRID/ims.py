@@ -206,6 +206,17 @@ class PTM_modification(_Table):
     _columns=['ptm_modification_name','ptm_modification_desc',
               'ptm_modification_addeddate','ptm_modification_status']
 
+class PTM_relationship(_Table):
+    _columns=['ptm_id','participant_id','ptm_relationship_type',
+              'publication_id','user_id','ptm_relationship_identity',
+              'ptm_relationship_addeddate','ptm_relationship_status']	 
+
+class PTM_history(_Table):
+    def table(self):
+        return 'ptm_history'
+    _columns=['modification_type','ptm_id','user_id',
+              'ptm_history_comment','ptm_history_date']
+
 class Participant(_Table):
     _columns=['participant_id','participant_value','participant_type_id',
               'participant_addeddate','participant_status']

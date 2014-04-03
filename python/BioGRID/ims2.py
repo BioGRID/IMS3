@@ -1,3 +1,4 @@
+
 """Stuff to convert IMS2 database schema to IMS3.  Hopefully this will
 be the only files with IMS2 information in it."""
 import BioGRID.ims
@@ -7,6 +8,7 @@ import warnings
 
 
 PARTICIPANT_TYPE=1
+DEFAULT_USER_ID=1
 
 class Config(BioGRID.ims.Config):
     def ims2db(self):
@@ -164,8 +166,15 @@ class PTM(BioGRID.ims.PTM):
         try:
             return super(BioGRID.ims.PTM,self).store()
         except _mysql_exceptions.OperationalError:
-            warnings.warn('Skipping ptms_id=%s where gene_id=%d' %
-                          (self.id(),self['gene_id']))
+            p=Participant({'participant_value':self['gene_id'],
+                           'participant_type_id':PARTICIPANT_TYPE,
+                           'participant_status':'active'})
+            p.store()
+            warnings.warn(
+                "Inserting participant_value=%d into participants" %
+                self['gene_id'])
+            return super(BioGRID.ims.PTM,self).store()
+
 
 class PTM_source(BioGRID.ims.PTM_source):
     def __getitem__(self,name):
@@ -187,6 +196,41 @@ class PTM_modification(BioGRID.ims.PTM_modification):
         if name==('ptm_modification_status'):
             return 'active'
         return super(PTM_modification,self).__getitem__(name)
+
+class PTM_relationship(BioGRID.ims.PTM_relationship):
+    _rename={'ptm_relationship_type':'relationship_type',
+             'ptm_relationship_identity':'relationship_identity'}
+    def __getitem__(self,name):
+        if 'user_id'==name:
+            return DEFAULT_USER_ID
+        if 'participant_id'==name:
+            return self.get_participant_id(self.row['gene_id'],
+                                           PARTICIPANT_TYPE)
+        return super(PTM_relationship,self).__getitem__(name)
+
+class PTM_history(BioGRID.ims.PTM_history):
+    _rename={'ptm_history_date':'ptm_addeddate'}
+    def __getitem__(self,name):
+        if 'modification_type'==name:
+            if 'active'==self['ptm_status']:
+                return 'ACTIVITATED'
+            else:
+                # hopefully produce a warning message
+                return self['ptm_status']
+        elif 'user_id'==name:
+            return DEFAULT_USER_ID
+        elif 'ptm_history_comment'==name:
+            if 'TRUE'==self['ptm_status']:
+                return "Warning: TRUE"
+            else:
+                return None
+        return super(PTM_history,self).__getitem__(name)
+    def store(self):
+        try:
+            return super(BioGRID.ims.PTM_history,self).store()
+        except _mysql_exceptions.OperationalError:
+            print row
+            raise
 
 class Participant(BioGRID.ims.Participant):
     def id(self):
@@ -291,6 +335,8 @@ UNION DISTINCT
                     table_name='project_pubmeds'
                 elif 'PTM_modification'==job:
                     table_name='modification'
+                elif 'PTM_history'==job:
+                    table_name='ptms'
                 else:
                     table_name='%ss' % job.lower()
                 c.execute('SELECT * FROM %s' % table_name)

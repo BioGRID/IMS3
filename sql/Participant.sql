@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS participants(
        participant_addeddate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
        participant_status    ENUM('active','inactive')NOT NULL DEFAULT 'active',
        UNIQUE KEY(participant_value,participant_type_id)
+              
 );
 
        

@@ -1,15 +1,20 @@
 {
-    "dbs":
-	{
-	    "ims":{
-		"user":"imsadmin",
-		"passwd":"your password here",
-		"db":"sven"
-	},
-	    "ims2":{
-		"user":"imsadmin",
-		"passwd":"your password here",
-		"db":"biogrid_ims_snapshot"
-		    }
-	}
+  "dbs":
+  {
+    "ims":{
+      "user":"imsadmin",
+      "passwd":"you password here",
+      "db":"sven"
+    },
+    "quick":{
+      "user":"imsadmin",
+      "passwd":"your password here",
+      "db":"biogrid_quick_20130521"
+    },
+    "ims2":{
+      "user":"imsadmin",
+      "passwd":"your password here",
+      "db":"biogrid_ims_snapshot"
+    }
+  }
 }
