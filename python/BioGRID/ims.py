@@ -217,6 +217,10 @@ class PTM_history(_Table):
     _columns=['modification_type','ptm_id','user_id',
               'ptm_history_comment','ptm_history_date']
 
+class PTM_note(_Table):
+    _columns=['ptm_note_text','user_id','ptm_note_addeddate',
+              'ptm_note_status','ptm_id']
+
 class Participant(_Table):
     _columns=['participant_id','participant_value','participant_type_id',
               'participant_addeddate','participant_status']

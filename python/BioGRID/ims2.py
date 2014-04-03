@@ -232,6 +232,26 @@ class PTM_history(BioGRID.ims.PTM_history):
             print row
             raise
 
+class PTM_note(BioGRID.ims.PTM_note):
+    _rename={'ptm_note_addeddate':'ptm_addeddate',
+             'ptm_note_status':'ptm_status'}
+    def __getitem__(self,name):
+        if 'user_id'==name:
+            return DEFAULT_USER_ID
+        elif 'ptm_note_text'==name:
+            notes=eval(self['ptm_notes'])
+            if len(notes)==0:
+                return None
+            elif len(notes)==1:
+                return notes[0]
+            else:
+                raise StandardError('Found multiple notes')
+        return super(PTM_note,self).__getitem__(name)
+    def store(self):
+        if '[]'==self.row['ptm_notes']:
+            return None
+        return super(PTM_note,self).store()
+
 class Participant(BioGRID.ims.Participant):
     def id(self):
         return None
@@ -335,7 +355,7 @@ UNION DISTINCT
                     table_name='project_pubmeds'
                 elif 'PTM_modification'==job:
                     table_name='modification'
-                elif 'PTM_history'==job:
+                elif 'PTM_history'==job or 'PTM_note'==job:
                     table_name='ptms'
                 else:
                     table_name='%ss' % job.lower()
