@@ -1,6 +1,7 @@
 
 """Stuff to convert IMS2 database schema to IMS3.  Hopefully this will
 be the only files with IMS2 information in it."""
+import json
 import BioGRID.ims
 from time import strftime
 import warnings
@@ -239,7 +240,8 @@ class PTM_note(BioGRID.ims.PTM_note):
         if 'user_id'==name:
             return DEFAULT_USER_ID
         elif 'ptm_note_text'==name:
-            notes=eval(self['ptm_notes'])
+            #notes=eval(self['ptm_notes'])
+            notes=json.loads(self['ptm_notes'])
             if len(notes)==0:
                 return None
             elif len(notes)==1:
