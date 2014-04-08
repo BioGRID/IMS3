@@ -65,6 +65,40 @@ class Project_user(BioGRID.ims.Project_user):
             else:
                 warnings.warn('user_id %s not in users' % self['user_id'])
 
+class Interaction(BioGRID.ims.Interaction):
+    ignore_id=None
+    
+    def ims2_cursor(self):
+        return self.config.ims2db().cursor(MySQLdb.cursors.DictCursor)
+    def __init__(self,path='ims.json'):
+        if None==self.ignore_id:
+            c=self.ims2_cursor()
+            c.execute('SELECT tag_category_id AS id FROM tag_categories WHERE tag_category_name=%s',
+                      ('Ignore Interactions',));
+            self.ignore_id=BioGRID.ims.fetch_one(c,'id');
+            warnings.warn('Fetched ignore_id==%d' % self.ignore_id)
+        return super(Interaction,self).__init__(path)
+    def __getitem__(self,name):
+        if 'interaction_status'==name:
+            return 'normal'
+        elif 'interaction_source_id'==name:
+            return 1
+        return super(Interaction,self).__getitem__(name)
+    def store(self):
+        try:
+            return super(Interaction,self).store()
+        except _mysql_exceptions.IntegrityError:
+            c=self.ims2_cursor();
+            c.execute('''SELECT publication_pubmed_id AS id FROM publications
+WHERE publication_id=%s''',(self['publication_id'],))
+            pmid=BioGRID.ims.fetch_one(c,'id');
+            c.execute('''SELECT modification_type FROM interaction_matrix
+WHERE interaction_id=%s''',(self.id(),))
+            mod_type=BioGRID.ims.fetch_one(c,'modification_type')
+            warnings.warn(
+                'Skipping %s interaction_id=%d where pubmed_id=%s' %
+                (mod_type,self.id(),pmid));
+
 class Interaction_source(BioGRID.ims.Interaction_source):
     def id(self):
         return None
@@ -321,6 +355,7 @@ if __name__ == '__main__':
             # WARNING! Don't use ; is you comments in the SQL files!
             for sql in sqls.split(';'):
                 try:
+                    #print sql
                     ims3.query(sql)
                 except _mysql_exceptions.OperationalError as(errno,msg):
                     # We can skip this error
