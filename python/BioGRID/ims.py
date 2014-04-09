@@ -145,7 +145,7 @@ class User(_Table):
     _columns=['user_name','user_password','user_cookie','user_firstname',
               'user_lastname','user_email','user_addeddate','user_lastaccess',
               'user_role','project_id']
-
+    
 class Project_user(_Table):
     """Stores a row from the PROJECT_USERS table."""
     _columns=['project_id','user_id','project_user_status',
@@ -155,13 +155,17 @@ class Interaction(_Table):
     _columns=['participant_hash','publication_id','interaction_type_id',
               'interaction_status','interaction_source_id']
 
-
-
 class Interaction_source(_Table):
     """List of interaction sources."""
     _columns=['interaction_source_name','interaction_source_url',
               'interaction_source_baseurl','interaction_source_addeddate',
               'interaction_source_status']
+
+class Interaction_quantitation(_Table):
+    _columns=['interaction_quantitation_value',           
+              'interaction_quantitation_type_id','user_id',
+              'interaction_quantitation_addeddate',
+              'interaction_quantitation_status','interaction_id']
 
 class Interaction_quantitation_type(_Table):
     _columns=['interaction_quantitation_type_name',

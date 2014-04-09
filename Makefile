@@ -9,7 +9,8 @@ IMS_CONFIG=ims.json
 
 IMS2=$(PYTHON) -m BioGRID.ims2 --conf=$(IMS_CONFIG) --sql=$(SQL_DIR)
 
-INTERACTION_TABLES=Interaction_source Interaction_quantitation_type
+INTERACTION_TABLES=Interaction_source Interaction_quantitation_type \
+	Interaction
 PART_TABLES=Participant
 #IPLEX_TABLES=Iplex_project
 USER_TABLES=Project User Project_user
@@ -18,7 +19,7 @@ PTM_TABLES= PTM_source PTM_modification PTM PTM_relationship PTM_history \
 PUB_TABLES=Publication_query Publication Project_publication
 
 
-TABLE_DEPENDS=$(USER_TABLES) $(INTERACTION_TABLES) $(PUB_TABLES) \
+TABLE_DEPENDS=$(USER_TABLES) $(PUB_TABLES) $(INTERACTION_TABLES) \
 	$(PART_TABLES) $(PTM_TABLES)
 TABLE_RDEPENDS=$(call reverse,$(TABLE_DEPENDS))
 

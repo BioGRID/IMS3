@@ -13,8 +13,9 @@ CREATE TABLE IF NOT EXISTS interactions(
        participant_hash      VARCHAR(64)NULL,
        publication_id        BIGINT(10)NOT NULL,
        interaction_type_id   BIGINT(10)NULL, -- for now
-       interaction_status    ENUM('normal','error','temporary','external')NOT NULL DEFAULT 'normal',
+       interaction_status    ENUM('normal','error','temporary')NOT NULL DEFAULT 'normal',
        interaction_source_id BIGINT(10)NOT NULL,
        FOREIGN KEY(publication_id)REFERENCES publications(publication_id),
-       FOREIGN KEY(interaction_type_id)REFERENCES interaction_types(interaction_type_id)
+       FOREIGN KEY(interaction_type_id)REFERENCES interaction_types(interaction_type_id),
+       FOREIGN KEY(interaction_source_id)REFERENCES interaction_sources(interaction_source_id)
 )
