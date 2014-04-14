@@ -4,12 +4,15 @@ be the only files with IMS2 information in it."""
 import json
 import BioGRID.ims
 from time import strftime
-import warnings
 
-
-PMID_NAME='PubMed ID'
+global PARTICIPANT_TYPE
 PARTICIPANT_TYPE=1
+global DEFAULT_USER_ID
 DEFAULT_USER_ID=1
+#global IGNORE_ID
+#IGNORE_ID=None
+global SOURCE_IDS
+SOURCE_IDS={}
 
 class Config(BioGRID.ims.Config):
     def ims2db(self):
@@ -63,41 +66,40 @@ class Project_user(BioGRID.ims.Project_user):
             if 0==str(x).count("REFERENCES `users` (`user_id`)"):
                 raise
             else:
-                warnings.warn('user_id %s not in users' % self['user_id'])
+                self.warn('user_id %s not in users' % self['user_id'])
 
 class Interaction(BioGRID.ims.Interaction):
-    ignore_id=None
-    source_ids={}
-    
+    IGNORE_ID=None
     def ims2_cursor(self):
         return self.config.ims2db().cursor(MySQLdb.cursors.DictCursor)
-    def __init__(self,path='ims.json'):
-        if None==self.ignore_id:
+    def __init__(self,passthru):
+        out=super(Interaction,self).__init__(passthru)
+
+        if None==Interaction.IGNORE_ID:
             c=self.ims2_cursor()
             c.execute('SELECT tag_category_id AS id FROM tag_categories WHERE tag_category_name=%s',
                       ('Ignore Interactions',));
-            self.ignore_id=BioGRID.ims.fetch_one(c,'id');
-            warnings.warn('Fetched ignore_id==%d' % self.ignore_id)
+            Interaction.IGNORE_ID=BioGRID.ims.fetch_one(c,'id');
+            self.warn('Fetched IGNORE_ID==%d' % Interaction.IGNORE_ID)
 
-        if 0==len(self.source_ids):
+        if 0==len(SOURCE_IDS):
             c=self.ims_cursor()
             c.execute('''SELECT
 interaction_source_id,interaction_source_name FROM interaction_sources''')
             row=c.fetchone()
             while row:
-                self.source_ids[row['interaction_source_name']
-                                ]=row['interaction_source_id']
+                SOURCE_IDS[row['interaction_source_name']
+                           ]=row['interaction_source_id']
                 row=c.fetchone()
-            warnings.warn('Source index: %s' % str(self.source_ids))
-
-        return super(Interaction,self).__init__(path)
+            self.warn('Source index: %s' % str(SOURCE_IDS))
+        return out
     def __getitem__(self,name):
         if 'interaction_status'==name:
             c=self.ims2_cursor()
             c.execute('''SELECT tag_id FROM interaction_tag_mappings 
 WHERE interaction_id=%s AND tag_id IN
 (SELECT tag_id FROM tags WHERE tag_category_id=%s)
-''',(self.id(),self.ignore_id))
+''',(self.id(),Interaction.IGNORE_ID))
             tag_id=BioGRID.ims.fetch_one(c,'tag_id')
             if tag_id:
                 return 'temporary'
@@ -114,8 +116,8 @@ AND interaction_id=%s
 ''',(self.id(),))
             name=BioGRID.ims.fetch_one(c,'is_name')
             if None==name:
-                return self.source_ids['BioGRID']
-            return self.source_ids[name]
+                return SOURCE_IDS['BioGRID']
+            return SOURCE_IDS[name]
 
         return super(Interaction,self).__getitem__(name)
     def store(self):
@@ -129,9 +131,7 @@ WHERE publication_id=%s''',(self['publication_id'],))
             c.execute('''SELECT modification_type FROM interaction_matrix
 WHERE interaction_id=%s''',(self.id(),))
             mod_type=BioGRID.ims.fetch_one(c,'modification_type')
-            warnings.warn(
-                'Skipping %s interaction_id=%d where %s is %s' %
-                (mod_type,self.id(),PMID_NAME,pmid));
+            self.warn('skipping %s where PubMed ID is %s' % (mod_type,pmid))
 
 class Interaction_source(BioGRID.ims.Interaction_source):
     def id(self):
@@ -139,10 +139,6 @@ class Interaction_source(BioGRID.ims.Interaction_source):
 
 class Interaction_quantitation(BioGRID.ims.Interaction_quantitation):
     def __getitem__(self,name):
-        if 'user_id'==name:
-            return DEFAULT_USER_ID
-        if 'interaction_quantitation_addeddate'==name:
-            return strftime("%Y-%m-%d %H:%M:%S")
         if 'interaction_quantitation_status'==name:
             return 'active'
         return super(Interaction_quantitation,self).__getitem__(name)
@@ -156,6 +152,32 @@ class Interaction_quantitation_type(BioGRID.ims.Interaction_quantitation_type):
         elif 'interaction_quantitation_type_status'==name:
             return 'active'
         return super(Interaction_quantitation_type,self).__getitem__(name)
+
+class Interaction_note(BioGRID.ims.Interaction_note):
+    _rename={'interaction_note_text':'interaction_qualification',
+             'interaction_note_status':'interaction_qualification_status'}
+    _user_ids=[]
+    def __getitem__(self,name):
+        if 'user_id'==name:
+            user_id=self.validate_user_id()
+            if user_id:
+                return user_id
+            self.warn('no user_id=%d' % self.row['user_id'])
+            return DEFAULT_USER_ID
+
+        return super(Interaction_note,self).__getitem__(name)
+    def id(self):
+        return self.row['interaction_qualification_id']
+    def store(self):
+        try:
+            return super(Interaction_note,self).store()
+        except _mysql_exceptions.IntegrityError as x:
+            if 0!=str(x).count("REFERENCES `interactions` (`interaction_id`)"):
+                self.warn('no interaction_id=%s in interactions' %
+                          self['interaction_id'])
+            else:
+                raise
+
 
 # class Iplex_project(BioGRID.ims.Iplex_project):
 #     _rename={'iplex_project_name':'iplex_name',
@@ -179,20 +201,16 @@ class Publication(BioGRID.ims.Publication):
         try:
             pmid=int(self['publication_pubmed_id'])
         except ValueError:
-            warnings.warn(
-                'publication_id=%s skipped since %s is %s' %
-                (self.id(),PMID_NAME,self['publication_pubmed_id']))
+            self.warn('skipping since PubMed ID is %s' %
+                      self['publication_pubmed_id'])
             return
         if 0==pmid:
-            warnings.warn(
-                'publication_id=%s skipped since %s is %d' %
-                (self.id(),PMID_NAME,pmid))
+            self.warn('skipped since PubMed ID is %d' % pmid)
         else:
             try:
                 super(Publication,self).store()
             except _mysql_exceptions.IntegrityError:
-                warnings.warn(
-                    'Skipping dup entry where publication_pubmed_id=%d' % pmid)
+                self.warn('skipping dup entry where PubMed ID is %d' % pmid)
 
 class Publication_query(BioGRID.ims.Publication_query):
     _rename={'publication_query_value':'pubmed_query_value',
@@ -223,8 +241,7 @@ class Project_publication(BioGRID.ims.Project_publication):
                 pub=Publication({'publication_pubmed_id':pmid,
                                  'publication_status':'active'})
                 pub.store() # should publication id
-                warnings.warn(
-                    "Inserting %s %d into publications" % (PMID_NAME,pmid))
+                self.warn('inserting PubMed ID %d into publications' % pmid)
                 return pub.id()
             return pub_id
 
@@ -347,7 +364,7 @@ if __name__ == '__main__':
     from optparse import OptionParser
     import MySQLdb.cursors
     import _mysql_exceptions
-
+    import warnings
 
     def warn_fmt(message,category,filename,lineno,line=None):
         return "%s\n" % message
@@ -425,13 +442,22 @@ WHERE tag_category_name IN('Source','Ignore Interactions')
 UNION DISTINCT
 (SELECT DISTINCT interactor_B_id AS participant_value FROM interactions)
 ''')
+            elif 'Interaction_quantitation'==job:
+                c.execute('''
+SELECT iq.*,user_id,interaction_history_date
+AS interaction_quantitation_addeddate
+FROM interaction_quantitation AS iq
+JOIN interaction_matrix USING(interaction_id)
+''')
             else:
                 # there doesn't really seem to be secure way to have dynamic
                 # table names
 
-                if ('Interaction_quantitation_type'==job)or('Interaction_quantitation'==job):
+                if 'Interaction_quantitation_type'==job:
                     # IMS2 table is not plural
                     table_name=job.lower()
+                elif 'Interaction_note'==job:
+                    table_name='interaction_qualifications'
                 elif 'Publication_query'==job:
                     table_name='pubmed_queries'
                 elif 'Project_publication'==job:

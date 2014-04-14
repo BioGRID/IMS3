@@ -10,7 +10,7 @@ IMS_CONFIG=ims.json
 IMS2=$(PYTHON) -m BioGRID.ims2 --conf=$(IMS_CONFIG) --sql=$(SQL_DIR)
 
 INTERACTION_TABLES=Interaction_source Interaction_quantitation_type \
-	Interaction
+	Interaction Interaction_quantitation Interaction_note
 PART_TABLES=Participant
 #IPLEX_TABLES=Iplex_project
 USER_TABLES=Project User Project_user

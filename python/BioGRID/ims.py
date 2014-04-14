@@ -29,6 +29,7 @@ class Config:
         except KeyError:
             db=self.json['dbs'][section]
             self.dbs[section]=MySQLdb.connect(**db)
+
             warnings.warn('Connecting to DB %s' % section)
         # If it don't work now we want to die
         return self.dbs[section]
@@ -40,6 +41,7 @@ class _Table(object):
     """The class-wide variable _Table.config must be set with an
     instance of the Config class."""
     _rename={}
+    _user_ids=[]
     def __init__(self,row):
         self.row=row
 #    def __repr__(self):
@@ -66,6 +68,20 @@ class _Table(object):
         """Returns a MySQLdb.cursors.DictCursor to the IMS
         database."""
         return self.config.imsdb().cursor(cur)
+    def validate_user_id(self,user_id=None):
+        if None==user_id:
+            user_id=self.row['user_id']
+        if 0==len(self._user_ids):
+            c=self.ims_cursor()
+            c.execute('SELECT user_id FROM users')
+            for u in c.fetchall():
+                self._user_ids.append(u['user_id'])
+            warnings.warn('Loading user_ids')
+        try:
+            self._user_ids.index(user_id)
+        except ValueError:
+            return None
+        return user_id
     def saved_self(self):
         """Returns a version of the same object, but as saved in the
         database."""
@@ -88,6 +104,8 @@ class _Table(object):
     def table(self):
         """Returns the primary SQL table name of this object."""
         return '%ss' % self.__class__.__name__.lower()
+    def warn(self,msg):
+        warnings.warn('%s=%s %s' % (self.id_column(),str(self.id()),msg))
     def insert(self):
         """Blindly insert a new row, no checking do dup primary key or
         anything."""
@@ -172,6 +190,11 @@ class Interaction_quantitation_type(_Table):
               'interaction_quantitation_type_desc',
               'interaction_quantitation_type_addeddate',
               'interaction_quantitation_type_status']
+
+class Interaction_note(_Table):
+    _columns=['interaction_note_text','user_id','interaction_note_addeddate',
+              'interaction_note_status','interaction_id']
+
 
 class Iplex_project(_Table):
     pass
