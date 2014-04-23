@@ -44,8 +44,17 @@ class _Table(object):
             cooked=cls(raw)
             cooked.store()
             raw=c.fetchone()
-
-        
+    def pubmed_id(self):
+        """Returns the PubMed ID as reported from the IMS2 database.
+        Otherwise returns None if current object has no
+        'publication_id' item."""
+        pub_id=self['publication_id']
+        if None!=pub_id:
+            c=self.ims2_cursor()
+            c.execute('''SELECT publication_pubmed_id FROM publications
+WHERE publication_id=%s''',(pub_id,))
+            return BioGRID.ims.fetch_one(c,'publication_pubmed_id')
+        return None
 
 class Project(BioGRID.ims.Project,_Table):
     _rename={'project_addeddate':'project_timestamp'}
@@ -150,10 +159,8 @@ AND interaction_id=%s
         try:
             return super(Interaction,self).store()
         except _mysql_exceptions.IntegrityError:
-            c=self.ims2_cursor();
-            c.execute('''SELECT publication_pubmed_id AS id FROM publications
-WHERE publication_id=%s''',(self['publication_id'],))
-            pmid=BioGRID.ims.fetch_one(c,'id');
+            pmid=self.pubmed_id()
+            c=self.ims2_cursor()
             c.execute('''SELECT modification_type FROM interaction_matrix
 WHERE interaction_id=%s''',(self.id(),))
             mod_type=BioGRID.ims.fetch_one(c,'modification_type')
@@ -210,7 +217,7 @@ class Interaction_note(BioGRID.ims.Interaction_note,_Table):
             user_id=self.validate_user_id()
             if user_id:
                 return user_id
-            self.warn('no user_id=%d' % self.row['user_id'])
+            self.warn('skipping where user_id=%d' % self.row['user_id'])
             return DEFAULT_USER_ID
 
         return super(Interaction_note,self).__getitem__(name)
@@ -221,11 +228,53 @@ class Interaction_note(BioGRID.ims.Interaction_note,_Table):
             return super(Interaction_note,self).store()
         except _mysql_exceptions.IntegrityError as x:
             if 0!=str(x).count("REFERENCES `interactions` (`interaction_id`)"):
-                self.warn('no interaction_id=%s in interactions' %
+                self.warn('skipping where interaction_id=%s' %
                           self['interaction_id'])
             else:
                 raise
 
+class Interaction_participant(BioGRID.ims.Interaction_participant,_Table):
+    ROLE_ID={}
+    P2P={} # BioGRID Protein ID -> participant_id
+    def __init__(self,passthru):
+        out=super(Interaction_participant,self).__init__(passthru)
+        if 0==len(Interaction_participant.P2P):
+            c=self.ims_cursor()
+            c.execute('''SELECT DISTINCT participant_id,participant_value FROM participants
+WHERE participant_type_id=%s''',(PARTICIPANT_TYPE,))
+            raw=c.fetchone()
+            while raw:
+                Interaction_participant.P2P[raw['participant_value']]=raw['participant_id']
+                raw=c.fetchone()
+            self.warn('fetched participant ids')
+        return out
+
+    @classmethod
+    def slurp_sql(cls):
+        c=cls.ims_cursor()
+        c.execute('''SELECT participant_role_name AS K,
+participant_role_id as V FROM participant_roles''')
+        row=c.fetchone()
+        ROLE_ID={}
+        while row:
+            ROLE_ID[row['K']]=row['V']
+            row=c.fetchone()
+        return '''
+(SELECT interaction_id,publication_id,interactor_A_id AS interactor_id,%d AS participant_role_id FROM interactions)
+UNION
+(SELECT interaction_id,publication_id,interactor_B_id AS interactor_id,%d AS participant_role_id FROM interactions)
+''' % (ROLE_ID['bait'],ROLE_ID['prey'])
+    def __getitem__(self,name):
+        if 'participant_id'==name:
+            return Interaction_participant.P2P[self['interactor_id']]
+        elif 'interaction_participant_status'==name:
+            return 'active'
+        return super(Interaction_participant,self).__getitem__(name)
+    def store(self):
+        try:
+            return super(Interaction_participant,self).store()
+        except _mysql_exceptions.IntegrityError:
+            self.warn('Skipping where PubMed ID is %s' % self.pubmed_id())
 
 # class Iplex_project(BioGRID.ims.Iplex_project):
 #     _rename={'iplex_project_name':'iplex_name',
@@ -494,7 +543,6 @@ if __name__ == '__main__':
                         pass
                     else:
                         raise
-            # ----
             Table=eval(job)
             Table.slurp()
             ims3.commit()

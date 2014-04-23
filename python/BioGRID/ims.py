@@ -201,6 +201,10 @@ class Interaction_note(_Table):
     _columns=['interaction_note_text','user_id','interaction_note_addeddate',
               'interaction_note_status','interaction_id']
 
+class Interaction_participant(_Table):
+    _columns=['interaction_id','participant_id','participant_role_id',
+              'interaction_participant_addeddate',
+              'interaction_participant_status']
 
 class Iplex_project(_Table):
     pass
