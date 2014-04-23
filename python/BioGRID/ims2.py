@@ -1,9 +1,9 @@
-
 """Stuff to convert IMS2 database schema to IMS3.  Hopefully this will
 be the only files with IMS2 information in it."""
 import json
 import BioGRID.ims
 from time import strftime
+import MySQLdb.cursors
 
 global PARTICIPANT_TYPE
 PARTICIPANT_TYPE=1
@@ -19,7 +19,35 @@ class Config(BioGRID.ims.Config):
         """Returns a MySQLdb pointer to the IMS2 database."""
         return self._db('ims2')
 
-class Project(BioGRID.ims.Project):
+class _Table(object):
+    @classmethod
+    def ims2_cursor(self,cur=MySQLdb.cursors.DictCursor):
+        return self.config.ims2db().cursor(cur)
+    @classmethod
+    def ims2_table(cls):
+        # IMS2 table is not plural
+        return cls.table()
+    @classmethod
+    def slurp_sql(cls):
+        # there doesn't really seem to be secure way to have dynamic
+        # table names
+        return 'SELECT * FROM %s' % cls.ims2_table()
+    @classmethod
+    def slurp(cls):
+        c=cls.ims2_cursor()
+        c.execute(cls.slurp_sql())
+        cls.puke(c)
+    @classmethod
+    def puke(cls,c):
+        raw=c.fetchone()
+        while raw:
+            cooked=cls(raw)
+            cooked.store()
+            raw=c.fetchone()
+
+        
+
+class Project(BioGRID.ims.Project,_Table):
     _rename={'project_addeddate':'project_timestamp'}
 
     def __getitem__(self,name):
@@ -31,7 +59,7 @@ class Project(BioGRID.ims.Project):
                 return 'private'
         return super(Project,self).__getitem__(name)
 
-class User(BioGRID.ims.User):
+class User(BioGRID.ims.User,_Table):
     _rename={
         'user_password':'password',
         'user_cookie':'cookie',
@@ -51,7 +79,7 @@ class User(BioGRID.ims.User):
             return adddate
         return super(User,self).__getitem__(name)
 
-class Project_user(BioGRID.ims.Project_user):
+class Project_user(BioGRID.ims.Project_user,_Table):
     _rename={'project_user_addeddate':'project_users_timestamp'}
     def __getitem__(self,name):
         if 'project_user_status'==name:
@@ -68,10 +96,8 @@ class Project_user(BioGRID.ims.Project_user):
             else:
                 self.warn('user_id %s not in users' % self['user_id'])
 
-class Interaction(BioGRID.ims.Interaction):
+class Interaction(BioGRID.ims.Interaction,_Table):
     IGNORE_ID=None
-    def ims2_cursor(self):
-        return self.config.ims2db().cursor(MySQLdb.cursors.DictCursor)
     def __init__(self,passthru):
         out=super(Interaction,self).__init__(passthru)
 
@@ -133,17 +159,36 @@ WHERE interaction_id=%s''',(self.id(),))
             mod_type=BioGRID.ims.fetch_one(c,'modification_type')
             self.warn('skipping %s where PubMed ID is %s' % (mod_type,pmid))
 
-class Interaction_source(BioGRID.ims.Interaction_source):
+class Interaction_source(BioGRID.ims.Interaction_source,_Table):
+    @classmethod
+    def slurp_sql(cls):
+        return '''SELECT
+REPLACE(tag_name,'-Ignore','') AS interaction_source_name,
+tag_added_date AS interaction_source_addeddate,
+tag_status AS interaction_source_status,
+tag_category_name
+FROM tag_categories JOIN tags USING(tag_category_id)
+WHERE tag_category_name IN('Source','Ignore Interactions')'''
+
     def id(self):
         return None
 
-class Interaction_quantitation(BioGRID.ims.Interaction_quantitation):
+class Interaction_quantitation(BioGRID.ims.Interaction_quantitation,_Table):
+    @classmethod
+    def slurp_sql(cls):
+        return '''SELECT iq.*,user_id,interaction_history_date
+AS interaction_quantitation_addeddate
+FROM interaction_quantitation AS iq
+JOIN interaction_matrix USING(interaction_id)'''
     def __getitem__(self,name):
         if 'interaction_quantitation_status'==name:
             return 'active'
         return super(Interaction_quantitation,self).__getitem__(name)
 
-class Interaction_quantitation_type(BioGRID.ims.Interaction_quantitation_type):
+class Interaction_quantitation_type(BioGRID.ims.Interaction_quantitation_type,_Table):
+    @classmethod
+    def ims2_table(cls):
+        return cls.__name__.lower()
     def __getitem__(self,name):
         if 'interaction_quantitation_type_addeddate'==name:
             return '%s %s' % (
@@ -153,10 +198,13 @@ class Interaction_quantitation_type(BioGRID.ims.Interaction_quantitation_type):
             return 'active'
         return super(Interaction_quantitation_type,self).__getitem__(name)
 
-class Interaction_note(BioGRID.ims.Interaction_note):
+class Interaction_note(BioGRID.ims.Interaction_note,_Table):
     _rename={'interaction_note_text':'interaction_qualification',
              'interaction_note_status':'interaction_qualification_status'}
     _user_ids=[]
+    @classmethod
+    def ims2_table(cls):
+        return 'interaction_qualifications'
     def __getitem__(self,name):
         if 'user_id'==name:
             user_id=self.validate_user_id()
@@ -185,7 +233,7 @@ class Interaction_note(BioGRID.ims.Interaction_note):
 #              'iplex_project_addeddate':'iplex_createddate',
 #              'iplex_project_status':'iplex_status'}
 
-class Publication(BioGRID.ims.Publication):
+class Publication(BioGRID.ims.Publication,_Table):
     _rename={'publication_addeddate':'publication_modified'}
     _use=['publication_pubmed_id','publication_addeddate',
           'publication_status']
@@ -212,22 +260,28 @@ class Publication(BioGRID.ims.Publication):
             except _mysql_exceptions.IntegrityError:
                 self.warn('skipping dup entry where PubMed ID is %d' % pmid)
 
-class Publication_query(BioGRID.ims.Publication_query):
+class Publication_query(BioGRID.ims.Publication_query,_Table):
     _rename={'publication_query_value':'pubmed_query_value',
              'publication_query_addeddate':'pubmed_query_added_date',
              'publication_query_lastrun':'pubmed_query_last_run',
              'publication_query_type':'pubmed_query_type',
              'publication_query_status':'pubmed_query_status'}
+    @classmethod
+    def ims2_table(cls):
+        return 'pubmed_queries'
     def id(self):
         """Overloaded because the table name is different between IMS2
         and IMS3."""
         return self.row['pubmed_query_id']
 
-class Project_publication(BioGRID.ims.Project_publication):
+class Project_publication(BioGRID.ims.Project_publication,_Table):
     """Make sure the Publicatin table is loaded before this!"""
     _rename={'project_publication_addeddate':'project_pubmed_timestamp',
              'project_publication_status':'project_pubmed_status',
              'publication_query_id':'pubmed_query_id'}
+    @classmethod
+    def ims2_table(cls):
+        return 'project_pubmeds'
     def id(self):
         return self.row['project_pubmed_id']
     def __getitem__(self,name):
@@ -250,7 +304,7 @@ class Project_publication(BioGRID.ims.Project_publication):
             return None
         return out
 
-class PTM(BioGRID.ims.PTM):
+class PTM(BioGRID.ims.PTM,_Table):
     _rename={'ptm_modification_id':'modification_id'}
     def __getitem__(self,name):
         if 'ptm_status'==name:
@@ -272,15 +326,18 @@ class PTM(BioGRID.ims.PTM):
             return super(BioGRID.ims.PTM,self).store()
 
 
-class PTM_source(BioGRID.ims.PTM_source):
+class PTM_source(BioGRID.ims.PTM_source,_Table):
     def __getitem__(self,name):
         if name==('ptm_source_status'):
             return 'active'
         return super(PTM_source,self).__getitem__(name)
 
-class PTM_modification(BioGRID.ims.PTM_modification):
+class PTM_modification(BioGRID.ims.PTM_modification,_Table):
     _rename={'ptm_modification_name':'modification_name',
              'ptm_modification_id':'modification_id'}
+    @classmethod
+    def ims2_table(cls):
+        return 'modification'
     def id(self):
         try:
             return self.row['modification_id']
@@ -293,7 +350,7 @@ class PTM_modification(BioGRID.ims.PTM_modification):
             return 'active'
         return super(PTM_modification,self).__getitem__(name)
 
-class PTM_relationship(BioGRID.ims.PTM_relationship):
+class PTM_relationship(BioGRID.ims.PTM_relationship,_Table):
     _rename={'ptm_relationship_type':'relationship_type',
              'ptm_relationship_identity':'relationship_identity'}
     def __getitem__(self,name):
@@ -304,7 +361,7 @@ class PTM_relationship(BioGRID.ims.PTM_relationship):
                                            PARTICIPANT_TYPE)
         return super(PTM_relationship,self).__getitem__(name)
 
-class PTM_history(BioGRID.ims.PTM_history):
+class PTM_history(BioGRID.ims.PTM_history,_Table):
     _rename={'ptm_history_date':'ptm_addeddate'}
     def __getitem__(self,name):
         if 'modification_type'==name:
@@ -321,6 +378,9 @@ class PTM_history(BioGRID.ims.PTM_history):
             else:
                 return None
         return super(PTM_history,self).__getitem__(name)
+    @classmethod
+    def ims2_table(cls):
+        return 'ptms'
     def store(self):
         try:
             return super(BioGRID.ims.PTM_history,self).store()
@@ -328,9 +388,12 @@ class PTM_history(BioGRID.ims.PTM_history):
             print row
             raise
 
-class PTM_note(BioGRID.ims.PTM_note):
+class PTM_note(BioGRID.ims.PTM_note,_Table):
     _rename={'ptm_note_addeddate':'ptm_addeddate',
              'ptm_note_status':'ptm_status'}
+    @classmethod
+    def ims2_table(cls):
+        return 'ptms'
     def __getitem__(self,name):
         if 'user_id'==name:
             return DEFAULT_USER_ID
@@ -349,9 +412,16 @@ class PTM_note(BioGRID.ims.PTM_note):
             return None
         return super(PTM_note,self).store()
 
-class Participant(BioGRID.ims.Participant):
+class Participant(BioGRID.ims.Participant,_Table):
     def id(self):
         return None
+    @classmethod
+    def slurp_sql(cls):
+        return '''
+(SELECT DISTINCT interactor_A_id AS participant_value FROM interactions)
+UNION DISTINCT
+(SELECT DISTINCT interactor_B_id AS participant_value FROM interactions)
+'''
     def __getitem__(self,name):
         if 'participant_status'==name:
             return 'active'
@@ -424,57 +494,7 @@ if __name__ == '__main__':
                         pass
                     else:
                         raise
-
-            c=ims2.cursor(MySQLdb.cursors.DictCursor)
-
-            if 'Interaction_source'==job:
-                c.execute('''SELECT
-REPLACE(tag_name,'-Ignore','') AS interaction_source_name,
-tag_added_date AS interaction_source_addeddate,
-tag_status AS interaction_source_status,
-tag_category_name
-FROM tag_categories JOIN tags USING(tag_category_id)
-WHERE tag_category_name IN('Source','Ignore Interactions')
-''')
-            elif 'Participant'==job:
-                c.execute('''
-(SELECT DISTINCT interactor_A_id AS participant_value FROM interactions)
-UNION DISTINCT
-(SELECT DISTINCT interactor_B_id AS participant_value FROM interactions)
-''')
-            elif 'Interaction_quantitation'==job:
-                c.execute('''
-SELECT iq.*,user_id,interaction_history_date
-AS interaction_quantitation_addeddate
-FROM interaction_quantitation AS iq
-JOIN interaction_matrix USING(interaction_id)
-''')
-            else:
-                # there doesn't really seem to be secure way to have dynamic
-                # table names
-
-                if 'Interaction_quantitation_type'==job:
-                    # IMS2 table is not plural
-                    table_name=job.lower()
-                elif 'Interaction_note'==job:
-                    table_name='interaction_qualifications'
-                elif 'Publication_query'==job:
-                    table_name='pubmed_queries'
-                elif 'Project_publication'==job:
-                    table_name='project_pubmeds'
-                elif 'PTM_modification'==job:
-                    table_name='modification'
-                elif 'PTM_history'==job or 'PTM_note'==job:
-                    table_name='ptms'
-                else:
-                    table_name='%ss' % job.lower()
-                c.execute('SELECT * FROM %s' % table_name)
-
-
-            raw=c.fetchone()
+            # ----
             Table=eval(job)
-            while raw:
-                cooked=Table(raw)
-                cooked.store()
-                raw=c.fetchone()
-                ims3.commit()
+            Table.slurp()
+            ims3.commit()

@@ -64,6 +64,7 @@ class _Table(object):
         if (other==None) or (self.id() != other.id()):
             return False
         raise NotImplementedError('__eq__')
+    @classmethod
     def ims_cursor(self,cur=MySQLdb.cursors.DictCursor):
         """Returns a MySQLdb.cursors.DictCursor to the IMS
         database."""
@@ -92,18 +93,23 @@ class _Table(object):
         if in_db:
             return self.__class__(in_db)
         return None
-        
-    def id_column(self):
-        return '%s_id' % self.__class__.__name__.lower()
+
+    @classmethod
+    def table(cls):
+        """Returns the primary SQL table name of this object."""
+        return '%ss' % cls.__name__.lower()
+    @classmethod
+    def id_column(cls):
+        return '%s_id' % cls.__name__.lower()
+        #return '%s_id' % self.__class__.__name__.lower()
+
+
     def id(self):
         try:
             return self.row[self.id_column()]
         except KeyError:
             # If we don't have the id we assume it's not in the database.
             return None
-    def table(self):
-        """Returns the primary SQL table name of this object."""
-        return '%ss' % self.__class__.__name__.lower()
     def warn(self,msg):
         warnings.warn('%s=%s %s' % (self.id_column(),str(self.id()),msg))
     def insert(self):
@@ -215,7 +221,8 @@ class Publication(_Table):
 
 
 class Publication_query(_Table):
-    def table(self):
+    @classmethod
+    def table(cls):
         """Please don't use plurels when naming your SQL tables."""
         return 'publication_queries'
     _columns=['project_id','publication_query_value',
@@ -246,7 +253,8 @@ class PTM_relationship(_Table):
               'ptm_relationship_addeddate','ptm_relationship_status']	 
 
 class PTM_history(_Table):
-    def table(self):
+    @classmethod
+    def table(cls):
         return 'ptm_history'
     _columns=['modification_type','ptm_id','user_id',
               'ptm_history_comment','ptm_history_date']
