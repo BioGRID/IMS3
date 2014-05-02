@@ -9,9 +9,11 @@ IMS_CONFIG=ims.json
 
 IMS2=$(PYTHON) -m BioGRID.ims2 --conf=$(IMS_CONFIG) --sql=$(SQL_DIR)
 
+# Complex isn't a table in IMS2, not IMS3
+
 INTERACTION_TABLES=Interaction_source Interaction_quantitation_type \
 	Interaction Interaction_quantitation Interaction_note
-PART_TABLES=Participant	Interaction_participant
+PART_TABLES=Participant	Interaction_participant Complex
 #IPLEX_TABLES=Iplex_project
 USER_TABLES=Project User Project_user
 PTM_TABLES= PTM_source PTM_modification PTM PTM_relationship PTM_history \

@@ -36,6 +36,24 @@ class Config:
     def imsdb(self):
         """Returns a MySQLdb object to the IMS3 database."""
         return self._db('ims')
+    def imsdb_cursor(self,cur=MySQLdb.cursors.DictCursor):
+        return self.imsdb().cursor(cur)
+    def _sql2kv(self,sql):
+        c=self.imsdb_cursor()
+        c.execute(sql)
+        out=self.cursor2kv(c)
+        warnings.warn(str(out))
+        return out
+        
+    def cursor2kv(self,c,k='k',v='v'):
+        """Convert an MySQL curser to a key/value pair."""
+        out={}
+        row=c.fetchone()
+        while row:
+            out[row[k]]=row[v]
+            row=c.fetchone()
+        return out
+
 
 class _Table(object):
     """The class-wide variable _Table.config must be set with an
@@ -60,15 +78,34 @@ class _Table(object):
             return None
     def __eq__(self,other):
         """This is a deep equals, it does more then just just the id,
-        it checks the elements too."""
+        it checks the elements too. (err, not implemented)"""
         if (other==None) or (self.id() != other.id()):
             return False
         raise NotImplementedError('__eq__')
+
+    FACTORY={}
+    @classmethod
+    def factory(cls,name):
+        try:
+            return cls.FACTORY[name]
+        except KeyError:
+            table=cls.table()
+            col_name='%s_name' % cls.__name__
+            sql="SELECT * FROM %s WHERE %s=%%s" % (table,col_name)
+            c=cls.ims_cursor()
+            c.execute(sql,(name,))
+            o=cls(c.fetchone())
+            warnings.warn('%s: %s -> %d' % (table,name,o.id()))
+            cls.FACTORY[name]=o
+        return cls.FACTORY[name]
+    @classmethod
+    def cursor2kv(self,c,k='k',v='v'):
+        return self.config.cursor2kv(c,k,v)
     @classmethod
     def ims_cursor(self,cur=MySQLdb.cursors.DictCursor):
         """Returns a MySQLdb.cursors.DictCursor to the IMS
         database."""
-        return self.config.imsdb().cursor(cur)
+        return self.config.imsdb_cursor(cur)
     def validate_user_id(self,user_id=None):
         if None==user_id:
             user_id=self.row['user_id']
@@ -103,7 +140,6 @@ class _Table(object):
         return '%s_id' % cls.__name__.lower()
         #return '%s_id' % self.__class__.__name__.lower()
 
-
     def id(self):
         try:
             return self.row[self.id_column()]
@@ -122,7 +158,8 @@ class _Table(object):
         primary_id=self.id()
         if primary_id:
             vals.append(self.id())
-        cur.execute(self.insert_sql(include_id_column=primary_id),vals)
+        sql=self.insert_sql(include_id_column=primary_id)
+        cur.execute(sql,vals)
         if primary_id:
             return primary_id
 
@@ -157,6 +194,16 @@ class _Table(object):
 WHERE participant_value=%s AND participant_type_id=%s
 ''',(value,p_type))
         return fetch_one(c,'participant_id')
+    def pgid(self,v,p):
+        out=self.get_participant_id(v,p)
+        if None==out:
+            p=Participant(
+                {'participant_value':v,
+                 'participant_type':t}
+                )
+            p.store()
+            return p.id()
+        return out
 
 
 class Project(_Table):
@@ -209,7 +256,7 @@ class Interaction_participant(_Table):
 class Iplex_project(_Table):
     pass
 #    _columns=['iplex_project_name','iplex_project_fullname',
-#              'iplex_project_description','iplex_project_addeddate',
+#              'iplex_project_description','iplex_project_added`date',
 #              'iplex_project_status']
 
 class Publication(_Table):

@@ -1,4 +1,4 @@
-"""Stuff to convert IMS2 database schema to IMS3.  Hopefully this will
+""""Stuff to convert IMS2 database schema to IMS3.  Hopefully this will
 be the only files with IMS2 information in it."""
 import json
 import BioGRID.ims
@@ -11,13 +11,15 @@ global DEFAULT_USER_ID
 DEFAULT_USER_ID=1
 #global IGNORE_ID
 #IGNORE_ID=None
-global SOURCE_IDS
-SOURCE_IDS={}
+#global SOURCE_IDS
+#SOURCE_IDS={}
 
 class Config(BioGRID.ims.Config):
     def ims2db(self):
         """Returns a MySQLdb pointer to the IMS2 database."""
         return self._db('ims2')
+    def ims3db(self):
+        return self.imsdb()
 
 class _Table(object):
     @classmethod
@@ -34,11 +36,22 @@ class _Table(object):
         return 'SELECT * FROM %s' % cls.ims2_table()
     @classmethod
     def slurp(cls):
+        """Does an SQL query of all the stiff in IMS2 and passes it to
+        puke()."""
+        sqls=cls.slurp_sql()
+        if('str'==type(sqls).__name__):
+            sqls=[sqls]
         c=cls.ims2_cursor()
-        c.execute(cls.slurp_sql())
-        cls.puke(c)
+
+        # I'm not sure we are ever going to have more then one sql at
+        # at time
+        for sql in sqls:
+            c.execute(sql)
+            cls.puke(c)
     @classmethod
     def puke(cls,c):
+        """Processes all the items in the provided cursor and saves
+        them in the database."""
         raw=c.fetchone()
         while raw:
             cooked=cls(raw)
@@ -117,17 +130,6 @@ class Interaction(BioGRID.ims.Interaction,_Table):
             Interaction.IGNORE_ID=BioGRID.ims.fetch_one(c,'id');
             self.warn('Fetched IGNORE_ID==%d' % Interaction.IGNORE_ID)
 
-        if 0==len(SOURCE_IDS):
-            c=self.ims_cursor()
-            c.execute('''SELECT
-interaction_source_id,interaction_source_name FROM interaction_sources''')
-            row=c.fetchone()
-            while row:
-                SOURCE_IDS[row['interaction_source_name']
-                           ]=row['interaction_source_id']
-                row=c.fetchone()
-            self.warn('Source index: %s' % str(SOURCE_IDS))
-        return out
     def __getitem__(self,name):
         if 'interaction_status'==name:
             c=self.ims2_cursor()
@@ -151,20 +153,35 @@ AND interaction_id=%s
 ''',(self.id(),))
             name=BioGRID.ims.fetch_one(c,'is_name')
             if None==name:
-                return SOURCE_IDS['BioGRID']
-            return SOURCE_IDS[name]
-
-        return super(Interaction,self).__getitem__(name)
+                return Interaction_source.factory('BioGRID').id()
+            return Interaction_source.factory(name).id()
+        out=super(Interaction,self).__getitem__(name)
+        if None==out:
+            if 'interaction_type_id'==name:
+                out=Interaction_type.factory('Protein-Protein').id()
+        return out
     def store(self):
         try:
             return super(Interaction,self).store()
         except _mysql_exceptions.IntegrityError:
-            pmid=self.pubmed_id()
-            c=self.ims2_cursor()
-            c.execute('''SELECT modification_type FROM interaction_matrix
+            pp_id=Interaction_type.factory('Protein-Protein').id()
+            if pp_id==self['interaction_type_id']:
+                pmid=self.pubmed_id()
+                c=self.ims2_cursor()
+                c.execute('''SELECT modification_type FROM interaction_matrix
 WHERE interaction_id=%s''',(self.id(),))
-            mod_type=BioGRID.ims.fetch_one(c,'modification_type')
-            self.warn('skipping %s where PubMed ID is %s' % (mod_type,pmid))
+                mod_type=BioGRID.ims.fetch_one(c,'modification_type')
+                self.warn('skipping %s where PubMed ID is %s'
+                          % (mod_type,pmid))
+            else:
+                raise
+
+
+class Interaction_type(BioGRID.ims._Table):
+    pass
+
+class Participant_role(BioGRID.ims._Table):
+    pass
 
 class Interaction_source(BioGRID.ims.Interaction_source,_Table):
     @classmethod
@@ -177,8 +194,8 @@ tag_category_name
 FROM tag_categories JOIN tags USING(tag_category_id)
 WHERE tag_category_name IN('Source','Ignore Interactions')'''
 
-    def id(self):
-        return None
+#    def id(self):
+#        return None
 
 class Interaction_quantitation(BioGRID.ims.Interaction_quantitation,_Table):
     @classmethod
@@ -234,7 +251,6 @@ class Interaction_note(BioGRID.ims.Interaction_note,_Table):
                 raise
 
 class Interaction_participant(BioGRID.ims.Interaction_participant,_Table):
-    ROLE_ID={}
     P2P={} # BioGRID Protein ID -> participant_id
     def __init__(self,passthru):
         out=super(Interaction_participant,self).__init__(passthru)
@@ -251,21 +267,27 @@ WHERE participant_type_id=%s''',(PARTICIPANT_TYPE,))
 
     @classmethod
     def slurp_sql(cls):
-        c=cls.ims_cursor()
-        c.execute('''SELECT participant_role_name AS K,
-participant_role_id as V FROM participant_roles''')
-        row=c.fetchone()
-        ROLE_ID={}
-        while row:
-            ROLE_ID[row['K']]=row['V']
-            row=c.fetchone()
+        cfg=cls.config
         return '''
 (SELECT interaction_id,publication_id,interactor_A_id AS interactor_id,%d AS participant_role_id FROM interactions)
 UNION
 (SELECT interaction_id,publication_id,interactor_B_id AS interactor_id,%d AS participant_role_id FROM interactions)
-''' % (ROLE_ID['bait'],ROLE_ID['prey'])
+''' % (Participant_role.factory('bait').id(),
+       Participant_role.factory('prey').id())
     def __getitem__(self,name):
         if 'participant_id'==name:
+            iid=self['interactor_id']
+            try:
+                return Interaction_participant.P2P[iid]
+            except KeyError:
+                p=Participant(
+                    {'participant_value':iid,
+                     'participant_type_id':PARTICIPANT_TYPE}
+                    )
+                p.store()
+                pid=p.id()
+                Interaction_participant.P2P[self['interactor_id']]=pid
+                self.warn('New Participant: %d=>%d' % (iid,pid))
             return Interaction_participant.P2P[self['interactor_id']]
         elif 'interaction_participant_status'==name:
             return 'active'
@@ -462,8 +484,8 @@ class PTM_note(BioGRID.ims.PTM_note,_Table):
         return super(PTM_note,self).store()
 
 class Participant(BioGRID.ims.Participant,_Table):
-    def id(self):
-        return None
+#    def id(self):
+#        return None
     @classmethod
     def slurp_sql(cls):
         return '''
@@ -478,12 +500,49 @@ UNION DISTINCT
             return PARTICIPANT_TYPE # for now assume protein
         return super(Participant,self).__getitem__(name)
 
+class Complex(BioGRID.ims._Table,_Table):
+    """This table is only in IMS2, not IMS3. Data from it is now
+    stored in the Interaction tables."""
+
+    @classmethod
+    def table(cls):
+        return 'complexes'
+    @classmethod
+    def puke(cls,c):
+        raw=c.fetchone()
+        complex_id=Interaction_type.factory('Complex').id()
+        source_id=Interaction_source.factory('BioGRID').id()
+        while raw:
+            cpx=Complex(raw)
+            i=Interaction(
+                {'publication_id':cpx['publication_id'],
+                 'interaction_type_id':complex_id,
+                 'interaction_source_id':source_id}
+                )
+            i.store()
+            interaction_id=i.id()
+            for interactor_id in cpx['complex_participants'].split('|'):
+                #pid=cpx.get_participant_id(bid,PARTICIPANT_TYPE)
+                #pid=cpx.pgid(bid,PARTICIPANT_TYPE)
+                ip=Interaction_participant(
+                    {'interaction_id':interaction_id,
+                     'interactor_id':int(interactor_id),
+                     'participant_role_id':Participant_role.factory(
+                            'unspecified').id()
+                     }
+                    )
+                ip.store()
+
+            raw=c.fetchone()
+
+
 if __name__ == '__main__':
     import sys
     from optparse import OptionParser
     import MySQLdb.cursors
     import _mysql_exceptions
     import warnings
+    import os.path
 
     def warn_fmt(message,category,filename,lineno,line=None):
         return "%s\n" % message
@@ -507,42 +566,46 @@ if __name__ == '__main__':
     for job in jobs:
         warnings.warn(msg_fmt % job)
 
-        # First check for SQL files containing IMS3 schema
-        file=open('%s/%s.sql' % (opts.sql_dir,job))
-        if opts.clean:
-            line=file.readline()
-            tables=[]
-            while line:
-                if line.startswith('CREATE TABLE'):
-                    table=line.split(' ')[-1].strip("(\n")
-                    tables.insert(0,table)
+        path='%s/%s.sql' % (opts.sql_dir,job)
+        if os.path.isfile(path):
+            # get for SQL files containing IMS3 schema
+            file=open('%s/%s.sql' % (opts.sql_dir,job))
+            if opts.clean:
                 line=file.readline()
-            file.close()
+                tables=[]
+                while line:
+                    if line.startswith('CREATE TABLE'):
+                        table=line.split(' ')[-1].strip("(\n")
+                        tables.insert(0,table)
+                    line=file.readline()
+                file.close()
 
-            for table in tables:
-                try:
-                    ims3.query('DROP TABLE %s' % table)
-                except _mysql_exceptions.OperationalError as(errno,msg):
-                    if 1051==errno: # Unknown table
-                        pass
-                    else:
-                        raise
+                for table in tables:
+                    try:
+                        ims3.query('DROP TABLE %s' % table)
+                    except _mysql_exceptions.OperationalError as(errno,msg):
+                        if 1051==errno: # Unknown table
+                            pass
+                        else:
+                            raise
 
+            else:
+                sqls=file.read()
+                file.close()
+                # WARNING! Don't use ; is you comments in the SQL files!
+                for sql in sqls.split(';'):
+                    try:
+                        ims3.query(sql)
+                    except _mysql_exceptions.OperationalError as(errno,msg):
+                        # We can skip this error
+                        if 1065==errno: # Query was empty
+                            pass
+                        else:
+                            raise
+        # close os.path.isfile
 
-        else:
-            sqls=file.read()
-            file.close()
-            # WARNING! Don't use ; is you comments in the SQL files!
-            for sql in sqls.split(';'):
-                try:
-                    #print sql
-                    ims3.query(sql)
-                except _mysql_exceptions.OperationalError as(errno,msg):
-                    # We can skip this error
-                    if 1065==errno: # Query was empty
-                        pass
-                    else:
-                        raise
+                        
+        if not(opts.clean):
             Table=eval(job)
             Table.slurp()
             ims3.commit()

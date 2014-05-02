@@ -6,13 +6,14 @@ CREATE TABLE IF NOT EXISTS interaction_types(
        interaction_type_status	  ENUM('active','inactive')NOT NULL DEFAULT 'active'
 );
 
-INSERT INTO interaction_types(interaction_type_name)VALUES('Protien-Protein');
+INSERT INTO interaction_types(interaction_type_name)VALUES
+('Protein-Protein'),('Complex');
 
 CREATE TABLE IF NOT EXISTS interactions(
        interaction_id        BIGINT(10)PRIMARY KEY AUTO_INCREMENT,
        participant_hash      VARCHAR(64)NULL,
        publication_id        BIGINT(10)NOT NULL,
-       interaction_type_id   BIGINT(10)NULL, -- for now
+       interaction_type_id   BIGINT(10)NOT NULL,
        interaction_status    ENUM('normal','error','temporary')NOT NULL DEFAULT 'normal',
        interaction_source_id BIGINT(10)NOT NULL,
        FOREIGN KEY(publication_id)REFERENCES publications(publication_id),
