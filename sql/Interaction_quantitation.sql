@@ -7,5 +7,5 @@ CREATE TABLE IF NOT EXISTS interaction_quantitations(
        interaction_quantitation_status	   ENUM('active','inactive')NOT NULL DEFAULT 'active',
        interaction_id			   BIGINT(10)NOT NULL,
        FOREIGN KEY(interaction_quantitation_type_id)REFERENCES interaction_quantitation_types(interaction_quantitation_type_id),
-       FOREIGN KEY(interaction_id)REFERENCES interactions(interaction_id)
+       FOREIGN KEY(interaction_id)REFERENCES interactions(interaction_id)ON DELETE CASCADE
 )

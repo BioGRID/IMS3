@@ -6,5 +6,5 @@ CREATE TABLE IF NOT EXISTS interaction_notes(
        interaction_note_status    ENUM('active','inactive'),
        interaction_id		  BIGINT(10)NOT NULL,
        FOREIGN KEY(user_id)REFERENCES users(user_id),
-       FOREIGN KEY(interaction_id)REFERENCES interactions(interaction_id)
+       FOREIGN KEY(interaction_id)REFERENCES interactions(interaction_id)ON DELETE CASCADE
 )

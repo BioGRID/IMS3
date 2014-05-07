@@ -9,10 +9,6 @@ global PARTICIPANT_TYPE
 PARTICIPANT_TYPE=1
 global DEFAULT_USER_ID
 DEFAULT_USER_ID=1
-#global IGNORE_ID
-#IGNORE_ID=None
-#global SOURCE_IDS
-#SOURCE_IDS={}
 
 class Config(BioGRID.ims.Config):
     def ims2db(self):
@@ -57,17 +53,34 @@ class _Table(object):
             cooked=cls(raw)
             cooked.store()
             raw=c.fetchone()
+    # def interaction(self,interaction_id=None):
+    #     """If the table has an interaction_id returns an Interaction
+    #     object."""
+    #     if(None==interaction_id):
+    #         interaction_id=self['interaction_id']
+    #     c=self.ims_cursor()
+    #     c.execute('''SELECT * FROM interactions WHERE interaction_id=%s''',
+    #               (interaction_id,))
+    #     row=c.fetchone()
+    #     print interaction_id
+    #     return Interaction(row)
     def pubmed_id(self):
-        """Returns the PubMed ID as reported from the IMS2 database.
+        """Returns the PubMed ID as reported from the IMS2 database, a string.
         Otherwise returns None if current object has no
-        'publication_id' item."""
+        'publication_id' item. """
         pub_id=self['publication_id']
-        if None!=pub_id:
-            c=self.ims2_cursor()
-            c.execute('''SELECT publication_pubmed_id FROM publications
-WHERE publication_id=%s''',(pub_id,))
-            return BioGRID.ims.fetch_one(c,'publication_pubmed_id')
-        return None
+        if None==pub_id:
+            sql='''SELECT publication_pubmed_id FROM interactions
+JOIN publications USING(publication_id) WHERE interaction_id=%s'''
+            use_id=self['interaction_id']
+        else:
+            sql='''SELECT publication_pubmed_id FROM publications
+WHERE publication_id=%s'''
+            use_id=pub_id
+
+        c=self.ims2_cursor()
+        c.execute(sql,(use_id,))
+        return BioGRID.ims.fetch_one(c,'publication_pubmed_id')
 
 class Project(BioGRID.ims.Project,_Table):
     _rename={'project_addeddate':'project_timestamp'}
@@ -176,6 +189,14 @@ WHERE interaction_id=%s''',(self.id(),))
             else:
                 raise
 
+
+class Interaction_history(BioGRID.ims.Interaction_history,_Table):
+    def store(self):
+        try:
+            return super(Interaction_history,self).store()
+        except _mysql_exceptions.IntegrityError:
+            pubmed_id=self.pubmed_id()
+            self.warn("Skipping where pubmed_id=%s" % self.pubmed_id())
 
 class Interaction_type(BioGRID.ims._Table):
     pass
@@ -504,6 +525,14 @@ class Complex(BioGRID.ims._Table,_Table):
     """This table is only in IMS2, not IMS3. Data from it is now
     stored in the Interaction tables."""
 
+    def logs(self):
+        """Read items from the IMS2.complex_history table and returns
+        them."""
+        c=self.ims2_cursor()
+        c.execute("SELECT * FROM complex_history WHERE complex_id=%s",
+                  (self['complex_id'],))
+        return c.fetchall()
+
     @classmethod
     def table(cls):
         return 'complexes'
@@ -533,7 +562,11 @@ class Complex(BioGRID.ims._Table,_Table):
                     )
                 ip.store()
 
+#                for log in cpx.logs():
+                    
+
             raw=c.fetchone()
+
 
 
 if __name__ == '__main__':

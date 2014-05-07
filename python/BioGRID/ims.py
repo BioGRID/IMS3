@@ -226,6 +226,13 @@ class Interaction(_Table):
     _columns=['participant_hash','publication_id','interaction_type_id',
               'interaction_status','interaction_source_id']
 
+class Interaction_history(_Table):
+    @classmethod
+    def table(cls):
+        return 'interaction_history'
+    _columns=['modification_type','interaction_id','user_id',
+              'interaction_history_comment','interaction_history_date']
+
 class Interaction_source(_Table):
     """List of interaction sources."""
     _columns=['interaction_source_name','interaction_source_url',
