@@ -195,8 +195,15 @@ class Interaction_history(BioGRID.ims.Interaction_history,_Table):
         try:
             return super(Interaction_history,self).store()
         except _mysql_exceptions.IntegrityError:
-            pubmed_id=self.pubmed_id()
-            self.warn("Skipping where pubmed_id=%s" % self.pubmed_id())
+                pubmed_id=self.pubmed_id()
+                self.warn("Skipping where pubmed_id=%s" % self.pubmed_id())
+                try:
+                    test_pubmed_id=int(pubmed_id)
+                except ValueError:
+                    test_pubmed_id=0
+                if test_pubmed_id1!=0:
+                    # valid pubmed_id, must be a user_id problem
+                    warnings.warn('Skipping user_id: %d' % self['user_id'])
 
 class Interaction_type(BioGRID.ims._Table):
     pass
@@ -260,7 +267,11 @@ class Interaction_note(BioGRID.ims.Interaction_note,_Table):
 
         return super(Interaction_note,self).__getitem__(name)
     def id(self):
-        return self.row['interaction_qualification_id']
+        try:
+            out=self.row['interaction_qualification_id']
+        except KeyError:
+            return None
+        return out
     def store(self):
         try:
             return super(Interaction_note,self).store()
@@ -308,7 +319,8 @@ UNION
                 p.store()
                 pid=p.id()
                 Interaction_participant.P2P[self['interactor_id']]=pid
-                self.warn('New Participant: %d=>%d' % (iid,pid))
+                # map interactor id -> participant id
+                self.warn('New Participant: %d -> %d' % (iid,pid))
             return Interaction_participant.P2P[self['interactor_id']]
         elif 'interaction_participant_status'==name:
             return 'active'
@@ -532,7 +544,11 @@ class Complex(BioGRID.ims._Table,_Table):
         c.execute("SELECT * FROM complex_history WHERE complex_id=%s",
                   (self['complex_id'],))
         return c.fetchall()
-
+    def notes(self):
+        c=self.ims2_cursor()
+        c.execute("SELECT * FROM complex_qualifications WHERE complex_id=%s",
+                  (self['complex_id'],))
+        return c.fetchall()
     @classmethod
     def table(cls):
         return 'complexes'
@@ -562,8 +578,19 @@ class Complex(BioGRID.ims._Table,_Table):
                     )
                 ip.store()
 
-#                for log in cpx.logs():
-                    
+                for log in cpx.logs():
+                    log['interaction_id']=i.id()
+                    log['interaction_history_comment']=log['complex_history_comment']
+                    log['interaction_history_date']=log['complex_history_date']
+                    ih=Interaction_history(log)
+                    ih.store()
+
+                for note in cpx.notes():
+                    note['interaction_id']=i.id()
+                    note['interaction_note_text']=note['complex_qualification']
+                    note['interaction_note_status']=note['complex_qualification_status']
+                    foo=BioGRID.ims.Interaction_note(note)
+                    foo.store()
 
             raw=c.fetchone()
 
