@@ -81,6 +81,7 @@ WHERE publication_id=%s'''
         c=self.ims2_cursor()
         c.execute(sql,(use_id,))
         return BioGRID.ims.fetch_one(c,'publication_pubmed_id')
+        
 
 class Project(BioGRID.ims.Project,_Table):
     _rename={'project_addeddate':'project_timestamp'}
@@ -125,10 +126,8 @@ class Project_user(BioGRID.ims.Project_user,_Table):
     def store(self):
         try:
             return super(Project_user,self).store()
-        except _mysql_exceptions.IntegrityError as x:
-            if 0==str(x).count("REFERENCES `users` (`user_id`)"):
-                raise
-            else:
+        except _mysql_exceptions.IntegrityError:
+            if not(self.validate_user_id()):
                 self.warn('user_id %s not in users' % self['user_id'])
 
 class Interaction(BioGRID.ims.Interaction,_Table):
@@ -196,14 +195,16 @@ class Interaction_history(BioGRID.ims.Interaction_history,_Table):
             return super(Interaction_history,self).store()
         except _mysql_exceptions.IntegrityError:
                 pubmed_id=self.pubmed_id()
-                self.warn("Skipping where pubmed_id=%s" % self.pubmed_id())
-                try:
-                    test_pubmed_id=int(pubmed_id)
-                except ValueError:
-                    test_pubmed_id=0
-                if test_pubmed_id1!=0:
-                    # valid pubmed_id, must be a user_id problem
-                    warnings.warn('Skipping user_id: %d' % self['user_id'])
+                self.warn("Skipping where pubmed_id=%s and user_id=%d"
+                          % (self.pubmed_id(),self['user_id']))
+
+                # try:
+                #     test_pubmed_id=int(pubmed_id)
+                # except ValueError:
+                #     test_pubmed_id=0
+                # if test_pubmed_id1!=0:
+                #     # valid pubmed_id, must be a user_id problem
+                #     warnings.warn('Skipping user_id: %d' % self['user_id'])
 
 class Interaction_type(BioGRID.ims._Table):
     pass
@@ -330,12 +331,6 @@ UNION
             return super(Interaction_participant,self).store()
         except _mysql_exceptions.IntegrityError:
             self.warn('Skipping where PubMed ID is %s' % self.pubmed_id())
-
-# class Iplex_project(BioGRID.ims.Iplex_project):
-#     _rename={'iplex_project_name':'iplex_name',
-#              'iplex_project_description':'iplex_description',
-#              'iplex_project_addeddate':'iplex_createddate',
-#              'iplex_project_status':'iplex_status'}
 
 class Publication(BioGRID.ims.Publication,_Table):
     _rename={'publication_addeddate':'publication_modified'}
