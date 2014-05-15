@@ -7,6 +7,8 @@ import MySQLdb.cursors
 
 global PARTICIPANT_TYPE
 PARTICIPANT_TYPE=1
+global UNKNOWN_PARTICIPANT_TYPE
+UNKNOWN_PARTICIPANT_TYPE=2
 global DEFAULT_USER_ID
 DEFAULT_USER_ID=1
 
@@ -212,6 +214,80 @@ class Interaction_type(BioGRID.ims._Table):
 class Participant_role(BioGRID.ims._Table):
     pass
 
+class Unknown_participant(BioGRID.ims.Unknown_participant,_Table):
+    @classmethod
+    def slurp_sql(cls):
+        return 'SELECT * FROM interaction_forced_additions'
+    @classmethod
+    def get_participant(cls,force,ab):
+        if 'Found'==force['interactor_%s_forced_status' % ab]:
+            c=cls.ims_cursor()
+            sql='''SELECT * FROM participants WHERE
+participant_value=%s AND participant_type_id=%s'''
+            c.execute(sql, (force['interactor_%s_name' % ab],PARTICIPANT_TYPE))
+            fetched=c.fetchone()
+            if None==fetched:
+                p=Participant(
+                    {'participant_value':force['interactor_%s_name' % ab],
+                     'participant_type_id':PARTICIPANT_TYPE}
+                    )
+                p.store()
+                return p
+            else:
+                return Participant(fetched)
+        
+        # Now we need to actually create an Unknown_participant object!
+        up=Unknown_participant(
+            {'unknown_participant_identifier':force['interactor_%s_name' % ab],
+             'participant_type_id':PARTICIPANT_TYPE,
+             'organis_id':force['interactor_%s_organism_id' % ab],
+             'publication_id':force['publication_id'],
+             'unknown_participant_status':'active'}
+            )
+        up.store()
+        
+        p=Participant(
+            {'participant_value':up.id(),
+             'participant_type_id':UNKNOWN_PARTICIPANT_TYPE,
+             'participant_status':'active'}
+            )
+        p.store()
+
+        return p
+    @classmethod
+    def puke(cls,c):
+        for force in c.fetchall():
+            #print force
+
+            i=Interaction(
+                {'publication_id':force['publication_id'],
+                 'interaction_type':Interaction_type.factory('Protein-Protein').id(),
+                 'interaction_status':'normal',
+                 'interaction_source_id':Interaction_source.factory('BioGRID').id()}
+                )
+            i.store()
+
+            foo=cls.get_participant(force,'A')
+            a_id=foo.id()
+            a=Interaction_participant(
+                {'interaction_id':i.id(),
+                 'participant_id':a_id,
+                 'participant_role_id':Participant_role.factory('bait').id(),
+                 'status':'active'}
+                )
+            a.store()
+
+            bar=cls.get_participant(force,'B')
+            b_id=bar.id()
+            b=Interaction_participant(
+                {'interaction_id':i.id(),
+                 'participant_id':b_id,
+                 'participant_role_id':Participant_role.factory('prey').id(),
+                 'status':'active'}
+                )
+            b.store()
+            
+
 class Interaction_source(BioGRID.ims.Interaction_source,_Table):
     @classmethod
     def slurp_sql(cls):
@@ -308,24 +384,28 @@ UNION
 ''' % (Participant_role.factory('bait').id(),
        Participant_role.factory('prey').id())
     def __getitem__(self,name):
-        if 'participant_id'==name:
-            iid=self['interactor_id']
-            try:
-                return Interaction_participant.P2P[iid]
-            except KeyError:
-                p=Participant(
-                    {'participant_value':iid,
-                     'participant_type_id':PARTICIPANT_TYPE}
-                    )
-                p.store()
-                pid=p.id()
-                Interaction_participant.P2P[self['interactor_id']]=pid
-                # map interactor id -> participant id
-                self.warn('New Participant: %d -> %d' % (iid,pid))
-            return Interaction_participant.P2P[self['interactor_id']]
-        elif 'interaction_participant_status'==name:
-            return 'active'
-        return super(Interaction_participant,self).__getitem__(name)
+        out=super(Interaction_participant,self).__getitem__(name)
+
+        if None==out:
+            if 'participant_id'==name:
+                iid=self['interactor_id']
+                try:
+                    return Interaction_participant.P2P[iid]
+                except KeyError:
+                    #print "%s !!!!!!" % iid
+                    p=Participant(
+                        {'participant_value':iid,
+                         'participant_type_id':PARTICIPANT_TYPE}
+                        )
+                    p.store()
+                    pid=p.id()
+                    Interaction_participant.P2P[self['interactor_id']]=pid
+                    # map interactor id -> participant id
+                    self.warn('New Participant: %d -> %d' % (iid,pid))
+                    return Interaction_participant.P2P[self['interactor_id']]
+            elif 'interaction_participant_status'==name:
+                return 'active'
+        return out
     def store(self):
         try:
             return super(Interaction_participant,self).store()
@@ -441,8 +521,7 @@ class PTM_modification(BioGRID.ims.PTM_modification,_Table):
         try:
             return self.row['modification_id']
         except:
-            print self
-            print self.row
+            #print self.row
             raise
     def __getitem__(self,name):
         if name==('ptm_modification_status'):
@@ -484,7 +563,7 @@ class PTM_history(BioGRID.ims.PTM_history,_Table):
         try:
             return super(BioGRID.ims.PTM_history,self).store()
         except _mysql_exceptions.OperationalError:
-            print row
+            #print row
             raise
 
 class PTM_note(BioGRID.ims.PTM_note,_Table):
@@ -512,8 +591,6 @@ class PTM_note(BioGRID.ims.PTM_note,_Table):
         return super(PTM_note,self).store()
 
 class Participant(BioGRID.ims.Participant,_Table):
-#    def id(self):
-#        return None
     @classmethod
     def slurp_sql(cls):
         return '''
@@ -522,11 +599,13 @@ UNION DISTINCT
 (SELECT DISTINCT interactor_B_id AS participant_value FROM interactions)
 '''
     def __getitem__(self,name):
-        if 'participant_status'==name:
-            return 'active'
-        if 'participant_type_id'==name:
-            return PARTICIPANT_TYPE # for now assume protein
-        return super(Participant,self).__getitem__(name)
+        out=super(Participant,self).__getitem__(name)
+        if None==out:
+            if 'participant_type_id'==name:
+                return PARTICIPANT_TYPE
+            if 'participant_status'==name:
+                return 'active'
+        return out
 
 class Complex(BioGRID.ims._Table,_Table):
     """This table is only in IMS2, not IMS3. Data from it is now

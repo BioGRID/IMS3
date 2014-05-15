@@ -142,6 +142,7 @@ class _Table(object):
 
     def id(self):
         try:
+            #print self.row
             return self.row[self.id_column()]
         except KeyError:
             # If we don't have the id we assume it's not in the database.
@@ -324,3 +325,8 @@ class PTM_note(_Table):
 class Participant(_Table):
     _columns=['participant_id','participant_value','participant_type_id',
               'participant_addeddate','participant_status']
+
+class Unknown_participant(_Table):
+    _columns=['unknown_participant_identifier','participant_type_id',
+              'organism_id','publication_id',
+              'unknown_participant_addeddate','unknown_participant_status']
