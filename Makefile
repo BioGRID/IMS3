@@ -1,39 +1,37 @@
-reverse = $(if $(1),$(call reverse,$(wordlist 2,$(words $(1)),$(1)))) $(firstword $(1))
-
-PYTHON_PREFIX=./python
+IMS_CONFIG=./ims.json
 SQL_DIR=./sql
-PYTHON=PYTHONPATH=$(PYTHON_PREFIX) python
-IMS_CONFIG=ims.json
 
-.PHONY:python ims3
+PYTHONPATH=python
+IMS22IMS3=PYTHONPATH=$(PYTHONPATH) $(PYTHONPATH)/ims22ims3 --config=$(IMS_CONFIG) --sql-dir=$(SQL_DIR)
 
-IMS2=$(PYTHON) -m BioGRID.ims2 --conf=$(IMS_CONFIG) --sql=$(SQL_DIR)
-
-# Complex isn't a table in IMS2, not IMS3
-
-INTERACTION_TABLES=Interaction_source Interaction_quantitation_type \
-	Interaction Interaction_quantitation Interaction_note \
-	Interaction_history
-PART_TABLES=Participant	Interaction_participant Complex Unknown_participant
-#IPLEX_TABLES=Iplex_project
-USER_TABLES=Project User Project_user
-PTM_TABLES= PTM_source PTM_modification PTM PTM_relationship PTM_history \
-	PTM_note
-PUB_TABLES=Publication_query Publication Project_publication
-
-
-TABLE_DEPENDS=$(USER_TABLES) $(PUB_TABLES) $(INTERACTION_TABLES) \
-	$(PART_TABLES) $(PTM_TABLES)
-TABLE_RDEPENDS=$(call reverse,$(TABLE_DEPENDS))
+CLEANING=ims3clean mostlyclean clean distclean
+.PHONY:ims3 ims3clean distclean rpms $(CLEANING)
 
 ims3:
-	$(IMS2) $(TABLE_DEPENDS)
+	$(IMS22IMS3)
 
-clean:
-	$(IMS2) --clean $(TABLE_RDEPENDS)
+$(PYTHONPATH)/sql: sql
+	mkdir $@
+	cp $</*.sql $@
 
-distclean:
-	find $(PYTHON_PREFIX) -name \*.pyc | xargs $(RM)
+python-rpms: $(PYTHONPATH)/sql
+	(cd $(PYTHONPATH); python setup.py bdist_rpm)
+	mv $(PYTHONPATH)/dist/*.rpm .
 
-python:
-	$(PYTHON)
+rpms: python-rpms
+
+
+# This should wipe out the IMS3 database, so use wisely
+ims3clean:
+	$(IMS22IMS3) --clean
+
+mostlyclean:
+	$(RM) -r $(PYTHONPATH)/sql
+	(cd $(PYTHONPATH); python setup.py clean)
+
+clean: mostlyclean
+	$(RM) -r $(PYTHONPATH)/build $(PYTHONPATH)/dist 
+	$(RM) *.rpm $(PYTHONPATH)/MANIFEST
+
+distclean: clean
+	find $(PYTHONPATH)/BioGRID -name \*.pyc | xargs $(RM)

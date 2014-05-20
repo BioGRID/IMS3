@@ -4,6 +4,7 @@ import json
 import BioGRID.ims
 from time import strftime
 import MySQLdb.cursors
+import _mysql_exceptions
 
 global PARTICIPANT_TYPE
 PARTICIPANT_TYPE=1
@@ -199,14 +200,6 @@ class Interaction_history(BioGRID.ims.Interaction_history,_Table):
                 pubmed_id=self.pubmed_id()
                 self.warn("Skipping where pubmed_id=%s and user_id=%d"
                           % (self.pubmed_id(),self['user_id']))
-
-                # try:
-                #     test_pubmed_id=int(pubmed_id)
-                # except ValueError:
-                #     test_pubmed_id=0
-                # if test_pubmed_id1!=0:
-                #     # valid pubmed_id, must be a user_id problem
-                #     warnings.warn('Skipping user_id: %d' % self['user_id'])
 
 class Interaction_type(BioGRID.ims._Table):
     pass
@@ -499,7 +492,7 @@ class PTM(BioGRID.ims.PTM,_Table):
                            'participant_type_id':PARTICIPANT_TYPE,
                            'participant_status':'active'})
             p.store()
-            warnings.warn(
+            self.warn(
                 "Inserting participant_value=%d into participants" %
                 self['gene_id'])
             return super(BioGRID.ims.PTM,self).store()
@@ -670,76 +663,4 @@ class Complex(BioGRID.ims._Table,_Table):
 
 
 
-if __name__ == '__main__':
-    import sys
-    from optparse import OptionParser
-    import MySQLdb.cursors
-    import _mysql_exceptions
-    import warnings
-    import os.path
 
-    def warn_fmt(message,category,filename,lineno,line=None):
-        return "%s\n" % message
-    warnings.formatwarning=warn_fmt
-
-    p=OptionParser()
-    p.add_option('-c','--config',metavar='JSON')
-    p.add_option('-s','--sql-dir',metavar='PATH')
-    p.add_option('--clean',action='store_true')
-    (opts,jobs)=p.parse_args()
-    
-    cfg=Config(opts.config)
-    BioGRID.ims._Table.config=cfg
-    if opts.clean:
-        msg_fmt='removing %s'
-    else:
-        ims2=cfg.ims2db() # not needed in --clean
-        msg_fmt='starting %s'
-    ims3=cfg.imsdb()
-
-    for job in jobs:
-        warnings.warn(msg_fmt % job)
-
-        path='%s/%s.sql' % (opts.sql_dir,job)
-        if os.path.isfile(path):
-            # get for SQL files containing IMS3 schema
-            file=open('%s/%s.sql' % (opts.sql_dir,job))
-            if opts.clean:
-                line=file.readline()
-                tables=[]
-                while line:
-                    if line.startswith('CREATE TABLE'):
-                        table=line.split(' ')[-1].strip("(\n")
-                        tables.insert(0,table)
-                    line=file.readline()
-                file.close()
-
-                for table in tables:
-                    try:
-                        ims3.query('DROP TABLE %s' % table)
-                    except _mysql_exceptions.OperationalError as(errno,msg):
-                        if 1051==errno: # Unknown table
-                            pass
-                        else:
-                            raise
-
-            else:
-                sqls=file.read()
-                file.close()
-                # WARNING! Don't use ; is you comments in the SQL files!
-                for sql in sqls.split(';'):
-                    try:
-                        ims3.query(sql)
-                    except _mysql_exceptions.OperationalError as(errno,msg):
-                        # We can skip this error
-                        if 1065==errno: # Query was empty
-                            pass
-                        else:
-                            raise
-        # close os.path.isfile
-
-                        
-        if not(opts.clean):
-            Table=eval(job)
-            Table.slurp()
-            ims3.commit()

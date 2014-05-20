@@ -1,0 +1,109 @@
+#!/bin/env python
+import BioGRID.ims2
+
+import warnings
+from optparse import OptionParser
+import sys
+import os
+import _mysql_exceptions
+
+p=OptionParser()
+p.add_option('-v','--verbose',action='store_true')
+p.add_option('-c','--config',metavar='PATH')
+p.add_option('--clean',action='store_true')
+p.add_option('-s','--sql-dir',metavar='PATH',
+             # If the default sql-dir changes you should change it in
+             # setup.py too
+             default=os.path.join(sys.prefix,'share/ims/sql'))
+(opts,jobs)=p.parse_args()
+
+if not opts.verbose:
+    def warn_fmt(message,category,filename,lineno,line=None):
+        return "%s\n" % message
+    warnings.formatwarning=warn_fmt
+
+# The order in which to creat and import tables
+ORDER=[
+    # User Tables
+    'Project','User','Project_user',
+
+    # Publication Tables
+    'Publication_query','Publication','Project_publication',
+
+    # Interaction tables
+    'Interaction_source','Interaction_quantitation_type',
+    'Interaction','Interaction_quantitation','Interaction_note',
+    'Interaction_history',
+
+    # Participant tables
+    'Participant','Interaction_participant','Complex',
+    'Unknown_participant',
+
+    # IPLEX tables
+    #'Iplex_project',
+
+    # PTM Tales
+    'PTM_source','PTM_modification','PTM','PTM_relationship',
+    'PTM_history','PTM_note',
+]
+
+doing_fmt='Loading %s'
+if 0==len(jobs):
+    jobs=ORDER
+
+if opts.clean:
+    jobs.reverse()
+    doing_fmt='Cleaning %s'
+
+cfg=BioGRID.ims2.Config(opts.config)
+BioGRID.ims._Table.config=cfg
+ims3=cfg.imsdb()
+
+for job in jobs:
+    warnings.warn(doing_fmt % job)
+    path=os.path.join(opts.sql_dir,'%s.sql' % job)
+
+    if os.path.isfile(path):
+        file=open(path)
+        if opts.clean:
+            tables=[]
+            line=file.readline()
+            while line:
+                if line.startswith('CREATE TABLE'):
+                    table=line.split(' ')[-1].strip("(\n")
+                    tables.insert(0,table)
+                line=file.readline()
+            file.close()
+
+        #tables.reverse()
+            for table in tables:
+                warnings.warn('Dropping %s' % table)
+                try:
+                    ims3.query('DROP TABLE %s' % table)
+                except _mysql_exceptions.OperationalError as(errno,msg):
+                    if 1051==errno: # Unknown table
+                        pass
+                    else:
+                        raise
+
+        else:
+            sqls=file.read()
+            file.close()
+        # WARNING! Don't use ; is you comments in the SQL files!
+            for sql in sqls.split(';'):
+                try:
+                    ims3.query(sql)
+                except _mysql_exceptions.OperationalError as(errno,msg):
+                    # We can skip this error
+                    if 1065==errno: # Query was empty
+                        pass
+                    else:
+                        raise
+        # close os.path.isfile
+    else:
+        warnings.warn('No file %s' % path)
+                        
+    if not(opts.clean):
+        Table=eval('BioGRID.ims2.%s' % job)
+        Table.slurp()
+        ims3.commit()
