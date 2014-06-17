@@ -271,7 +271,7 @@ class Publication(_Table):
     _columns=[
         'publication_pubmed_id','publication_article_title',
         'publication_abstract','publication_author_short',
-        'publication_author_full','publication_volumne',
+        'publication_author_full','publication_volume',
         'publication_issue','publication_date',
         'publication_journal','publication_pagination',
         'publication_affiliation','publication_meshterms',

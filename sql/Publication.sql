@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS publications(
        publication_abstract	 MEDIUMTEXT NULL,
        publication_author_short	 VARCHAR(255) NULL,
        publication_author_full	 TEXT NULL,
-       publication_volumne	 BIGINT(10) NULL,
+       publication_volume	 BIGINT(10) NULL,
        publication_issue	 BIGINT(10) NULL,
        publication_date		 DATE NULL,
        publication_journal	 VARCHAR(255) NULL,

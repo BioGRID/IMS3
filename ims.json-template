@@ -16,5 +16,15 @@
       "passwd":"your password here",
       "db":"biogrid_ims_snapshot"
     }
-  }
+  },
+  "css":
+  [
+    "/bootstrap-3.1.1-dist/css/bootstrap.min.css"
+  ],
+  "js":
+  [
+    "/jquery.min.js",
+    "/bootstrap-3.1.1-dist/js/bootstrap.min.js",
+    "ims.js"
+  ]
 }
