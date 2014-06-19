@@ -203,6 +203,7 @@ IMS.Interaction.prototype.dd=function(dt){
 }
 
 
+// Need to abstract this
 IMS.Interaction.prototype.interaction_source=function(){
   if(!localStorage.getItem('interaction_source')){
     ajax=$.ajax({

@@ -82,7 +82,7 @@ class PubMedID
   public function date(){
     $parse_me=$this->medline('DP')[0];
 
-    $tries=['Y M j','Y M','Y M#???','Y'];
+    $tries=['Y M j|','Y M|','Y M#???|','Y|'];
     $date=FALSE;
     while(!$date and $tries){
       $try=array_shift($tries);
