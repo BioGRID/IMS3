@@ -1,7 +1,7 @@
 <?php
-require_once('../php/ims.php');
+require_once('ims/ims.php');
 IMS\divert_errors();
-$cfg=new IMS\config('../ims.json');
+$cfg=new IMS\config('ims.json');
 $table=IMS\table_factory($cfg,$_GET);
 if($table){
   $table->query();

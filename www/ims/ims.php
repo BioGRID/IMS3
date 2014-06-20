@@ -33,8 +33,10 @@ class config
 {
   private $path;
   function __construct($json){
-    $this->path=realpath(dirname(__FILE__).'/'.$json);
-    $this->config=json_decode(file_get_contents($this->path));
+    $saved_include_path=get_include_path();
+    set_include_path('..:/etc');
+    $this->config=json_decode(file_get_contents($json,FILE_USE_INCLUDE_PATH));
+    set_include_path($saved_include_path);
   }
 
   public $pdos=[];

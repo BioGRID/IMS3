@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <?php
-require_once('../php/ims.php');
-$ims=new IMS\config('../ims.json');
+require_once('ims/ims.php');
+$ims=new IMS\config('ims.json');
 ?>
 <html lang="en"><head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
