@@ -1,14 +1,44 @@
+* Introduction
 Source Code for future versions of BioGRID IMS, see:
-
        http://wiki.thebiogrid.org/doku.php/interaction_management_system
-
 For now mainly concerned in porting the IMS2 database schema to the
 IMS3 schema.
 
+* Non RPM requires
+Currently jQUery, bootstrap, and select2 are required but not included
+in the RPM and not available from default CentOS RPMs.  You will need
+to specify where they are using the /etc/ims.json file.
 
+* /etc/ims.json
+The main configuration file.  It can also be located ../ims.json
+relative to the location if the ims.php file, but that is mainly for
+developement.
 
+Note, no comments are allowed in JSON files.
 
+** dbs
+Accessing databases. Hopefully this will be the only section you will
+need edit to use this package.
 
--- CentOS Packages (not complete)
+*** ims
+The main database to read and write to.
 
-#php-tidy
+*** quick
+Access database with constant information.
+
+*** ims2
+Not needed after we sucefully update to the latest database.
+
+** css
+List of CSS files to be included. See non-RPM rqueires above.
+
+** js
+List of JavaScript files to be incuded.  See non-RPM rqueires above.
+
+** pubmed_update
+An ISO 8601 date. Publications that have been updated before this date
+will be refreshed by queries to PubMed.
+
+** limit
+Limit the number of items a call to query.php will return if not
+specified.

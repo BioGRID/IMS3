@@ -43,8 +43,14 @@ IMS={
   },
 
   report_messages:function(messages){
-    $('.message-count').html('('+messages.length+')');
-    list=$('#messages').html('');
+    // Add the number of new messages to the current message count.
+    mc=$('.message-count');
+    count=Number(mc.text());
+    count+=messages.length;
+    mc.text(count);
+
+    // prepend new messages to list
+    list=$('#messages');
     for(var row in messages){
       msg=messages[row];
       type=IMS.php_error(msg['type']);
@@ -53,7 +59,7 @@ IMS={
         '<span class="message">' + msg['message'] + '</span> in ' +
         '<span class="file">' + msg['file'] + '</span> ' +
         'on line ' + msg['line'] + '</p>';
-      list.append(html);
+      list.prepend(html);
     }
   },
 

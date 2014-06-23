@@ -6,13 +6,13 @@ $ims=new IMS\config('ims.json');
 <html lang="en"><head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="utf-8">
-<title>IMS3</title>
+<title><?php print $ims->title(); ?></title>
 <?php print $ims->html_head(); ?>
 </head><body>
 
 <div class="container">
 
-  <h1>IMS3</h1>
+  <h1 id="title"><?php print $ims->title(); ?></h1>
 
   <header>
   <input type="hidden" id="pubmed" style="width:90%">
@@ -29,8 +29,8 @@ $ims=new IMS\config('ims.json');
 
   <aside class="col-md-3">
 
-  <h1>Messages <span class="message-count"></span></h1>
-  <div id="messages"><p>Nothing</p></div>
+  <h1>Messages (<span class="message-count">0</span>)</h1>
+  <div id="messages"></div>
 
   <h1>Publication</h1>
   <div class="panel-group" id="publication"><div class="panel panel-default"></div></div>

@@ -7,3 +7,7 @@ aside h1{
 .error .type{
     font-weight:bold;
 }
+#messages{
+    height:25em;
+    overflow:scroll;
+}

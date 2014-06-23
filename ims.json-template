@@ -1,9 +1,9 @@
 {
-  "dbs":
-  {
+  "title":"PHP3 - Testing",
+  "dbs":{
     "ims":{
       "user":"imsadmin",
-      "passwd":"you password here",
+      "passwd":"your password here",
       "db":"sven"
     },
     "quick":{
@@ -17,14 +17,18 @@
       "db":"biogrid_ims_snapshot"
     }
   },
-  "css":
-  [
-    "/bootstrap-3.1.1-dist/css/bootstrap.min.css"
+  "css":[
+    "/bootstrap-3.1.1-dist/css/bootstrap.min.css",
+    "/select2/select2.css",
+    "ims.css",
+    "solarized.css"
   ],
-  "js":
-  [
+  "js":[
     "/jquery.min.js",
     "/bootstrap-3.1.1-dist/js/bootstrap.min.js",
+    "/select2/select2.js",
     "ims.js"
-  ]
+  ],
+  "pubmed_update":"2014-06-17",
+  "limit":10
 }

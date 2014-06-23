@@ -6,6 +6,7 @@ License: GPLv2+
 URL: http://wiki.thebiogrid.org/doku.php/interaction_management_system
 Source0: %{name}-%{version}.tar.gz
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
+Requires: php-mysql
 
 %description
 

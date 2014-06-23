@@ -49,6 +49,10 @@ class config
     return $this->pdos[$db];
   }
 
+  function title(){
+    return $this->config->title;
+  }
+
   function html_head(){
     $out=[];
     foreach($this->config->css as $css){
