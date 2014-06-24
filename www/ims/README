@@ -1,0 +1,2 @@
+When built into an RPM this directory gets put in /usr/share/php, it's
+just here so one can develope right out of git.

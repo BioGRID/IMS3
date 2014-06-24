@@ -8,6 +8,12 @@ $ims=new IMS\config('ims.json');
 <meta charset="utf-8">
 <title><?php print $ims->title(); ?></title>
 <?php print $ims->html_head(); ?>
+<link href="ims.css" rel="stylesheet"/>
+<script src="ims.js"></script>
+<script src="Publication.js"></script>
+<script src="Interaction.js"></script>
+<script src="Interaction_source.js"></script>
+<script src="Interaction_type.js"></script>
 </head><body>
 
 <div class="container">

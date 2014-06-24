@@ -20,7 +20,10 @@ Requires: php-mysql
 %{__install} -m 755 www/home.php $RPM_BUILD_ROOT%{ims_wwwdir}/home.php
 %{__install} -m 755 www/query.php $RPM_BUILD_ROOT%{ims_wwwdir}/query.php
 %{__install} -m 755 www/ims.js $RPM_BUILD_ROOT%{ims_wwwdir}/ims.js
-%{__install} -m 755 www/pubmed.js $RPM_BUILD_ROOT%{ims_wwwdir}/pubmed.js
+%{__install} -m 755 www/Interaction.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction.js
+%{__install} -m 755 www/Interaction_source.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_source.js
+%{__install} -m 755 www/Interaction_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_type.js
+%{__install} -m 755 www/Publication.js $RPM_BUILD_ROOT%{ims_wwwdir}/Publication.js
 %{__install} -m 755 www/ims.css $RPM_BUILD_ROOT%{ims_wwwdir}/ims.css
 %{__install} -m 755 www/solarized.css $RPM_BUILD_ROOT%{ims_wwwdir}/solarized.css
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{ims_phpdir}
@@ -40,7 +43,10 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/home.php
 %{ims_wwwdir}/query.php
 %{ims_wwwdir}/ims.js
-%{ims_wwwdir}/pubmed.js
+%{ims_wwwdir}/Interaction.js
+%{ims_wwwdir}/Interaction_source.js
+%{ims_wwwdir}/Interaction_type.js
+%{ims_wwwdir}/Publication.js
 %{ims_wwwdir}/ims.css
 %{ims_wwwdir}/solarized.css
 %{ims_phpdir}
@@ -52,6 +58,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Thu Jun 19 2014 Sven Heinicke <sven@genomics.princeton.edu> - IMS3-1
+* Tue Jun 24 2014 Sven Heinicke <sven@tyersdev.tyerslab.com> - 0.1-1
+- Now fetches interaction_type and intering_sources.
+
+* Thu Jun 19 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.0-1
 - Initial build.
 

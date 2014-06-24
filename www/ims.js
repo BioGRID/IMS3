@@ -1,3 +1,5 @@
+// Items that start with a capitol letter are reserved for table
+// objects related to the database.
 IMS={
   pub_id:null,
 
@@ -33,15 +35,6 @@ IMS={
 
   },
 
-  _table:function(data){
-    this.data=data;
-
-    // Here to make select2 happy
-    this.__defineGetter__('id',function(){
-      return this.primary_id();
-    })
-  },
-
   report_messages:function(messages){
     // Add the number of new messages to the current message count.
     mc=$('.message-count');
@@ -73,26 +66,11 @@ IMS={
     return this.pub_id;
   },
 
-  Publication:function(data){
-    this.data=data;
-
-    // Move this up to IMS._table if we need to use select2 for a
-    // different items buth publication.
-    this.__defineGetter__('text',function(){
-      return this.pmid();
-    });
-  },
-
-  Interaction:function(data){
-    this.data=data;
-  },
 
 
-  Interaction_source:function(data){
-
-  },
-
-
+  /*
+   * Returns PHP error codes as text.
+   */
   php_error:function(errno){
     switch(errno){
       case     1:return 'E_ERROR';
@@ -113,13 +91,32 @@ IMS={
       case 30719:return 'E_ALL';
     }
     return false;
+  },
+
+
+  // prototype for this defined below
+  _table:function(data){
+    this.data=data;
+
+    // Here to make select2 happy
+    this.__defineGetter__('id',function(){
+      return this.primary_id();
+    })
   }
 }
 
 
 IMS._table.prototype={
+  primary_col:function(){
+    return this._cols.primary_key;
+  },
   primary_id:function(){
-    return this.data[this._cols.primary_key];
+    return this.data[this.primary_col()];
+  },
+
+  // Returns HTML suitable for inlined usage.
+  html:function(){
+    return this.primary_col()+'='+this.primary_id();
   },
 
   // return a list of definition term names, that then can be fed to
@@ -181,81 +178,57 @@ IMS._table.prototype={
      '<div class="panel-body">{dd}</div>'+
      '</div>' + // panel-collapse
      '</div>');
-  }
+  },
 
-};
+  cache:function(col){
+    Table=IMS[col[0].toUpperCase() + col.substr(1)];
+    pk=Table.prototype._cols.primary_key;
+    pkv=this.data[col+'_id'];
 
-
-IMS.Interaction.prototype=new IMS._table();
-IMS.Interaction.prototype._cols={
-  primary_key:'interaction_id'
-};
-IMS.Interaction.prototype.dts=function(){
-  return [
-    'interaction_id',
-    //'participant_hash',
-    //'publication_id',
-    'interaction_type_id',
-    'interaction_status',
-    //'interaction_source_id',
-    'interaction_source',
-  ];
-}
-IMS.Interaction.prototype.dd=function(dt){
-  switch(dt){
-    case 'interaction_source': return this.interaction_source();
-  }
-  return this.data[dt];
-}
-
-
-// Need to abstract this
-IMS.Interaction.prototype.interaction_source=function(){
-  if(!localStorage.getItem('interaction_source')){
-    ajax=$.ajax({
+    ls=localStorage.getItem(col);
+    ls              =
+      (null==ls)    ?
+      {}            :
+      JSON.parse(ls);
+    if(undefined==ls[pkv]){
+      ls[pkv]=this._cache(Table,pk,pkv);
+      localStorage.setItem(col,JSON.stringify(ls))
+    }
+    return new Table(ls[pkv]);
+  },
+  _cache:function(Table,pk,pkv){
+    data={table:Table.prototype._table};
+    data[pk]=pkv;
+    $.ajax({
       async:false,
       type:'GET',
       url:'query.php',
       dataType:'json',
-      data:{table:'interaction_sources'}
-    }).done
-    (function(data){
+      data:data
+    }).done(function(data){
       IMS.report_messages(data.messages);
-           if(data.results){
-             store_me={};
-
-             foo=function(row){
-               store_me[row.interaction_source_id]=row.interaction_source_name;
-             }
-             data.results.forEach(foo);
-             localStorage.setItem('interaction_source',
-                                  JSON.stringify(store_me));
-             }
+      // As we specified a primary key we should only ever get one
+      // result.
+      out=data.results[0];
     });
-  }
-  return JSON.parse(localStorage.getItem('interaction_source'))[this.data.interaction_source_id];
-}
+
+    return out;
+  },
 
 
 
-IMS.Publication.prototype=new IMS._table();
-IMS.Publication.prototype._cols={
-  primary_key:'publication_id'
-}
-IMS.Publication.prototype.format_item=function(){
-  return this.data.publication_pubmed_id + ' - ' +
-    this.data.publication_article_title;
-}
-IMS.Publication.prototype.pmid=function(){
-  return this.data['publication_pubmed_id'];
-}
+};
 
 
+
+
+// This part is specific to home.php, if we ever need ims.js elsewhere
+// it will need to be abstracted or moved there.
 $(document).ready(function(){
 
-  // Need to bury this in IMS.* somehow
+  // should bury this in IMS.* somehow
   $("#pubmed").select2({
-    minimumInputLength:1,
+    minimumInputLength:3,
     formatResult:function(obj){
       return obj.format_item();
     },

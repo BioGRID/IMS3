@@ -201,6 +201,13 @@ class Interaction_sources extends _Table
   const DEFAULT_STATUS='active';
 }
 
+class Interaction_types extends _Table
+{
+  const TABLE='interaction_types';
+  const PRIMARY_KEY='interaction_type_id';
+  const STATUS_COLUMN='interaction_type_status';
+  const DEFAULT_STATUS='active';
+}
 
 // Information about the table
 class Publications extends _Table
@@ -270,18 +277,18 @@ function table_factory($cfg,$qs)
     return new Interactions($cfg,$qs);
   case 'interaction_sources':
     return new Interaction_sources($cfg,$qs);
+  case 'interaction_types':
+    return new Interaction_types($cfg,$qs);
   }
+  trigger_error("Can't access requested data",E_USER_ERROR);
   return NULL;
 }
 
 
-function _messages2json(){
+function messages2json(){
   global $errors,$errors_reported;
   $errors_reported=TRUE;
   return json_encode($errors);
-}
-function messages2json(){
-  print '['.json_encode($out).']';
 }
 /* Print PDOstatement as JSON. */
 function pdo2json($r){
@@ -299,5 +306,5 @@ function pdo2json($r){
   }
 
 
-  print '],"messages":' . _messages2json() . '}';
+  print '],"messages":' . messages2json() . '}';
 }

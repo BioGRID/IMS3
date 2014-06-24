@@ -20,14 +20,12 @@
   "css":[
     "/bootstrap-3.1.1-dist/css/bootstrap.min.css",
     "/select2/select2.css",
-    "ims.css",
     "solarized.css"
   ],
   "js":[
     "/jquery.min.js",
     "/bootstrap-3.1.1-dist/js/bootstrap.min.js",
-    "/select2/select2.js",
-    "ims.js"
+    "/select2/select2.js"
   ],
   "pubmed_update":"2014-06-17",
   "limit":10
