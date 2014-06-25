@@ -81,6 +81,7 @@ class PubMedID
   // Parse 
   public function date(){
     $parse_me=$this->medline('DP')[0];
+    $parse_me=str_replace('Fall','September',$parse_me);
 
     $tries=['Y M j|','Y M|','Y M#???|','Y|'];
     $date=FALSE;
@@ -94,7 +95,7 @@ class PubMedID
     }
 
     $out=$date->format('Y-m-d');
-    trigger_error("Parsed '".$parse_me."' to '".$out."'");
+    #trigger_error("Parsed '".$parse_me."' to '".$out."'");
     return $out;
   }
 
