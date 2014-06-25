@@ -1,14 +1,9 @@
-aside,.version{
+aside{
     font-size:small;
+    border:1ex solid silver;
 }
 aside h1{
     font-size:medium;
-}
-.error .type{
-    font-weight:bold;
-}
-.file{
-    font-family:monospace;
 }
 #messages{
     height:25em;

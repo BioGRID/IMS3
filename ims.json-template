@@ -19,8 +19,7 @@
   },
   "css":[
     "/bootstrap-3.1.1-dist/css/bootstrap.min.css",
-    "/select2/select2.css",
-    "solarized.css"
+    "/select2/select2.css"
   ],
   "js":[
     "/jquery.min.js",

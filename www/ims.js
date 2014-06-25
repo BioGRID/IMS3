@@ -46,12 +46,10 @@ IMS={
     list=$('#messages');
     for(var row in messages){
       msg=messages[row];
-      type=IMS.php_error(msg['type']);
-      html='<p class="error ' + (type?type:'E_UNKNOWN') + '">' +
-        '<span class="type">' + (type?type:'E_UNKNOWN('+msg['type']+')') + '</span>: ' +
-        '<span class="message">' + msg['message'] + '</span> in ' +
-        '<span class="file">' + msg['file'] + '</span> ' +
-        'on line ' + msg['line'] + '</p>';
+      t=IMS.php_error(msg['type']);
+      html='<p><strong class="text-'+t.class+'">'+t.msg+'</strong>: '
+          +msg['message']+' in <code>' + msg['file'] + '</code> '
+          +'on line ' + msg['line'] + '</p>';
       list.prepend(html);
     }
   },
@@ -69,28 +67,28 @@ IMS={
 
 
   /*
-   * Returns PHP error codes as text.
+   * Returns PHP error codes as text, along with bootstrap class.
    */
   php_error:function(errno){
     switch(errno){
-      case     1:return 'E_ERROR';
-      case     2:return 'E_WARNING';
-      case     4:return 'E_PARSE';
-      case     8:return 'E_NOTICE';
-      case    16:return 'E_CORE_ERROR';
-      case    32:return 'E_CORE_WARNING';
-      case    64:return 'E_COMPILE_ERROR';
-      case   128:return 'E_COMPILE_WARNING';
-      case   256:return 'E_USER_ERROR';
-      case   512:return 'E_USER_WARNING';
-      case  1024:return 'E_USER_NOTICE';
-      case  2048:return 'E_STRICT';
-      case  4096:return 'E_RECOVERABLE_ERROR';
-      case  8192:return 'E_DEPRECATED';
-      case 16384:return 'E_USER_DEPRECATED';
-      case 30719:return 'E_ALL';
+      case     1:return {msg:'E_ERROR',class:'danger'};
+      case     2:return {msg:'E_WARNING',class:'warning'};
+      case     4:return {msg:'E_PARSE',class:'danger'};
+      case     8:return {msg:'E_NOTICE',class:'info'};
+      case    16:return {msg:'E_CORE_ERROR',class:'danger'};
+      case    32:return {msg:'E_CORE_WARNING',class:'warning'};
+      case    64:return {msg:'E_COMPILE_ERROR',class:'danger'};
+      case   128:return {msg:'E_COMPILE_WARNING',class:'warning'};
+      case   256:return {msg:'E_USER_ERROR',class:'danger'};
+      case   512:return {msg:'E_USER_WARNING',class:'warning'};
+      case  1024:return {msg:'E_USER_NOTICE',class:'notice'};
+      case  2048:return {msg:'E_STRICT',class:'danger'};
+      case  4096:return {msg:'E_RECOVERABLE_ERROR',class:'danger'};
+      case  8192:return {msg:'E_DEPRECATED',class:'info'};
+      case 16384:return {msg:'E_USER_DEPRECATED',class:'info'};
+      case 30719:return {msg:'E_ALL',class:'danger'};
     }
-    return false;
+    return {msg:'E_UNKNOWN',class:'danger'};
   },
 
 

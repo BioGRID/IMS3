@@ -16,22 +16,27 @@ $ims=new IMS\config('ims.json');
 <script src="Interaction_type.js"></script>
 </head><body>
 
+
 <div class="container">
-
-  <h1 id="title"><?php print $ims->title(); ?> <span class="version">Ver:<?php print $ims->version(); ?></span></h1>
-
-  <header>
-  <input type="hidden" id="pubmed" style="width:90%">
-  </header>
-
-
-
-  <div class="row">
-
-  <div class="col-md-9">
-  <h1>Interactions <span class="interaction_count"></span></h1>
-  <table class="table"><tbody id="interactions"></tbody></table>
+  <div class="starter-template">
+  <h1 id="title"><?php print $ims->title(); ?> <small>Ver:<?php print $ims->version(); ?></small></h1>
   </div>
+</div>
+
+<div class="container">
+  <div class="row">
+  <div class="col-md-9">
+
+
+  <!-- h1>Something Else</h1>
+  <p>Some text here.</p -->
+
+
+  <h1>Interactions <span class="interaction_count"></span></h1>
+  <input type="hidden" id="pubmed" style="width:100%">
+  <table class="table table-hover"><tbody id="interactions"></tbody></table>
+
+  </div><!-- .col-md-9 -->
 
   <aside class="col-md-3">
 
@@ -41,7 +46,7 @@ $ims=new IMS\config('ims.json');
   <h1>Publication</h1>
   <div class="panel-group" id="publication"><div class="panel panel-default"></div></div>
 
-  </aside>
+  </aside><!-- .col-md-3 -->
 
 </div>
 

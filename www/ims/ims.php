@@ -1,6 +1,8 @@
 <?php namespace IMS;
 require_once('pubmed.php');
 
+// Hopefully in the RPM we will always have version.php, but in dev
+// it's ok if we don't.
 if(stream_resolve_include_path('version.php')){
   include_once('version.php');
 }else{
@@ -32,7 +34,7 @@ function divert_errors(){
       return FALSE;
     },E_ALL);
   error_reporting(0);
-  trigger_error("Messaging On");
+  //trigger_error("Messaging On",E_USER_WARNING);
 }
 
 
