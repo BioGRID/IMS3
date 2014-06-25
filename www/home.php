@@ -18,7 +18,7 @@ $ims=new IMS\config('ims.json');
 
 <div class="container">
 
-  <h1 id="title"><?php print $ims->title(); ?></h1>
+  <h1 id="title"><?php print $ims->title(); ?> <span class="version">Ver:<?php print $ims->version(); ?></span></h1>
 
   <header>
   <input type="hidden" id="pubmed" style="width:90%">

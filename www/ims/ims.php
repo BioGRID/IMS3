@@ -1,6 +1,13 @@
 <?php namespace IMS;
 require_once('pubmed.php');
 
+if(stream_resolve_include_path('version.php')){
+  include_once('version.php');
+}else{
+  DEFINE("IMS3_VERSION","???");
+}
+
+
 global $errors_reported;
 $errors_reported=FALSE;
 global $errors;
@@ -51,6 +58,10 @@ class config
 
   function title(){
     return $this->config->title;
+  }
+
+  function version(){
+    return IMS3_VERSION;
   }
 
   function html_head(){

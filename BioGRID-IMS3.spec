@@ -28,6 +28,7 @@ Requires: php-mysql
 %{__install} -m 755 www/solarized.css $RPM_BUILD_ROOT%{ims_wwwdir}/solarized.css
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{ims_phpdir}
 %{__install} -m 755 www/ims/ims.php $RPM_BUILD_ROOT%{ims_phpdir}/ims.php
+%{__install} -m 755 www/ims/version.php $RPM_BUILD_ROOT%{ims_phpdir}/version.php
 %{__install} -m 755 www/ims/pubmed.php $RPM_BUILD_ROOT%{ims_phpdir}/pubmed.php
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}
 %{__install} -m 755 ims.json-template $RPM_BUILD_ROOT%{_sysconfdir}/ims.json
@@ -51,6 +52,7 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/solarized.css
 %{ims_phpdir}
 %{ims_phpdir}/ims.php
+%{ims_phpdir}/version.php
 %{ims_phpdir}/pubmed.php
 
 %defattr(-,root,root,-)

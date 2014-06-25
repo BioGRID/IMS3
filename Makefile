@@ -34,10 +34,14 @@ SPEC=$(DIST_NAME).spec
 MANIFEST=README Makefile ims.json-template $(SPEC) www
 DIST_FILES=$(foreach MAN,$(MANIFEST),$(DIR_NAME)/$(MAN))
 
+VERSION_PHP=www/ims/version.php
+
+$(VERSION_PHP): Makefile
+	echo -e '<?php\ndefine("IMS3_VERSION","${VERSION}-${RELEASE}");' > $@
+
 
 # Creates python and IMS3 rpms.
 rpms: python-rpms rpm
-
 
 rpm: $(RPM_FILE)
 
@@ -70,7 +74,7 @@ dist: $(TAR_FILE)
 
 # Create a tar file with with RPM spec file it it to easily create
 # ims3 rpm.
-$(TAR_FILE): ${DIR_NAME} ${SPEC}
+$(TAR_FILE): ${DIR_NAME} ${SPEC} ${VERSION_PHP}
 	tar -zcvf $@ --exclude=*~ $(DIST_FILES)
 
 
@@ -87,7 +91,7 @@ mostlyclean:
 
 clean: mostlyclean
 	$(RM) -r $(PYTHONPATH)/build $(PYTHONPATH)/dist ${RPMDIR}
-	$(RM) *.rpm $(PYTHONPATH)/MANIFEST $(DIR_NAME)
+	$(RM) *.rpm $(PYTHONPATH)/MANIFEST $(DIR_NAME) $(VERSION_PHP)
 
 distclean: clean
 	find $(PYTHONPATH)/BioGRID -name \*.pyc | xargs $(RM)
