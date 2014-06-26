@@ -58,6 +58,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Tue Jun 26 2014 Sven Heinicke <sven@tyersdev.tyerslab.com> - 0.2-1
+- Use more bootstrap stiff.
+
 * Tue Jun 24 2014 Sven Heinicke <sven@tyersdev.tyerslab.com> - 0.1-1
 - Now fetches interaction_type and intering_sources.
 
