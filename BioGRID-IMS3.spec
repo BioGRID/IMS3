@@ -25,7 +25,6 @@ Requires: php-mysql
 %{__install} -m 755 www/Interaction_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_type.js
 %{__install} -m 755 www/Publication.js $RPM_BUILD_ROOT%{ims_wwwdir}/Publication.js
 %{__install} -m 755 www/ims.css $RPM_BUILD_ROOT%{ims_wwwdir}/ims.css
-%{__install} -m 755 www/solarized.css $RPM_BUILD_ROOT%{ims_wwwdir}/solarized.css
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{ims_phpdir}
 %{__install} -m 755 www/ims/ims.php $RPM_BUILD_ROOT%{ims_phpdir}/ims.php
 %{__install} -m 755 www/ims/version.php $RPM_BUILD_ROOT%{ims_phpdir}/version.php
@@ -49,7 +48,6 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/Interaction_type.js
 %{ims_wwwdir}/Publication.js
 %{ims_wwwdir}/ims.css
-%{ims_wwwdir}/solarized.css
 %{ims_phpdir}
 %{ims_phpdir}/ims.php
 %{ims_phpdir}/version.php
