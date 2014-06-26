@@ -17,38 +17,36 @@ $ims=new IMS\config('ims.json');
 </head><body>
 
 
+<h1 id="title"><?php print $ims->title(); ?> <small>Ver:<?php print $ims->version(); ?></small></h1>
+
 <div class="container">
-  <div class="starter-template">
-  <h1 id="title"><?php print $ims->title(); ?> <small>Ver:<?php print $ims->version(); ?></small></h1>
+<ul class="nav nav-tabs">
+  <li class="active"><a href="#interaction_tab" data-toggle="tab">Interactions</a></li>
+  <!-- li><a href="#conversion" data-toggle="tab">ID Conversion</a></li -->
+  <li><a href="#log_tab" data-toggle="tab">Log (<span class="message-count">0</span>)</a></li>
+</ul>
+</div>
+
+<div class="tab-content container">
+  <div class="tab-pane active" id="interaction_tab">
+    <h1>Publication</h1>
+    <input type="hidden" id="pubmed" style="width:100%">
+    <h1>Interactions <span class="interaction_count"></span></h1>
+    <div class="row">
+      <div class="col-md-9"><table class="table table-hover"><tbody id="interactions"></tbody></table></div>
+      <aside class="col-md-3 panel-group" id="publication"><div class="panel panel-default"></div></aside>
+    </div>
+
+  </div>
+  <!-- div class="tab-pane" id="conversion">Convert</div -->
+  <div class="tab-pane" id="log_tab">
+    <h1>Messages</h1>
+    <div id="log"></div>
   </div>
 </div>
 
-<div class="container">
-  <div class="row">
-  <div class="col-md-9">
 
 
-  <!-- h1>Something Else</h1>
-  <p>Some text here.</p -->
-
-
-  <h1>Interactions <span class="interaction_count"></span></h1>
-  <input type="hidden" id="pubmed" style="width:100%">
-  <table class="table table-hover"><tbody id="interactions"></tbody></table>
-
-  </div><!-- .col-md-9 -->
-
-  <aside class="col-md-3">
-
-  <h1>Messages (<span class="message-count">0</span>)</h1>
-  <div id="messages"></div>
-
-  <h1>Publication</h1>
-  <div class="panel-group" id="publication"><div class="panel panel-default"></div></div>
-
-  </aside><!-- .col-md-3 -->
-
-</div>
 
 
 </body></html>

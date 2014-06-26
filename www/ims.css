@@ -1,11 +1,6 @@
 aside{
     font-size:small;
-    border:1ex solid silver;
 }
 aside h1{
     font-size:medium;
-}
-#messages{
-    height:25em;
-    overflow:scroll;
 }

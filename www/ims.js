@@ -43,7 +43,7 @@ IMS={
     mc.text(count);
 
     // prepend new messages to list
-    list=$('#messages');
+    list=$('#log');
     for(var row in messages){
       msg=messages[row];
       t=IMS.php_error(msg['type']);
