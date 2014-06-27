@@ -23,7 +23,7 @@ IMS={
 
   update_interactions:function(raw){
     that.report_messages(raw.messages);
-    $('.interaction_count').html('('+raw.results.length+')');
+    $('.interaction-count').html('('+raw.results.length+')');
     tbl=$('#interactions').html('');
     for(var row in raw.results){
       i=new IMS.Interaction(raw.results[row]);
@@ -37,7 +37,7 @@ IMS={
 
   report_messages:function(messages){
     // Add the number of new messages to the current message count.
-    mc=$('.message-count');
+    mc=$('.log-count');
     count=Number(mc.text());
     count+=messages.length;
     mc.text(count);
@@ -52,6 +52,7 @@ IMS={
           +'on line ' + msg['line'] + '</p>';
       list.prepend(html);
     }
+    list.prepend("<h2>"+(new Date().toString())+"</h2>");
   },
 
   /*
@@ -81,14 +82,14 @@ IMS={
       case   128:return {msg:'E_COMPILE_WARNING',class:'warning'};
       case   256:return {msg:'E_USER_ERROR',class:'danger'};
       case   512:return {msg:'E_USER_WARNING',class:'warning'};
-      case  1024:return {msg:'E_USER_NOTICE',class:'notice'};
+      case  1024:return {msg:'E_USER_NOTICE',class:'info'};
       case  2048:return {msg:'E_STRICT',class:'danger'};
       case  4096:return {msg:'E_RECOVERABLE_ERROR',class:'danger'};
       case  8192:return {msg:'E_DEPRECATED',class:'info'};
       case 16384:return {msg:'E_USER_DEPRECATED',class:'info'};
       case 30719:return {msg:'E_ALL',class:'danger'};
     }
-    return {msg:'E_UNKNOWN',class:'danger'};
+    return {msg:'E_UNKNOWN('+errno+')',class:'danger'};
   },
 
 

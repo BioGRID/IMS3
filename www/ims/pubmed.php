@@ -7,7 +7,7 @@ class PubMedID
     $this->pmid=(int)$pmid;
 
     if(0==$this->pmid){
-      return null;
+      throw new Excetpion("Invalid $pmid");
     }
 
     $this->url='https://www.ncbi.nlm.nih.gov/pubmed/?' .
@@ -32,7 +32,11 @@ class PubMedID
 	  $data.=' '.trim($line);
 	}
       }
-    }    
+    }
+    if(1>=count($this->data)){
+      throw new Excetpion("No data fetched for $pmid");
+    }
+    
   }
 
   /* See:
@@ -81,6 +85,10 @@ class PubMedID
   // Parse 
   public function date(){
     $parse_me=$this->medline('DP')[0];
+
+    // Winter => December
+    // Spring => March
+    // Summer => June
     $parse_me=str_replace('Fall','September',$parse_me);
 
     $tries=['Y M j|','Y M|','Y M#???|','Y|'];
@@ -90,7 +98,7 @@ class PubMedID
       $date=DateTime::createFromFormat($try,$parse_me);
     }
     if(!$date){
-      trigger_error("Can't parse: " . $parse_me,E_USER_WARNING);
+      #trigger_error("Can't parse: " . $parse_me,E_USER_WARNING);
       return NULL;
     }
 

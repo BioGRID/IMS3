@@ -1,8 +1,8 @@
-<!DOCTYPE html>
-<?php
+<!DOCTYPE html><?php /* -*- mode: html -*- */
 require_once('ims/ims.php');
 $ims=new IMS\config('ims.json');
 ?>
+
 <html lang="en"><head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta charset="utf-8">
@@ -23,7 +23,7 @@ $ims=new IMS\config('ims.json');
 <ul class="nav nav-tabs">
   <li class="active"><a href="#interaction_tab" data-toggle="tab">Interactions</a></li>
   <!-- li><a href="#conversion" data-toggle="tab">ID Conversion</a></li -->
-  <li><a href="#log_tab" data-toggle="tab">Log (<span class="message-count">0</span>)</a></li>
+  <li><a href="#log_tab" data-toggle="tab">Log (<span class="log-count">0</span>)</a></li>
 </ul>
 </div>
 
@@ -31,7 +31,7 @@ $ims=new IMS\config('ims.json');
   <div class="tab-pane active" id="interaction_tab">
     <h1>Publication</h1>
     <input type="hidden" id="pubmed" style="width:100%">
-    <h1>Interactions <span class="interaction_count"></span></h1>
+    <h1>Interactions <span class="interaction-count"></span></h1>
     <div class="row">
       <div class="col-md-9"><table class="table table-hover"><tbody id="interactions"></tbody></table></div>
       <aside class="col-md-3 panel-group" id="publication"><div class="panel panel-default"></div></aside>
@@ -41,6 +41,7 @@ $ims=new IMS\config('ims.json');
   <!-- div class="tab-pane" id="conversion">Convert</div -->
   <div class="tab-pane" id="log_tab">
     <h1>Messages</h1>
+    <button onclick="$('#log').html('');$('.log-count').html(0);">Clear</button>
     <div id="log"></div>
   </div>
 </div>

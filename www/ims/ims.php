@@ -34,7 +34,7 @@ function divert_errors(){
       return FALSE;
     },E_ALL);
   error_reporting(0);
-  //trigger_error("Messaging On",E_USER_WARNING);
+  #trigger_error("Messaging On",E_USER_NOTICE);
 }
 
 
@@ -238,9 +238,10 @@ class Publications extends _Table
     }
     if($this->cfg->pubmed_update($out['publication_lastupdated'])){
       $pm=new \PubMedID($out[self::SEARCH_COLUMN]);
+      trigger_error($this->message($out,"fetched MEDLINE for PMID:".$out[self::SEARCH_COLUMN]),E_USER_NOTICE);
       $date=$pm->date();
-      if(!$date){
-	trigger_error($this->message($out,"unknown date format"));
+      if(NULL==$date){
+	trigger_error($this->message($out,"unknown date format"),E_USER_WARNING);
       }
       $this->update
 	($out[self::PRIMARY_KEY],

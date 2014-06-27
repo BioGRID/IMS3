@@ -1,9 +1,9 @@
 
 # Version Numbers, generally to be passed to RPMBUILD
-VERSION:=0.2
-RELEASE:=1
+VERSION:=0.3
+RELEASE:=dev
 
-# Organize phoney Targets
+# Organize phony Targets
 CLEANING_T:=ims3clean mostlyclean clean distclean
 PYTHON_T:=python-rpms
 DB_T:=ims3 ims3clean
