@@ -1,0 +1,31 @@
+* RPM
+This is made to be run as an RPM.  While it is possable to put these
+files in a correctly configrued web server it is very likely that
+password could get leaked.  So bulid the RPM and run from CentOS
+unless you are developing.
+
+** make rpm
+Should make an RPM suitable for CentOS 6.3 anyway.  Read the
+README and install the RPM.
+
+** make rpms
+Also makes a python RPM, only suitable if you have an older version of
+IMS running and you need to port the database over.
+
+* Developement
+Get latest source from:
+    https://github.com/svenmh/IMS3
+
+I have a symbolic like from my ~/public_html/xxx directory to the
+./www directory, and provided php in configured to work there all
+should be well.
+
+** ./ims.json
+If you don't create an ./ims.json file it will find an /etc/ims.json
+file.  Follow the steps in the README to create the /etc/ims.json file
+to create the ./ims.json file.
+
+
+* Database
+For now, I'm only concerned about porting IMS2->IMS3.  Use the
+python-BioGRID-IMS RPM for that.

@@ -4,7 +4,10 @@ Source Code for future versions of BioGRID IMS, see:
 For now mainly concerned in porting the IMS2 database schema to the
 IMS3 schema.
 
-* Non RPM requires
+Get latest source from:
+    https://github.com/svenmh/IMS3
+
+* Non RPM requirements
 Currently jQUery, bootstrap, and select2 are required but not included
 in the RPM and not available from default CentOS RPMs.  You will need
 to specify where they are using the /etc/ims.json file.
