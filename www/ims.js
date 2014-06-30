@@ -7,7 +7,7 @@ IMS={
 
     that=this;
     this.pub_id=pub.primary_id();
-    $("#publication div").html(pub.collapsible_panel('publication'));
+    $("#publication").html(pub.select('publication_abstract'));
 
     ajax=$.ajax({
       type:'GET',
@@ -16,8 +16,6 @@ IMS={
       data:{publication_id:this.pub_id,
             table:'interactions'},
     }).done(this.update_interactions);
-
-
 
   },
 
@@ -92,6 +90,19 @@ IMS={
     return {msg:'E_UNKNOWN('+errno+')',class:'danger'};
   },
 
+  /*
+   * Sure Twitter Bootstrap has dropdown menus, but they don't change
+   * what they are displaying!  See #publication in home.php for
+   * usage.
+   */
+  select:function(select){
+    // Might have to change this to using something like data-toggle,
+    // but for now this will do.
+    from=$(select.nextSibling);
+    from.find('div').addClass('hide');
+    from.find('#'+select.value).removeClass('hide');
+  },
+
 
   // prototype for this defined below
   _table:function(data){
@@ -126,6 +137,29 @@ IMS._table.prototype={
   dd:function(dt){
     return this.data[dt];
   },
+
+
+  /*
+   * Output items useable with the IMS.select function.
+   */
+  select:function(show){
+    divs='';
+    options='';
+    this.dts().forEach(function(dt){
+      clazz='hide';
+      selected='';
+      if(show==dt){
+        clazz='';
+        selected=' selected';
+      }
+      dd=this.dd(dt);
+      divs+='<div class="'+clazz+'" id="'+dt+'">'+dd+'</div>';
+      options+='<option'+selected+'>'+dt+'</option>';
+    },this);
+
+    return '<select onchange="IMS.select(this)">'+options+'</select><div>'+divs+'</div>';
+  },
+
 
   format:function(fmt){
     out='';
