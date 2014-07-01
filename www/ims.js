@@ -40,7 +40,7 @@ IMS={
     .wrapInner('<span></span>');
     tbody
     .find('tr');
-    */
+    /*
     .click(function(){
       console.log(this);
     });
