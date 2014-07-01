@@ -22,15 +22,29 @@ IMS={
   update_interactions:function(raw){
     that.report_messages(raw.messages);
     $('.interaction-count').html('('+raw.results.length+')');
-    tbl=$('#interactions').html('');
+    tbl=$('#interactions');
+    thead=tbl.find('thead').html('');
+    tbody=tbl.find('tbody').html('');
     for(var row in raw.results){
       i=new IMS.Interaction(raw.results[row]);
       if(0==row){
-        tbl.append(i.th());
+        thead.append(i.th());
       }
-      tbl.append(i.td());
+      tbody.append(i.td());
     }
 
+    // So we can use some CSS to align the numbers right, but still
+    // keep them more or less left.
+    tbody
+    .find('.primary-key')
+    .wrapInner('<span></span>');
+    tbody
+    .find('tr');
+    */
+    .click(function(){
+      console.log(this);
+    });
+    */
   },
 
   report_messages:function(messages){
@@ -160,13 +174,27 @@ IMS._table.prototype={
     return '<select onchange="IMS.select(this)">'+options+'</select><div>'+divs+'</div>';
   },
 
+  clazz:function(dt){
+    switch(dt){
+      case this._cols.primary_key:return ' class="primary-key"';
+    }
+    return '';
+  },
 
+  /*
+   * dt: the column name
+   * dd: the data in the column
+   * cz: specify special class, so for only primary-key
+   */
   format:function(fmt){
     out='';
     this.dts().forEach(function(dt){
       out+=fmt
            .replace(/\{dt\}/g,dt)
-           .replace(/\{dd\}/g,this.dd(dt));
+           .replace(/\{dd\}/g,this.dd(dt))
+           .replace(/\{cz\}/g,this.clazz(dt));
+
+
     },this);
     return out;
   },
@@ -180,7 +208,7 @@ IMS._table.prototype={
     return '<tr>' + this.format('<th>{dt}</th>') + '</tr>';
   },
   td:function(){
-    return '<tr>' + this.format('<td>{dd}</td>') + '</tr>';
+    return '<tr>' + this.format('<td{cz}>{dd}</td>') + '</tr>';
   },
 
   panel:function(){

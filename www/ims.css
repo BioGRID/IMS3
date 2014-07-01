@@ -1,3 +1,8 @@
 #publication_abstract,#publication_meshterms{
     font-size:small;
 }
+.primary-key span{
+    text-align:right;
+    display:block;
+    width:9ex;
+}

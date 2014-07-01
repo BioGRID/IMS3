@@ -10,7 +10,7 @@ IMS.Interaction.prototype.dts=function(){
   return [
     'interaction_id',
     //'participant_hash',
-    'publication_id',
+    //'publication_id',
     //'interaction_type_id',
     'interaction_type',
     'interaction_status',

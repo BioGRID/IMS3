@@ -33,7 +33,7 @@ $ims=new IMS\config('ims.json');
     <input type="hidden" id="pubmed" style="width:100%">
     <blockquote class="dropdown" id="publication"></blockquote>
     <h1>Interactions <span class="interaction-count"></span></h1>
-    <table class="table table-hover"><tbody id="interactions"></tbody></table>
+    <table id="interactions" class="table table-hover"><thead/><tbody/></table>
   </div>
   <!-- div class="tab-pane" id="conversion">Convert</div -->
   <div class="tab-pane" id="log_tab">

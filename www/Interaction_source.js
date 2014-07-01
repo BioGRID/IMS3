@@ -11,7 +11,7 @@ IMS.Interaction_source.prototype.html=function(){
   name=this.data.interaction_source_name;
 
   if(url){
-    return '<a href="'+url+'">'+name+'</a>';
+    return '<a target="_blank" href="'+url+'">'+name+'</a>';
   }
   return name;
 }
