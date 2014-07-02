@@ -10,6 +10,11 @@ IMS={
 
   // Accepts a Publication object, and set it to do document.
   set_publication:function(pub){
+    // clear some thingsfrom the last publication
+    $("#participants").html('<thead/><tbody/>');
+    $(".participant-count").html('');
+
+
     that=this;
     this.pub_id=pub.primary_id();
     $("#publication").html(pub.select('publication_abstract'));
@@ -37,16 +42,17 @@ IMS={
       }
       tbody.append(i.td());
     }
+
+    // So we can use some CSS to align the numbers right but still
+    // keep them, more or less, left.
+    tbody
+    .find('.primary-key')
+    .wrapInner('<span></span>');
   },
 
   update_interactions:function(raw){
     that.update_table(raw,IMS.Interaction);
 
-    // So we can use some CSS to align the numbers right, but still
-    // keep them more or less left.
-    tbody
-    .find('.primary-key')
-    .wrapInner('<span></span>');
     tbody
     .find('tr')
     .click(function(){

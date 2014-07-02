@@ -238,7 +238,6 @@ class Participant_roles extends _Table
   const DEFAULT_STATUS='active';
 }
 
-// Information about the table
 class Publications extends _Table
 {
   const TABLE='publications';
