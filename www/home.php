@@ -10,11 +10,12 @@ $ims=new IMS\config('ims.json');
 <?php print $ims->html_head(); ?>
 <link href="ims.css" rel="stylesheet"/>
 <script src="ims.js"></script>
-<script src="Publication.js"></script>
 <script src="Interaction.js"></script>
+<script src="Interaction_participant.js"></script>
 <script src="Interaction_source.js"></script>
 <script src="Interaction_type.js"></script>
-<script src="Interaction_participant.js"></script>
+<script src="Participant_role.js"></script>
+<script src="Publication.js"></script>
 </head><body>
 
 <h1 id="title"><?php print $ims->title(); ?> <small>Ver:<?php print $ims->version(); ?></small></h1>

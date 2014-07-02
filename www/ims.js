@@ -270,8 +270,8 @@ IMS._table.prototype={
 
   cache:function(col){
     Table=IMS[col[0].toUpperCase() + col.substr(1)];
-    pk=Table.prototype._const.primary_key;
-    pkv=this.data[col+'_id'];
+    pk=IMS.constant(Table,'primary_key');
+    pkv=this.data[pk];
 
     ls=localStorage.getItem(col);
     ls              =
