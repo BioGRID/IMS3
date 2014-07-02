@@ -222,6 +222,14 @@ class Interaction_types extends _Table
   const DEFAULT_STATUS='active';
 }
 
+class Interaction_participants extends _Table
+{
+  const TABLE='interaction_participants';
+  const PRIMARY_KEY='interaction_participant_id';
+  const STATUS_COLUMS='interaction_participant_status';
+  const DEFAULT_STATUS='active';
+}
+
 // Information about the table
 class Publications extends _Table
 {
@@ -293,6 +301,8 @@ function table_factory($cfg,$qs)
     return new Interaction_sources($cfg,$qs);
   case 'interaction_types':
     return new Interaction_types($cfg,$qs);
+  case 'interaction_participants':
+    return new Interaction_participants($cfg,$qs);
   }
   trigger_error("Can't access requested data",E_USER_ERROR);
   return NULL;

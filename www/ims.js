@@ -3,8 +3,13 @@
 IMS={
   pub_id:null,
 
-  update_publication:function(pub){
+  // Looks up constant data from Table objects, not Table instances.
+  constant:function(Table,get){
+    return Table.prototype._const[get];
+  },
 
+  // Accepts a Publication object, and set it to do document.
+  set_publication:function(pub){
     that=this;
     this.pub_id=pub.primary_id();
     $("#publication").html(pub.select('publication_abstract'));
@@ -19,19 +24,23 @@ IMS={
 
   },
 
-  update_interactions:function(raw){
+  update_table:function(raw,Table){
     that.report_messages(raw.messages);
-    $('.interaction-count').html('('+raw.results.length+')');
-    tbl=$('#interactions');
+    $(that.constant(Table,'count_class')).html('('+raw.results.length+')');
+    tbl=$(that.constant(Table,'table_id'));
     thead=tbl.find('thead').html('');
     tbody=tbl.find('tbody').html('');
     for(var row in raw.results){
-      i=new IMS.Interaction(raw.results[row]);
+      i=new Table(raw.results[row]);
       if(0==row){
         thead.append(i.th());
       }
       tbody.append(i.td());
     }
+  },
+
+  update_interactions:function(raw){
+    that.update_table(raw,IMS.Interaction);
 
     // So we can use some CSS to align the numbers right, but still
     // keep them more or less left.
@@ -39,12 +48,27 @@ IMS={
     .find('.primary-key')
     .wrapInner('<span></span>');
     tbody
-    .find('tr');
-    /*
+    .find('tr')
     .click(function(){
-      console.log(this);
+      tag=$(this);
+      tag.parent().find('.active').removeClass('active');
+      tag.addClass('active');
+      interaction_id=tag.find('.primary-key').text();
+
+      // get the participants
+      ajax=$.ajax({
+        type:'GET',
+        url:'query.php',
+        dataType:'json',
+        data:{interaction_id:interaction_id,
+              table:'interaction_participants'},
+      }).done(that.update_participants);
     });
-    */
+  },
+
+  // Perhaps this should be update interaction_participants?
+  update_participants:function(raw){
+    that.update_table(raw,IMS.Interaction_participant);
   },
 
   report_messages:function(messages){
@@ -130,9 +154,12 @@ IMS={
 }
 
 
+
+
 IMS._table.prototype={
+
   primary_col:function(){
-    return this._cols.primary_key;
+    return this._const.primary_key;
   },
   primary_id:function(){
     return this.data[this.primary_col()];
@@ -176,7 +203,7 @@ IMS._table.prototype={
 
   clazz:function(dt){
     switch(dt){
-      case this._cols.primary_key:return ' class="primary-key"';
+      case this._const.primary_key:return ' class="primary-key"';
     }
     return '';
   },
@@ -243,7 +270,7 @@ IMS._table.prototype={
 
   cache:function(col){
     Table=IMS[col[0].toUpperCase() + col.substr(1)];
-    pk=Table.prototype._cols.primary_key;
+    pk=Table.prototype._const.primary_key;
     pkv=this.data[col+'_id'];
 
     ls=localStorage.getItem(col);
@@ -294,7 +321,7 @@ $(document).ready(function(){
       return obj.format_item();
     },
     formatSelection:function(obj){
-      IMS.update_publication(obj); // maybe this should be in a button
+      IMS.set_publication(obj); // maybe this should be in a button
       return obj.format_item();
     },
     ajax:{

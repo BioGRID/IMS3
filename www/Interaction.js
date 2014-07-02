@@ -3,8 +3,12 @@ IMS.Interaction=function(data){
 }
 
 IMS.Interaction.prototype=new IMS._table();
-IMS.Interaction.prototype._cols={
-  primary_key:'interaction_id'
+IMS.Interaction.prototype._const={
+  primary_key:'interaction_id',
+
+  // how to access elements in the DOM
+  table_id:'#interactions',
+  count_class:'.interaction-count'
 };
 IMS.Interaction.prototype.dts=function(){
   return [

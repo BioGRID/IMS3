@@ -10,7 +10,7 @@ IMS.Publication=function(data){
 
 
 IMS.Publication.prototype=new IMS._table();
-IMS.Publication.prototype._cols={
+IMS.Publication.prototype._const={
   primary_key:'publication_id'
 }
 IMS.Publication.prototype.format_item=function(){

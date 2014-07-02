@@ -3,7 +3,7 @@ IMS.Interaction_source=function(data){
 };
 IMS.Interaction_source.prototype=new IMS._table();
 IMS.Interaction_source.prototype._table='interaction_sources';
-IMS.Interaction_source.prototype._cols={
+IMS.Interaction_source.prototype._const={
   primary_key:'interaction_source_id'
 }
 IMS.Interaction_source.prototype.html=function(){
