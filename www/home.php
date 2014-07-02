@@ -32,9 +32,35 @@ $ims=new IMS\config('ims.json');
 
   <div class="tab-pane" id="log_tab">
     <h1>Messages</h1>
-    <button onclick="$('#log').html('');$('.log-count').html(0)">Clear</button>
+    <button class="btn btn-primary" onclick="$('#log').html('');$('.log-count').html(0)">Clear Log</button>
+    <button class="btn btn-primary" data-toggle="modal" data-target="#localStorage" onclick="IMS.localStorage_dl()">View localStorage</button>
+
     <div id="log"></div>
-  </div>
+
+    <div class="modal fade" id="localStorage">
+      <div class="modal-dialog">
+	<div class="modal-content">
+	  <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+            <h4 class="modal-title">Modal title</h4>
+	    <p>Here is the data being stored using
+	    the <a target="_blank"
+	    href="http://www.w3.org/TR/webstorage/#dom-localstorage">localStorage</a>
+	    feature.  If it look
+	    currupt <a href="https://github.com/svenmh/IMS3/issues">report
+	    it</a> and clear it.</p>
+	  </div>
+	  <div class="modal-body">
+	  </div>
+	  <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary" onclick="localStorage.clear();IMS.localStorage_dl()">Clear localStorage</button>
+	  </div>
+	</div><!-- .modal-content -->
+      </div><!-- .modal-dialog -->
+    </div><!-- .modal -->
+
+  </div><!-- #log_tab -->
 
   <div class="tab-pane active" id="interaction_tab">
     <h1>Publication</h1>
@@ -46,7 +72,9 @@ $ims=new IMS\config('ims.json');
     <table id="participants" class="table"><thead/><tbody/></table>
   </div>
 
-  <!-- div class="tab-pane" id="conversion">Convert</div -->
+  <!-- div class="tab-pane" id="conversion">
+    Yo!
+  </div -->
 
 </div>
 

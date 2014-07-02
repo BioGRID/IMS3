@@ -8,6 +8,18 @@ IMS={
     return Table.prototype._const[get];
   },
 
+  localStorage_dl:function(){
+    $('#localStorage .modal-body').html(IMS._localStorage_dl())
+  },
+  _localStorage_dl:function(){
+    out='<dl class="dl-horizontal">';
+    Object.keys(localStorage).forEach(function(dt){
+      dd=localStorage.getItem(dt).replace(/,/g,',&#8203;');
+      out+='<dt>'+dt+'</dt><dd>'+dd+'</dd>';
+    });
+    return out+'</dl>';
+  },
+
   // Accepts a Publication object, and set it to do document.
   set_publication:function(pub){
     // clear some thingsfrom the last publication
