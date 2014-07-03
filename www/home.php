@@ -14,6 +14,7 @@ $ims=new IMS\config('ims.json');
 <script src="Interaction_participant.js"></script>
 <script src="Interaction_source.js"></script>
 <script src="Interaction_type.js"></script>
+<script src="Participant.js"></script>
 <script src="Participant_role.js"></script>
 <script src="Publication.js"></script>
 </head><body>

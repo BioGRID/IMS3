@@ -13,7 +13,8 @@ IMS.Interaction_participant.prototype.dts=function(){
   return [
     'interaction_participant_id',
     //'interaction_id',
-    'participant_id',
+    //'participant_id',
+    'participant',
     //'participant_role_id',
     'participant_role',
     'interaction_participant_addeddate',
@@ -24,6 +25,8 @@ IMS.Interaction_participant.prototype.dd=function(dt){
   switch(dt){
     case 'participant_role':
     return this.cache(dt).html();
+    case 'participant':
+    return this.cache(dt,sessionStorage).html();
   }
   return this.data[dt];
 }

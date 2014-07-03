@@ -286,25 +286,28 @@ IMS._table.prototype={
      '</div>');
   },
 
-  cache:function(col){
+  cache:function(col,store){
+    if(!store){
+      store=localStorage;
+    }
     Table=IMS[col[0].toUpperCase() + col.substr(1)];
     pk=IMS.constant(Table,'primary_key');
     pkv=this.data[pk];
 
-    ls=localStorage.getItem(col);
+    ls=store.getItem(col);
     ls              =
       (null==ls)    ?
       {}            :
       JSON.parse(ls);
     if(undefined==ls[pkv]){
       ls[pkv]=this._cache(Table,pk,pkv);
-      localStorage.setItem(col,JSON.stringify(ls))
+      store.setItem(col,JSON.stringify(ls))
     }
     return new Table(ls[pkv]);
   },
   _cache:function(Table,pk,pkv){
-    data={table:Table.prototype._table};
-    data[pk]=pkv;
+    data={table:IMS.constant(Table,'table')};
+    data[IMS.constant(Table,'primary_key')]=pkv;
     $.ajax({
       async:false,
       type:'GET',

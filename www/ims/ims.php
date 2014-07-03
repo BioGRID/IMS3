@@ -238,6 +238,14 @@ class Participant_roles extends _Table
   const DEFAULT_STATUS='active';
 }
 
+class Participants extends _Table
+{
+  const TABLE='participants';
+  const PRIMARY_KEY='participant_id';
+  const STATUS_COLUMN='participant_status';
+  const DEFAULT_STATUS='active';
+}
+
 class Publications extends _Table
 {
   const TABLE='publications';
@@ -300,18 +308,20 @@ function table_factory($cfg,$qs)
 
   // We don't need breaks because we are always returning.
   switch($table){
-  case 'publications':
-    return new Publications($cfg,$qs);
   case 'interactions':
     return new Interactions($cfg,$qs);
-  case 'interaction_sources':
-    return new Interaction_sources($cfg,$qs);
-  case 'interaction_types':
-    return new Interaction_types($cfg,$qs);
   case 'interaction_participants':
     return new Interaction_participants($cfg,$qs);
   case 'participant_roles':
     return new Participant_roles($cfg,$qs);
+  case 'interaction_sources':
+    return new Interaction_sources($cfg,$qs);
+  case 'interaction_types':
+    return new Interaction_types($cfg,$qs);
+  case 'participants':
+    return new Participants($cfg,$qs);
+  case 'publications':
+    return new Publications($cfg,$qs);
   }
   trigger_error("Can't access requested data",E_USER_ERROR);
   return NULL;
