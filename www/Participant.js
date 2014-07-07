@@ -7,6 +7,14 @@ IMS.Participant.prototype._const={
   primary_key:'participant_id',
 }
 IMS.Participant.prototype.html=function(){
+  /*
+  switch(this.data.participant_type_id){
+    // Hopefully some of this will be in the the quick database, but
+    // for now...
+    case 1:
+
+  }
+   */
   return '<span class="text-danger">'
        +this.data.participant_id+'&#9888;'+this.data.participant_type_id
        +'</span>';

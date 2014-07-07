@@ -111,6 +111,7 @@ class _Table
     return $this->cfg->pdo($c::DB);
   }
 
+  /*
   public function update($pk,$to){
     $c=get_called_class();
     $dbh=$this->pdo();
@@ -129,6 +130,7 @@ class _Table
     $s=$dbh->prepare($sql);
     $s->execute();
   }
+  */
 
   public function _where(){
     $c=get_called_class();
@@ -157,15 +159,19 @@ class _Table
   }
   
 
+  public function status_match(){
+    $c=get_called_class();
+    if(!isset($this->qs['status'])){
+      $this->qs['status']=$c::DEFAULT_STATUS;
+    }
+  }
+
   public function query(){
     $c=get_called_class();
     $dbh=$this->pdo();
     $sql='SELECT * FROM ' . $c::TABLE;
     $where=$this->_where();
-
-    if(!isset($this->qs['status'])){
-      $this->qs['status']=$c::DEFAULT_STATUS;
-    }
+    $this->status_match();
 
     if($where){
       // We know there is a status item in $where so lets add the WHERE
@@ -194,6 +200,16 @@ class _Table
     return sprintf('Where %s=%d %s',$c::PRIMARY_KEY,$row[$c::PRIMARY_KEY],
 		   $msg);
   }
+} // _Table
+
+class Quick_identifiers extends _Table
+{
+  const DB='quick';
+  public function status_match(){
+  }
+
+  const TABLE='quick_identifiers';
+  const PRIMARY_KEY='gene_id'; // not unique
 }
 
 class Interactions extends _Table
@@ -322,6 +338,8 @@ function table_factory($cfg,$qs)
     return new Participants($cfg,$qs);
   case 'publications':
     return new Publications($cfg,$qs);
+  case 'quick_identifiers':
+    return new Quick_identifiers($cfg,$qs);
   }
   trigger_error("Can't access requested data",E_USER_ERROR);
   return NULL;

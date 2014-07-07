@@ -6,8 +6,10 @@ from time import strftime
 import MySQLdb.cursors
 import _mysql_exceptions
 
+// This means you should look it up in the quick_participants table.
 global PARTICIPANT_TYPE
 PARTICIPANT_TYPE=1
+
 global UNKNOWN_PARTICIPANT_TYPE
 UNKNOWN_PARTICIPANT_TYPE=2
 global DEFAULT_USER_ID
