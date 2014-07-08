@@ -111,7 +111,8 @@ class _Table
     return $this->cfg->pdo($c::DB);
   }
 
-  /*
+  # Currently only being used by Publication whet making queries to
+  # PubMed
   public function update($pk,$to){
     $c=get_called_class();
     $dbh=$this->pdo();
@@ -130,7 +131,6 @@ class _Table
     $s=$dbh->prepare($sql);
     $s->execute();
   }
-  */
 
   public function _where(){
     $c=get_called_class();
