@@ -17,6 +17,7 @@ $ims=new IMS\config('ims.json');
 <script src="Participant.js"></script>
 <script src="Participant_role.js"></script>
 <script src="Publication.js"></script>
+<script src="Quick_identifiers.js"></script>
 </head><body>
 
 <h1 id="title"><?php print $ims->title(); ?> <small>Ver:<?php print $ims->version(); ?></small></h1>

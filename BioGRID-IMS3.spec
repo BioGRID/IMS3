@@ -21,9 +21,13 @@ Requires: php-mysql
 %{__install} -m 755 www/query.php $RPM_BUILD_ROOT%{ims_wwwdir}/query.php
 %{__install} -m 755 www/ims.js $RPM_BUILD_ROOT%{ims_wwwdir}/ims.js
 %{__install} -m 755 www/Interaction.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction.js
+%{__install} -m 755 www/Interaction_participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_participant.js
 %{__install} -m 755 www/Interaction_source.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_source.js
 %{__install} -m 755 www/Interaction_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_type.js
+%{__install} -m 755 www/Participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant.js
+%{__install} -m 755 www/Participant_role.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant_role.js
 %{__install} -m 755 www/Publication.js $RPM_BUILD_ROOT%{ims_wwwdir}/Publication.js
+%{__install} -m 755 www/Quick_identifiers.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_identifiers.js
 %{__install} -m 755 www/ims.css $RPM_BUILD_ROOT%{ims_wwwdir}/ims.css
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{ims_phpdir}
 %{__install} -m 755 www/ims/ims.php $RPM_BUILD_ROOT%{ims_phpdir}/ims.php
@@ -44,9 +48,13 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/query.php
 %{ims_wwwdir}/ims.js
 %{ims_wwwdir}/Interaction.js
+%{ims_wwwdir}/Interaction_participant.js	
 %{ims_wwwdir}/Interaction_source.js
 %{ims_wwwdir}/Interaction_type.js
+%{ims_wwwdir}/Participant.js
+%{ims_wwwdir}/Participant_role.js
 %{ims_wwwdir}/Publication.js
+%{ims_wwwdir}/Quick_identifiers.js
 %{ims_wwwdir}/ims.css
 %{ims_phpdir}
 %{ims_phpdir}/ims.php
@@ -58,7 +66,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Mon Jun 30 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.3-1
+* Tue Jun 08 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.4-2
+- You can now drill down to interactors.
+
+* Mon Jun 30 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.4-1
 - Got publications columns to display more cleanly.
 
 * Thu Jun 26 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.2-1

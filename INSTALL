@@ -20,6 +20,9 @@ I have a symbolic like from my ~/public_html/xxx directory to the
 ./www directory, and provided php in configured to work there all
 should be well.
 
+The latest code will often be out of sync with the RPM *.spec
+file. Feal free to gripe about that.
+
 ** ./ims.json
 If you don't create an ./ims.json file it will find an /etc/ims.json
 file.  Follow the steps in the README to create the /etc/ims.json file

@@ -152,7 +152,7 @@ class _Table
 	$where[]=$k.'='.(int)$v;
       break;
       default:
-	$where[]=$k."='".$dbh->quote($v)."'";
+	$where[]=$k."=".$dbh->quote($v);
       }
     }
     return $where;
@@ -206,6 +206,7 @@ class Quick_identifiers extends _Table
 {
   const DB='quick';
   public function status_match(){
+    // this table has no status column
   }
 
   const TABLE='quick_identifiers';
