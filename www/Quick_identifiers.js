@@ -8,10 +8,11 @@ IMS.Quick_identifiers.prototype._const={
 }
 IMS.Quick_identifiers.prototype.html=function(){
   var org=this.data.organism_common_name;
-  var id                             =
-    this.data.systematic_name=='-'   ?
-    this.data.quick_identifier_value :
-    this.data.systematic_name        ;
+  var id=this.data.quick_identifier_value;
+//  var id                             =
+//    this.data.systematic_name=='-'   ?
+//    this.data.quick_identifier_value :
+//    this.data.systematic_name        ;
 
   return id+' ('+org+')';
 }

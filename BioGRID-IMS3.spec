@@ -66,7 +66,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Tue Jun 08 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.4-2
+* Wed Jul 09 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.4-2
+- Now trusts the OFFICAL SYMBOL in the quick_identifiers table.
+
+* Tue Jul 08 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.4-2
 - You can now drill down to interactors.
 
 * Mon Jun 30 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.4-1
