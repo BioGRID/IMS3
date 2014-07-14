@@ -1,18 +1,52 @@
 // Items that start with a capitol letter are reserved for table
 // objects related to the database.
 IMS={
+  // What page publication we are currently looking at
   pub_id:null,
 
-  // Looks up constant data from Table objects, not Table instances.
+  // Looks up constant data from _table objects, not Table instances.
   constant:function(Table,get){
     return Table.prototype._const[get];
   },
+
+  /*
+   * Abstracted access to the query.php CGI script.
+   */
+
+  // Returns a standard argument suitable for use is a $.ajax call to
+  // the query.php CGI. This is abstracted this way to make select2
+  // happy.
+  ajax_query:function(request,also){
+    var out={
+      type:'GET',
+      url:'query.php',
+      dataType:'json',
+      data:request,
+      table:request.table
+    };
+    if(also){
+      for(var key in also){
+        out[key]=also[key];
+      }
+    }
+    return out;
+  },
+
+  query:function(request,act){
+    $.ajax(IMS.ajax_query(request,IMS.act)).done(
+      function(data){
+        IMS.report_messages(data.messages);
+        act(data.results);
+      });
+  },
+
+
 
   localStorage_dl:function(){
     $('#localStorage .modal-body').html(IMS._localStorage_dl())
   },
   _localStorage_dl:function(){
-    out='<dl class="dl-horizontal">';
+    var out='<dl class="dl-horizontal">';
     Object.keys(localStorage).forEach(function(dt){
       dd=localStorage.getItem(dt).replace(/,/g,',&#8203;');
       out+='<dt>'+dt+'</dt><dd>'+dd+'</dd>';
@@ -20,35 +54,27 @@ IMS={
     return out+'</dl>';
   },
 
-  // Accepts a Publication object, and set it to do document.
+  // Accepts a Publication object, and make it what we are looking at.
   set_publication:function(pub){
     // clear some thingsfrom the last publication
     $("#participants").html('<thead/><tbody/>');
     $(".participant-count").html('');
 
-
-    that=this;
-    this.pub_id=pub.primary_id();
+    IMS.pub_id=pub.primary_id();
     $("#publication").html(pub.select('publication_abstract'));
 
-    ajax=$.ajax({
-      type:'GET',
-      url:'query.php',
-      dataType:'json',
-      data:{publication_id:this.pub_id,
-            table:'interactions'},
-    }).done(this.update_interactions);
-
+    IMS.query({publication_id:this.pub_id,table:'interactions'},
+              IMS.update_interactions);
   },
 
-  update_table:function(raw,Table){
-    that.report_messages(raw.messages);
-    $(that.constant(Table,'count_class')).html('('+raw.results.length+')');
-    tbl=$(that.constant(Table,'table_id'));
-    thead=tbl.find('thead').html('');
-    tbody=tbl.find('tbody').html('');
-    for(var row in raw.results){
-      i=new Table(raw.results[row]);
+  // Abstracted was to dump results from query.php into an HTML table.
+  update_table:function(results,Table){
+    $(IMS.constant(Table,'count_class')).html('('+results.length+')');
+    var tbl=$(IMS.constant(Table,'table_id'));
+    var thead=tbl.find('thead').html('');
+    var tbody=tbl.find('tbody').html('');
+    for(var row in results){
+      var i=new Table(results[row]);
       if(0==row){
         thead.append(i.th());
       }
@@ -60,33 +86,28 @@ IMS={
     tbody
     .find('.primary-key')
     .wrapInner('<span></span>');
+
+    // Return the tbody so we can add events, et al.
+    return tbody;
   },
 
-  update_interactions:function(raw){
-    that.update_table(raw,IMS.Interaction);
-
-    tbody
+  update_interactions:function(results){
+    IMS.update_table(results,IMS.Interaction)
     .find('tr')
     .click(function(){
-      tag=$(this);
+      var tag=$(this);
       tag.parent().find('.active').removeClass('active');
       tag.addClass('active');
-      interaction_id=tag.find('.primary-key').text();
-
-      // get the participants
-      ajax=$.ajax({
-        type:'GET',
-        url:'query.php',
-        dataType:'json',
-        data:{interaction_id:interaction_id,
-              table:'interaction_participants'},
-      }).done(that.update_participants);
+      var interaction_id=tag.find('.primary-key').text();
+      IMS.query({interaction_id:interaction_id,
+                 table:'interaction_participants'},
+                IMS.update_participants);
     });
   },
 
   // Perhaps this should be update interaction_participants?
-  update_participants:function(raw){
-    that.update_table(raw,IMS.Interaction_participant);
+  update_participants:function(results){
+    IMS.update_table(results,IMS.Interaction_participant);
   },
 
   report_messages:function(messages){
@@ -99,11 +120,11 @@ IMS={
     // prepend new messages to list
     list=$('#log');
     for(var row in messages){
-      msg=messages[row];
-      t=IMS.php_error(msg['type']);
-      html='<p><strong class="text-'+t.class+'">'+t.msg+'</strong>: '
-          +msg['message']+' in <code>' + msg['file'] + '</code> '
-          +'on line ' + msg['line'] + '</p>';
+      var msg=messages[row];
+      var t=IMS.php_error(msg['type']);
+      var html='<p><strong class="text-'+t.class+'">'+t.msg+'</strong>: '
+              +msg['message']+' in <code>' + msg['file'] + '</code> '
+              +'on line ' + msg['line'] + '</p>';
       list.prepend(html);
     }
     list.prepend("<h2>"+(new Date().toString())+"</h2>");
@@ -146,15 +167,15 @@ IMS={
     return {msg:'E_UNKNOWN('+errno+')',class:'danger'};
   },
 
-  /*
-   * Sure Twitter Bootstrap has dropdown menus, but they don't change
-   * what they are displaying!  See #publication in home.php for
-   * usage.
-   */
+
+
+  // Sure Twitter Bootstrap has dropdown menus, but they don't change
+  // what they are displaying!  See #publication in home.php for
+  // usage.
   select:function(select){
     // Might have to change this to using something like data-toggle,
     // but for now this will do.
-    from=$(select.nextSibling);
+    var from=$(select.nextSibling);
     from.find('div').addClass('hide');
     from.find('#'+select.value).removeClass('hide');
   },
@@ -176,9 +197,12 @@ IMS={
 
 IMS._table.prototype={
 
+  // returns the column name that contains the primary_id of the
+  // table.
   primary_col:function(){
     return this._const.primary_key;
   },
+  // Returns the items contained in the primary_col of the row.
   primary_id:function(){
     return this.data[this.primary_col()];
   },
@@ -188,7 +212,7 @@ IMS._table.prototype={
     return this.primary_col()+'='+this.primary_id();
   },
 
-  // return a list of definition term names, that then can be fed to
+  // Return a list of definition term names, that then can be fed to
   // the dt function.
   dts:function(){
     return Object.keys(this.data);
@@ -202,11 +226,11 @@ IMS._table.prototype={
    * Output items useable with the IMS.select function.
    */
   select:function(show){
-    divs='';
-    options='';
+    var divs='';
+    var options='';
     this.dts().forEach(function(dt){
-      clazz='hide';
-      selected='';
+      var clazz='hide';
+      var selected='';
       if(show==dt){
         clazz='';
         selected=' selected';
@@ -232,7 +256,7 @@ IMS._table.prototype={
    * cz: specify special class, so for only primary-key
    */
   format:function(fmt){
-    out='';
+    var out='';
     this.dts().forEach(function(dt){
       out+=fmt
            .replace(/\{dt\}/g,dt)
@@ -290,11 +314,11 @@ IMS._table.prototype={
     if(!store){
       store=localStorage;
     }
-    Table=IMS[col[0].toUpperCase() + col.substr(1)];
-    pk=IMS.constant(Table,'primary_key');
-    pkv=this.data[pk];
+    var Table=IMS[col[0].toUpperCase() + col.substr(1)];
+    var pk=IMS.constant(Table,'primary_key');
+    var pkv=this.data[pk];
 
-    ls=store.getItem(col);
+    var ls=store.getItem(col);
     ls              =
       (null==ls)    ?
       {}            :
@@ -306,7 +330,7 @@ IMS._table.prototype={
     return new Table(ls[pkv]);
   },
   _cache:function(Table,pk,pkv){
-    data={table:IMS.constant(Table,'table')};
+    var data={table:IMS.constant(Table,'table')};
     data[IMS.constant(Table,'primary_key')]=pkv;
     $.ajax({
       async:false,
@@ -329,8 +353,6 @@ IMS._table.prototype={
 };
 
 
-
-
 // This part is specific to home.php, if we ever need ims.js elsewhere
 // it will need to be abstracted or moved there.
 $(document).ready(function(){
@@ -345,23 +367,23 @@ $(document).ready(function(){
       IMS.set_publication(obj); // maybe this should be in a button
       return obj.format_item();
     },
-    ajax:{
-      url:'query.php',
-      dataType:'json',
-      results:function(data){
-        IMS.report_messages(data.messages);
-        out=[];
-        for(var row in data.results){
-          out.push(new IMS.Publication(data.results[row]));
-        }
-        return {results:out};
-      },
-      data:function(term,page){
+    ajax:IMS.ajax_query(
+      function(term,page){
         return{
           table:'publications',
           q:term
         }
+      },{
+        results:function(data){
+          IMS.report_messages(data.messages);
+          var out=[];
+          for(var row in data.results){
+            out.push(new IMS.Publication(data.results[row]));
+          }
+          return {results:out};
+        }
       }
-    }
-  });
-});
+    ) // ajax_query
+  }); // select2
+}); // ready
+

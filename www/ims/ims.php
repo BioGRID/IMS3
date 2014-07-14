@@ -166,6 +166,11 @@ class _Table
     }
   }
 
+  public function table(){
+    $c=get_called_class();
+    return $c::TABLE;
+  }
+
   public function query(){
     $c=get_called_class();
     $dbh=$this->pdo();
@@ -366,7 +371,6 @@ function pdo2json($r){
     }
     print json_encode($v);
   }
-
 
   print '],"messages":' . messages2json() . '}';
 }
