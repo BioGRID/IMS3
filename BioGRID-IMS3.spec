@@ -27,7 +27,8 @@ Requires: php-mysql
 %{__install} -m 755 www/Participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant.js
 %{__install} -m 755 www/Participant_role.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant_role.js
 %{__install} -m 755 www/Publication.js $RPM_BUILD_ROOT%{ims_wwwdir}/Publication.js
-%{__install} -m 755 www/Quick_identifiers.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_identifiers.js
+%{__install} -m 755 www/Quick_identifier.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_identifier.js
+%{__install} -m 755 www/Quick_identifier_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_identifier_type.js
 %{__install} -m 755 www/ims.css $RPM_BUILD_ROOT%{ims_wwwdir}/ims.css
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{ims_phpdir}
 %{__install} -m 755 www/ims/ims.php $RPM_BUILD_ROOT%{ims_phpdir}/ims.php
@@ -48,13 +49,14 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/query.php
 %{ims_wwwdir}/ims.js
 %{ims_wwwdir}/Interaction.js
-%{ims_wwwdir}/Interaction_participant.js	
+%{ims_wwwdir}/Interaction_participant.js
 %{ims_wwwdir}/Interaction_source.js
 %{ims_wwwdir}/Interaction_type.js
 %{ims_wwwdir}/Participant.js
 %{ims_wwwdir}/Participant_role.js
 %{ims_wwwdir}/Publication.js
-%{ims_wwwdir}/Quick_identifiers.js
+%{ims_wwwdir}/Quick_identifier.js
+%{ims_wwwdir}/Quick_identifier_type.js
 %{ims_wwwdir}/ims.css
 %{ims_phpdir}
 %{ims_phpdir}/ims.php
@@ -66,6 +68,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Jul 16 2014 Sven Heinicke <sven@genomcis.princeton.edu> - 0.5-3
+- Added ID Conversion tab, that mostly works.
+- Removed query limits for all by select2.
+
 * Wed Jul 09 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.4-2
 - Now trusts the OFFICAL SYMBOL in the quick_identifiers table.
 
