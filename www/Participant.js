@@ -24,7 +24,7 @@ IMS.Participant.prototype.html=function(){
       }
     }).done(function(data){
       IMS.report_messages(data.messages);
-      qi=new IMS.Quick_identifiers(data.results[0]);
+      qi=new IMS.Quick_identifier(data.results[0]);
       $('.'+clazz).html(qi.html());
       //console.log(that.data.participant_value);
     });

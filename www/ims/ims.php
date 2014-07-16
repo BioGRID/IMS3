@@ -37,6 +37,10 @@ function divert_errors(){
   #trigger_error("Messaging On",E_USER_NOTICE);
 }
 
+function int($val){
+  return (int)$val;
+}
+
 
 class config
 {
@@ -102,13 +106,26 @@ class _Table
   }
   public function limit(){
     return isset($this->cfg->config->limit) ?
-      $this->cfg->config->limit             :
+      (int)$this->cfg->config->limit        :
       self::LIMIT                           ;
   }
 
   public function pdo(){
     $c=get_called_class();
     return $this->cfg->pdo($c::DB);
+  }
+
+
+  public function _ineq($tainted,$qm){
+    $vs=explode('|',$tainted);
+    if(1==count($vs)){
+      return '='.$qm($tainted);
+    }
+    $in=[];
+    foreach($vs as $v){
+      $in[]=$qm($v);
+    }
+    return ' IN('.implode(',',$in).')';
   }
 
   # Currently only being used by Publication whet making queries to
@@ -139,6 +156,7 @@ class _Table
     foreach($this->qs as $k=>$v){
       switch($k){
       case '_':
+      case 'limit':
 	break;
       case 'q':
 	$where[]=$c::SEARCH_COLUMN.' LIKE '.$dbh->quote($v.'%');
@@ -149,10 +167,15 @@ class _Table
       case $c::PRIMARY_KEY:
       case 'publication_id':
       case 'interaction_id':
-	$where[]=$k.'='.(int)$v;
+	$where[]=$k.$this->_ineq($v,function($x){
+	    return (int)$x;
+	  });
       break;
       default:
-	$where[]=$k."=".$dbh->quote($v);
+	$where[]=$k.$this->_ineq($v,function($x){
+	    $dbh=$this->pdo();
+	    return $dbh->quote($x);
+	      });
       }
     }
     return $where;
@@ -171,9 +194,22 @@ class _Table
     return $c::TABLE;
   }
 
-  public function query(){
+  public function limit_sql(){
+    if(isset($this->qs['limit'])){
+      $limit=$this->qs['limit'];
+      if('no'==$limit){
+	return '';
+      }
+      $limit=isset($this->qs['limit']) ?
+	(int)$this->qs['limit']        :
+	$this->limit()                 ;
+      return "LIMIT $limit";
+    }
+    return ' LIMIT '.$this->limit();
+  }
+
+  public function sql(){
     $c=get_called_class();
-    $dbh=$this->pdo();
     $sql='SELECT * FROM ' . $c::TABLE;
     $where=$this->_where();
     $this->status_match();
@@ -183,11 +219,13 @@ class _Table
       $sql.=' WHERE '.implode(' AND ',$where);
     }
     
-    $limit=isset($this->qs['limit']) ?
-      (int)$this->qs['limit']        :
-      $this->limit()                 ;
-    $sql.=' LIMIT '.$limit;
+    $sql.=$this->limit_sql();
+    return $sql;
+  }
 
+  public function query(){
+    $dbh=$this->pdo();
+    $sql=$this->sql();
     $this->statement=$dbh->prepare($sql);
     $out=$this->statement->execute();
     if(!$out){
@@ -207,15 +245,31 @@ class _Table
   }
 } // _Table
 
-class Quick_identifiers extends _Table
-{
+class _Quick extends _Table{
   const DB='quick';
   public function status_match(){
     // this table has no status column
   }
 
+}
+
+class Quick_identifiers extends _Quick
+{
   const TABLE='quick_identifiers';
   const PRIMARY_KEY='gene_id'; // not unique
+}
+
+class Quick_identifier_types extends _Quick
+{
+  const TABLE='quick_identifiers';
+  # The _where() function assumes the PRIMARY_KEY's value is an
+  # integer, but as we overide the the sql() function we skip that
+  # part.
+  const PRIMARY_KEY='quick_identifier_type';
+  public function sql(){
+    $c=get_called_class();
+    return sprintf("SELECT DISTINCT %s FROM %s",$c::PRIMARY_KEY,$c::TABLE);
+  }
 }
 
 class Interactions extends _Table
@@ -346,6 +400,8 @@ function table_factory($cfg,$qs)
     return new Publications($cfg,$qs);
   case 'quick_identifiers':
     return new Quick_identifiers($cfg,$qs);
+  case 'quick_identifier_types':
+    return new Quick_identifier_types($cfg,$qs);
   }
   trigger_error("Can't access requested data",E_USER_ERROR);
   return NULL;

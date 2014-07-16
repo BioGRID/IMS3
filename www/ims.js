@@ -1,13 +1,71 @@
 // Items that start with a capitol letter are reserved for table
 // objects related to the database.
 IMS={
+
+  /*
+   * First, a bunch af utilities.
+   */
+
+  // Returns the current publication_id.
   // What page publication we are currently looking at
   pub_id:null,
+  publication_id:function(){
+    if(!this.pub_id){
+      this.pub_id=Number($('$publication_id div').text());
+    }
+    return this.pub_id;
+  },
 
   // Looks up constant data from _table objects, not Table instances.
   constant:function(Table,get){
     return Table.prototype._const[get];
   },
+
+  // Report errors, usually from the query.php script, on the log page.
+  report_messages:function(messages){
+    // Add the number of new messages to the current message count.
+    mc=$('.log-count');
+    count=Number(mc.text());
+    count+=messages.length;
+    mc.text(count);
+
+    // prepend new messages to list
+    list=$('#log');
+    for(var row in messages){
+      var msg=messages[row];
+      var t=IMS.php_error(msg['type']);
+      var html='<p><strong class="text-'+t.class+'">'+t.msg+'</strong>: '
+              +msg['message']+' in <code>' + msg['file'] + '</code> '
+              +'on line ' + msg['line'] + '</p>';
+      list.prepend(html);
+    }
+    list.prepend("<h2>"+(new Date().toString())+"</h2>");
+  },
+
+  // Returns PHP error codes as text, along with bootstrap class.
+  php_error:function(errno){
+    switch(errno){
+      case     1:return {msg:'E_ERROR'            ,class:'danger'};
+      case     2:return {msg:'E_WARNING'          ,class:'warning'};
+      case     4:return {msg:'E_PARSE'            ,class:'danger'};
+      case     8:return {msg:'E_NOTICE'           ,class:'info'};
+      case    16:return {msg:'E_CORE_ERROR'       ,class:'danger'};
+      case    32:return {msg:'E_CORE_WARNING'     ,class:'warning'};
+      case    64:return {msg:'E_COMPILE_ERROR'    ,class:'danger'};
+      case   128:return {msg:'E_COMPILE_WARNING'  ,class:'warning'};
+      case   256:return {msg:'E_USER_ERROR'       ,class:'danger'};
+      case   512:return {msg:'E_USER_WARNING'     ,class:'warning'};
+      case  1024:return {msg:'E_USER_NOTICE'      ,class:'info'};
+      case  2048:return {msg:'E_STRICT'           ,class:'danger'};
+      case  4096:return {msg:'E_RECOVERABLE_ERROR',class:'danger'};
+      case  8192:return {msg:'E_DEPRECATED'       ,class:'info'};
+      case 16384:return {msg:'E_USER_DEPRECATED'  ,class:'info'};
+      case 30719:return {msg:'E_ALL'              ,class:'danger'};
+    }
+    return {msg:'E_UNKNOWN('+errno+')',class:'danger'};
+  },
+
+
 
   /*
    * Abstracted access to the query.php CGI script.
@@ -22,7 +80,8 @@ IMS={
       url:'query.php',
       dataType:'json',
       data:request,
-      table:request.table
+      table:request.table,
+      cache:true,
     };
     if(also){
       for(var key in also){
@@ -41,6 +100,10 @@ IMS={
   },
 
 
+  /*
+   * Weird stuff for display localStorage, hopefully sessionStorage in
+   * the future too.
+   */
 
   localStorage_dl:function(){
     $('#localStorage .modal-body').html(IMS._localStorage_dl())
@@ -53,6 +116,11 @@ IMS={
     });
     return out+'</dl>';
   },
+
+
+  /*
+   * Updating tables, et al.
+   */
 
   // Accepts a Publication object, and make it what we are looking at.
   set_publication:function(pub){
@@ -110,64 +178,11 @@ IMS={
     IMS.update_table(results,IMS.Interaction_participant);
   },
 
-  report_messages:function(messages){
-    // Add the number of new messages to the current message count.
-    mc=$('.log-count');
-    count=Number(mc.text());
-    count+=messages.length;
-    mc.text(count);
-
-    // prepend new messages to list
-    list=$('#log');
-    for(var row in messages){
-      var msg=messages[row];
-      var t=IMS.php_error(msg['type']);
-      var html='<p><strong class="text-'+t.class+'">'+t.msg+'</strong>: '
-              +msg['message']+' in <code>' + msg['file'] + '</code> '
-              +'on line ' + msg['line'] + '</p>';
-      list.prepend(html);
-    }
-    list.prepend("<h2>"+(new Date().toString())+"</h2>");
-  },
-
-  /*
-   * Returns the current publication_id.
-   */
-  publication_id:function(){
-    if(!this.pub_id){
-      this.pub_id=Number($('$publication_id div').text());
-    }
-    return this.pub_id;
-  },
-
 
 
   /*
-   * Returns PHP error codes as text, along with bootstrap class.
+   * Functions I think should be in other libraries.
    */
-  php_error:function(errno){
-    switch(errno){
-      case     1:return {msg:'E_ERROR',class:'danger'};
-      case     2:return {msg:'E_WARNING',class:'warning'};
-      case     4:return {msg:'E_PARSE',class:'danger'};
-      case     8:return {msg:'E_NOTICE',class:'info'};
-      case    16:return {msg:'E_CORE_ERROR',class:'danger'};
-      case    32:return {msg:'E_CORE_WARNING',class:'warning'};
-      case    64:return {msg:'E_COMPILE_ERROR',class:'danger'};
-      case   128:return {msg:'E_COMPILE_WARNING',class:'warning'};
-      case   256:return {msg:'E_USER_ERROR',class:'danger'};
-      case   512:return {msg:'E_USER_WARNING',class:'warning'};
-      case  1024:return {msg:'E_USER_NOTICE',class:'info'};
-      case  2048:return {msg:'E_STRICT',class:'danger'};
-      case  4096:return {msg:'E_RECOVERABLE_ERROR',class:'danger'};
-      case  8192:return {msg:'E_DEPRECATED',class:'info'};
-      case 16384:return {msg:'E_USER_DEPRECATED',class:'info'};
-      case 30719:return {msg:'E_ALL',class:'danger'};
-    }
-    return {msg:'E_UNKNOWN('+errno+')',class:'danger'};
-  },
-
-
 
   // Sure Twitter Bootstrap has dropdown menus, but they don't change
   // what they are displaying!  See #publication in home.php for
@@ -181,7 +196,9 @@ IMS={
   },
 
 
-  // prototype for this defined below
+  /*
+   * To hold prototype for row data.
+   */
   _table:function(data){
     this.data=data;
 
@@ -363,9 +380,9 @@ $(document).ready(function(){
     formatResult:function(obj){
       return obj.format_item();
     },
-    formatSelection:function(obj){
-      IMS.set_publication(obj); // maybe this should be in a button
-      return obj.format_item();
+    formatSelection:function(pub){
+      IMS.set_publication(pub); // maybe this should be in a button
+      return pub.format_item();
     },
     ajax:IMS.ajax_query(
       function(term,page){
@@ -385,5 +402,59 @@ $(document).ready(function(){
       }
     ) // ajax_query
   }); // select2
+
+
+  /*
+   * Here we populate the pull down box on the ID Conersion page.
+   */
+  var sel=$('#id-from>select,#id-to>select');
+  IMS.query(
+    {table:'quick_identifier_types'},
+    function(results){
+      for(var row in results){
+        var result=new IMS.Quick_identifier_type(results[row]);
+        sel.append(result.option('ENTREZ_GENE'));
+      }
+    });
+
+  /*
+   * Here is what happends when you actually click to convert IDs of a
+   * document.
+   */
+
+  var bg2id=function(results){
+    $('#id-to>dl').html('<dt>IDs Returned</dt><dd>'+results.length+'</dd>');
+    var to=$('#id-to>textarea');
+    for(var row in results){
+      var result=new IMS.Quick_identifier(results[row]);
+      to.append(result+"\n");
+    }
+  }
+  var from2bg=function(results){
+    $('#id-to>textarea').html('');
+    var bgid=[];
+    for(var row in results){
+      result=results[row];
+      bgid.push(result.gene_id);
+    }
+    IMS.query(
+      {table:'quick_identifiers',
+       limit:'no',
+       quick_identifier_type:$('#id-to>select').val(),
+       gene_id:bgid.join('|')},bg2id);
+  };
+
+  $('#conv')
+  .click(function(){
+    var from=$('#id-from>textarea').val().trim().split(/\W/);
+    $('#id-from>dl').html('<dt>IDs Detected</dt><dd>'+from.length+'</dd>');
+    from=from.join('|');
+    IMS.query(
+      {table:'quick_identifiers',
+       limit:'no',
+       quick_identifier_type:$('#id-from>select').val(),
+       quick_identifier_value:from},from2bg);
+  });
+
 }); // ready
 

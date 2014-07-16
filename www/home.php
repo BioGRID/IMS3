@@ -17,7 +17,8 @@ $ims=new IMS\config('ims.json');
 <script src="Participant.js"></script>
 <script src="Participant_role.js"></script>
 <script src="Publication.js"></script>
-<script src="Quick_identifiers.js"></script>
+<script src="Quick_identifier.js"></script>
+<script src="Quick_identifier_type.js"></script>
 </head><body>
 
 <h1 id="title"><?php print $ims->title(); ?> <small>Ver:<?php print $ims->version(); ?></small></h1>
@@ -26,7 +27,7 @@ $ims=new IMS\config('ims.json');
 <ul class="nav nav-tabs">
   <li><a href="#log_tab" data-toggle="tab">Log (<span class="log-count">0</span>)</a></li>
   <li class="active"><a href="#interaction_tab" data-toggle="tab">Interactions</a></li>
-  <!-- li><a href="#conversion" data-toggle="tab">ID Conversion</a></li -->
+  <li><a href="#conversion" data-toggle="tab">ID Conversion</a></li>
 </ul>
 </div>
 
@@ -60,7 +61,7 @@ $ims=new IMS\config('ims.json');
 	  </div>
 	</div><!-- .modal-content -->
       </div><!-- .modal-dialog -->
-    </div><!-- .modal -->
+    </div><!-- .modal #localStorage -->
 
   </div><!-- #log_tab -->
 
@@ -74,14 +75,28 @@ $ims=new IMS\config('ims.json');
     <table id="participants" class="table"><thead/><tbody/></table>
   </div>
 
-  <!-- div class="tab-pane" id="conversion">
-    Yo!
-  </div -->
+  <div class="tab-pane" id="conversion">
+    <h1>ID Conversion</h1>
+    <p>This is still very hackey, but hopefully it will improve as
+    time goes by.  Plus, the BioGRID Quick database doesn't have every
+    ID anyway.  The order of the output isn't the same as the order if
+    the input. -Sven</p>
 
+    <div clas="row">
+      <div class="col-md-5" id="id-from">
+	<select></select>
+	<textarea></textarea>
+	<dl class="dl-horizontal"></dl>
+      </div><div class="col-md-2">
+	<button id="conv" class="h1">&#10144;</button>
+      </div><div class="col-md-5" id="id-to">
+	<select></select>
+	<textarea readonly></textarea>
+	<dl class="dl-horizontal"></dl>
+      </div>
+    </div>
+
+  </div>
 </div>
-
-
-
-
 
 </body></html>
