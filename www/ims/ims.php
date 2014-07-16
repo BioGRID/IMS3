@@ -97,17 +97,11 @@ class config
 
 class _Table
 {
-  const LIMIT=5;
   const DB='ims';
 
   public function __construct($cfg,$qs){
     $this->cfg=$cfg;
     $this->qs=$qs;
-  }
-  public function limit(){
-    return isset($this->cfg->config->limit) ?
-      (int)$this->cfg->config->limit        :
-      self::LIMIT                           ;
   }
 
   public function pdo(){
@@ -194,20 +188,6 @@ class _Table
     return $c::TABLE;
   }
 
-  public function limit_sql(){
-    if(isset($this->qs['limit'])){
-      $limit=$this->qs['limit'];
-      if('no'==$limit){
-	return '';
-      }
-      $limit=isset($this->qs['limit']) ?
-	(int)$this->qs['limit']        :
-	$this->limit()                 ;
-      return "LIMIT $limit";
-    }
-    return ' LIMIT '.$this->limit();
-  }
-
   public function sql(){
     $c=get_called_class();
     $sql='SELECT * FROM ' . $c::TABLE;
@@ -219,7 +199,11 @@ class _Table
       $sql.=' WHERE '.implode(' AND ',$where);
     }
     
-    $sql.=$this->limit_sql();
+    if(isset($this->qs['limit'])){
+      $limit=(int)$this->qs['limit'];
+      $sql.=" LIMIT $limit ";
+    }
+
     return $sql;
   }
 

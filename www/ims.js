@@ -365,8 +365,6 @@ IMS._table.prototype={
     return out;
   },
 
-
-
 };
 
 
@@ -387,6 +385,7 @@ $(document).ready(function(){
     ajax:IMS.ajax_query(
       function(term,page){
         return{
+          limit:10,
           table:'publications',
           q:term
         }
@@ -439,7 +438,6 @@ $(document).ready(function(){
     }
     IMS.query(
       {table:'quick_identifiers',
-       limit:'no',
        quick_identifier_type:$('#id-to>select').val(),
        gene_id:bgid.join('|')},bg2id);
   };
@@ -451,7 +449,6 @@ $(document).ready(function(){
     from=from.join('|');
     IMS.query(
       {table:'quick_identifiers',
-       limit:'no',
        quick_identifier_type:$('#id-from>select').val(),
        quick_identifier_value:from},from2bg);
   });
