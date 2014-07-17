@@ -199,9 +199,7 @@ IMS={
   /*
    * To hold prototype for row data.
    */
-  _table:function(data){
-    this.data=data;
-
+  _table:function(){
     // Here to make select2 happy
     this.__defineGetter__('id',function(){
       return this.primary_id();
@@ -213,7 +211,10 @@ IMS={
 
 
 IMS._table.prototype={
-
+  // Returns the SQL table.
+  table:function(){
+    return this._const.table;
+  },
   // returns the column name that contains the primary_id of the
   // table.
   primary_col:function(){
@@ -222,6 +223,11 @@ IMS._table.prototype={
   // Returns the items contained in the primary_col of the row.
   primary_id:function(){
     return this.data[this.primary_col()];
+  },
+  // unique value for this suitable for use in an HTML class or id
+  // attribute.
+  unique_html:function(){
+    return this.primary_col() + this.primary_id();
   },
 
   // Returns HTML suitable for inlined usage.

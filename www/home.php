@@ -11,6 +11,7 @@ $ims=new IMS\config('ims.json');
 <link href="ims.css" rel="stylesheet"/>
 <script src="ims.js"></script>
 <script src="Interaction.js"></script>
+<script src="Interaction_history.js"></script>
 <script src="Interaction_participant.js"></script>
 <script src="Interaction_source.js"></script>
 <script src="Interaction_type.js"></script>

@@ -93,11 +93,17 @@ class config
 }
 
 
-
-
 class _Table
 {
-  const DB='ims';
+  const DB='ims'; // this name of the database as specified in the
+                  // ims.json file.
+
+  // consts to be defined by children classes:
+  const TABLE=null;          // The of the SQL table
+  const PRIMARY_KEY=null;    // The primary key of the SQL table
+  const STATUS_COLUMN=null;  // The status column of the SQL table
+  const DEFAULT_STATUS=null; // The default status of the SQL table
+  const ORDER_BY=null;       // If the table needs to be sorted
 
   public function __construct($cfg,$qs){
     $this->cfg=$cfg;
@@ -156,7 +162,11 @@ class _Table
 	$where[]=$c::SEARCH_COLUMN.' LIKE '.$dbh->quote($v.'%');
 	break;
       case 'status':
-	$where[]=$c::STATUS_COLUMN."=".$dbh->quote($v);
+	if($c::STATUS_COLUMN){
+	  $where[]=$c::STATUS_COLUMN."=".$dbh->quote($v);
+	}else{
+	  trigger_error('Table '.$this->table().' has no status column.');
+	}
 	break;
       case $c::PRIMARY_KEY:
       case 'publication_id':
@@ -178,8 +188,10 @@ class _Table
 
   public function status_match(){
     $c=get_called_class();
-    if(!isset($this->qs['status'])){
-      $this->qs['status']=$c::DEFAULT_STATUS;
+    if($c::DEFAULT_STATUS){
+      if(!isset($this->qs['status'])){
+	$this->qs['status']=$c::DEFAULT_STATUS;
+      }
     }
   }
 
@@ -194,11 +206,14 @@ class _Table
     $where=$this->_where();
     $this->status_match();
 
-    if($where){
-      // We know there is a status item in $where so lets add the WHERE
+    if(0<count($where)){
       $sql.=' WHERE '.implode(' AND ',$where);
     }
     
+    if($c::ORDER_BY){
+      $sql.=' ORDER BY '.$c::ORDER_BY;
+    }
+
     if(isset($this->qs['limit'])){
       $limit=(int)$this->qs['limit'];
       $sql.=" LIMIT $limit ";
@@ -231,10 +246,6 @@ class _Table
 
 class _Quick extends _Table{
   const DB='quick';
-  public function status_match(){
-    // this table has no status column
-  }
-
 }
 
 class Quick_identifiers extends _Quick
@@ -262,9 +273,14 @@ class Interactions extends _Table
   const PRIMARY_KEY='interaction_id';
   const STATUS_COLUMN='interaction_status';
   const DEFAULT_STATUS='normal';
-  //const SEARCH_COLUMN;
 }
 
+class Interaction_history extends _Table
+{
+  const TABLE='interaction_history';
+  const PRIMARY_KEY='interaction_history_id';
+  const ORDER_BY='interaction_history_date DESC';
+}
 
 class Interaction_sources extends _Table
 {
@@ -370,6 +386,8 @@ function table_factory($cfg,$qs)
   switch($table){
   case 'interactions':
     return new Interactions($cfg,$qs);
+  case 'interaction_history':
+    return new Interaction_history($cfg,$qs);
   case 'interaction_participants':
     return new Interaction_participants($cfg,$qs);
   case 'participant_roles':
