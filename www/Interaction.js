@@ -44,7 +44,7 @@ IMS.Interaction.prototype.modification_type=function(){
   IMS.query(
     {table:'interaction_history',interaction_id:this.id},
     function(results){
-      history=[];
+      var history=[];
       for(var row in results){
         history.push(new IMS.Interaction_history(results[row]));
       }
