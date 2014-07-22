@@ -99,6 +99,30 @@ IMS={
       });
   },
 
+  cache:function(request,act,primary_key){
+    var store=localStorage;
+    switch(primary_key){
+      case 'participant_id':
+      store=sessionStorage;
+    }
+    var have=store.getItem(primary_key);
+    have=(null==have)?{}:JSON.parse(have);
+    if(have[request[primary_key]]){
+      act([have[request[primary_key]]]);
+    }else{
+      IMS.query(request,function(data){
+        // Hurry up and update the user feedback.
+        act(data);
+
+        // We do this again since the ajax query is asynchronous.
+        have=store.getItem(primary_key);
+        have=(null==have)?{}:JSON.parse(have);
+
+        have[data[0][primary_key]]=data[0];
+        store.setItem(primary_key,JSON.stringify(have));
+      });
+    }
+  },
 
   /*
    * Weird stuff for display localStorage, hopefully sessionStorage in
@@ -135,8 +159,26 @@ IMS={
               IMS.update_interactions);
   },
 
+  update_danger:function(tbl){
+    tbl.find('.bg-danger').each(function(){
+      var tag=$(this);
+      var prop=tag.parent().attr('itemprop');
+      var Table=IMS[prop.charAt(0).toUpperCase()+prop.slice(1)];
+      if(Table){
+        var primary_key=IMS.constant(Table,'primary_key');
+        var request={table:IMS.constant(Table,'table')};
+        request[primary_key]=tag.text();
+        IMS.cache(request,function(raw){
+          tag.replaceWith(new Table(raw[0]).html());
+        },primary_key);
+      }else{
+        tag.html('Wuzza ' + prop + '?');
+      }
+    });
+  },
+
   // Abstracted was to dump results from query.php into an HTML table.
-  update_table:function(results,Table){
+  update_table:function(results,Table,other){
     $(IMS.constant(Table,'count_class')).html('('+results.length+')');
     var tbl=$(IMS.constant(Table,'table_id'));
     var thead=tbl.find('thead').html('');
@@ -155,21 +197,37 @@ IMS={
     .find('.primary-key')
     .wrapInner('<span></span>');
 
+    if(other){
+      other(tbody);
+    }
+
+    var that=this;
+    tbl.dataTable().on('draw.dt',function(){
+      that.update_danger(tbl);
+    });
+    this.update_danger(tbl)
+
     // Return the tbody so we can add events, et al.
     return tbody;
   },
 
+  _interaction_tr:null, // selected interaction in the table
   update_interactions:function(results){
-    IMS.update_table(results,IMS.Interaction)
-    .find('tr')
-    .click(function(){
-      var tag=$(this);
-      tag.parent().find('.active').removeClass('active');
-      tag.addClass('active');
-      var interaction_id=tag.find('.primary-key').text();
-      IMS.query({interaction_id:interaction_id,
-                 table:'interaction_participants'},
-                IMS.update_participants);
+    IMS.Interaction._interactions={};
+    IMS.update_table(results,IMS.Interaction,function(tbody){
+      tbody.find('tr').click(function(){
+        var tag=$(this);
+        //tag.parent().find('.active').removeClass('active');
+        if(IMS._interaction_tr){
+          IMS._interaction_tr.removeClass('active');
+        }
+        IMS._interaction_tr=tag;
+        tag.addClass('active');
+        var interaction_id=tag.find('[itemprop=primary-key]').text();
+        IMS.query({interaction_id:interaction_id,
+                   table:'interaction_participants'},
+                  IMS.update_participants);
+      });
     });
   },
 
@@ -208,8 +266,6 @@ IMS={
 }
 
 
-
-
 IMS._table.prototype={
   // Returns the SQL table.
   table:function(){
@@ -241,7 +297,10 @@ IMS._table.prototype={
     return Object.keys(this.data);
   },
   dd:function(dt){
-    return this.data[dt];
+    if(this.data[dt]){
+      return this.data[dt];
+    }
+    return '<span class="bg-danger">'+this.data[dt+'_id']+'</span>';
   },
 
 
@@ -266,9 +325,21 @@ IMS._table.prototype={
     return '<select onchange="IMS.select(this)">'+options+'</select><div>'+divs+'</div>';
   },
 
+
+  /*
   clazz:function(dt){
     switch(dt){
       case this._const.primary_key:return ' class="primary-key"';
+    }
+    return '';
+  },
+   */
+
+  itemprop:function(dt){
+    if(dt==this._const.primary_key){
+      return ' itemprop="primary-key"';
+    }else if(!this.data[dt]){
+      return ' itemprop="' + dt + '"';
     }
     return '';
   },
@@ -276,7 +347,7 @@ IMS._table.prototype={
   /*
    * dt: the column name
    * dd: the data in the column
-   * cz: specify special class, so for only primary-key
+   * ip: return itemprop HTML attribute
    */
   format:function(fmt){
     var out='';
@@ -284,7 +355,7 @@ IMS._table.prototype={
       out+=fmt
            .replace(/\{dt\}/g,dt)
            .replace(/\{dd\}/g,this.dd(dt))
-           .replace(/\{cz\}/g,this.clazz(dt));
+           .replace(/\{ip\}/g,this.itemprop(dt));
 
 
     },this);
@@ -300,7 +371,7 @@ IMS._table.prototype={
     return '<tr>' + this.format('<th>{dt}</th>') + '</tr>';
   },
   td:function(){
-    return '<tr>' + this.format('<td{cz}>{dd}</td>') + '</tr>';
+    return '<tr>' + this.format('<td{ip}>{dd}</td>') + '</tr>';
   },
 
   panel:function(){
@@ -331,44 +402,6 @@ IMS._table.prototype={
      '<div class="panel-body">{dd}</div>'+
      '</div>' + // panel-collapse
      '</div>');
-  },
-
-  cache:function(col,store){
-    if(!store){
-      store=localStorage;
-    }
-    var Table=IMS[col[0].toUpperCase() + col.substr(1)];
-    var pk=IMS.constant(Table,'primary_key');
-    var pkv=this.data[pk];
-
-    var ls=store.getItem(col);
-    ls              =
-      (null==ls)    ?
-      {}            :
-      JSON.parse(ls);
-    if(undefined==ls[pkv]){
-      ls[pkv]=this._cache(Table,pk,pkv);
-      store.setItem(col,JSON.stringify(ls))
-    }
-    return new Table(ls[pkv]);
-  },
-  _cache:function(Table,pk,pkv){
-    var data={table:IMS.constant(Table,'table')};
-    data[IMS.constant(Table,'primary_key')]=pkv;
-    $.ajax({
-      async:false,
-      type:'GET',
-      url:'query.php',
-      dataType:'json',
-      data:data
-    }).done(function(data){
-      IMS.report_messages(data.messages);
-      // As we specified a primary key we should only ever get one
-      // result.
-      out=data.results[0];
-    });
-
-    return out;
   },
 
 };
@@ -460,4 +493,3 @@ $(document).ready(function(){
   });
 
 }); // ready
-

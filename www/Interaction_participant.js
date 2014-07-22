@@ -21,12 +21,3 @@ IMS.Interaction_participant.prototype.dts=function(){
     'interaction_participant_status',
   ];
 }
-IMS.Interaction_participant.prototype.dd=function(dt){
-  switch(dt){
-    case 'participant_role':
-    return this.cache(dt).html();
-    case 'participant':
-    return this.cache(dt,sessionStorage).html();
-  }
-  return this.data[dt];
-}
