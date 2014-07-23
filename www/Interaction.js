@@ -1,6 +1,6 @@
 IMS.Interaction=function(data){
   this.data=data;
-  IMS.Interaction._interactions[this.id]=this;
+  IMS.Interaction._active[this.id]=this;
 }
 
 IMS.Interaction.prototype=new IMS._table();
@@ -24,4 +24,25 @@ IMS.Interaction.prototype.dts=function(){
     'interaction_source',
     'state',
   ];
-}
+};
+
+IMS.Interaction.prototype.prop=function(prop,tag){
+  if('state'==prop){
+    if(this.history){
+      tag.replaceWith(this.history[0].modification_type());
+    }else{
+      var that=this;
+      IMS.query(
+        {table:'interaction_history',interaction_id:this.id},
+        function(results){
+          var history=[];
+          for(var row in results){
+            history.push(new IMS.Interaction_history(results[row]));
+          }
+          tag.replaceWith(history[0].modification_type());
+          that.history=history;
+        }
+      )
+    }
+  }
+};

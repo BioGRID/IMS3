@@ -4,6 +4,7 @@ IMS.Interaction_participant=function(data){
 
 IMS.Interaction_participant.prototype=new IMS._table();
 IMS.Interaction_participant.prototype._const={
+  table:'interaction_participants',
   primary_key:'interaction_participant_id',
 
   table_id:'#participants',

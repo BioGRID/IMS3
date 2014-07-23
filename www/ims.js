@@ -159,12 +159,26 @@ IMS={
               IMS.update_interactions);
   },
 
+  // try to get an active object from a HTML tag burried in a
+  // itemscope.
+  active:function(tag){
+    var item=tag.parentsUntil('tr[itemscope]').parent();
+    var pk=IMS[item.attr('itemtype')]
+           ._active[item.find('[itemprop=primary-key]').text()];
+    return pk;
+  },
+
   update_danger:function(tbl){
     tbl.find('.bg-danger').each(function(){
       var tag=$(this);
       var prop=tag.parent().attr('itemprop');
+
+      // Not sure how portable this is
       var Table=IMS[prop.charAt(0).toUpperCase()+prop.slice(1)];
+
       if(Table){
+        // Stuff we can figure out without actually accessing the
+        // object in scope.
         var primary_key=IMS.constant(Table,'primary_key');
         var request={table:IMS.constant(Table,'table')};
         request[primary_key]=tag.text();
@@ -172,6 +186,9 @@ IMS={
           tag.replaceWith(new Table(raw[0]).html());
         },primary_key);
       }else{
+        // Here we gotta get the object first.
+        var i=IMS.active(tag);
+        i.prop(prop,tag);
         tag.html('Wuzza ' + prop + '?');
       }
     });
@@ -180,9 +197,21 @@ IMS={
   // Abstracted was to dump results from query.php into an HTML table.
   update_table:function(results,Table,other){
     $(IMS.constant(Table,'count_class')).html('('+results.length+')');
+
     var tbl=$(IMS.constant(Table,'table_id'));
+    var tbody=tbl.find('tbody');
+    // If the table is under control by dataTable, clear and destroy
+    // it! Otherwise, just make sure the body is empty.
+    if(tbl.is('.dataTable')){
+      tbl.DataTable().clear().destroy();
+    }else{
+      tbody.html('');
+    }
+    // clear the header.
     var thead=tbl.find('thead').html('');
-    var tbody=tbl.find('tbody').html('');
+
+
+    // Populate the table with results.
     for(var row in results){
       var i=new Table(results[row]);
       if(0==row){
@@ -197,6 +226,7 @@ IMS={
     .find('.primary-key')
     .wrapInner('<span></span>');
 
+    // We have something else to do!
     if(other){
       other(tbody);
     }
@@ -213,7 +243,7 @@ IMS={
 
   _interaction_tr:null, // selected interaction in the table
   update_interactions:function(results){
-    IMS.Interaction._interactions={};
+    IMS.Interaction._active={};
     IMS.update_table(results,IMS.Interaction,function(tbody){
       tbody.find('tr').click(function(){
         var tag=$(this);
@@ -270,6 +300,10 @@ IMS._table.prototype={
   // Returns the SQL table.
   table:function(){
     return this._const.table;
+  },
+  type:function(){
+    table=this.table();
+    return table.charAt(0).toUpperCase()+table.slice(1);
   },
   // returns the column name that contains the primary_id of the
   // table.
@@ -371,7 +405,8 @@ IMS._table.prototype={
     return '<tr>' + this.format('<th>{dt}</th>') + '</tr>';
   },
   td:function(){
-    return '<tr>' + this.format('<td{ip}>{dd}</td>') + '</tr>';
+    return '<tr itemscope itemtype="' + this.type() + '">'
+         + this.format('<td{ip}>{dd}</td>') + '</tr>';
   },
 
   panel:function(){
