@@ -41,6 +41,9 @@ IMS.Interaction.prototype.prop=function(prop,tag){
           }
           tag.replaceWith(history[0].modification_type());
           that.history=history;
+
+          // do this next line more intelegently
+          $('#interactions').trigger('updateAll');
         }
       )
     }

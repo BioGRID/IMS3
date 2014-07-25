@@ -202,11 +202,16 @@ IMS={
     var tbody=tbl.find('tbody');
     // If the table is under control by dataTable, clear and destroy
     // it! Otherwise, just make sure the body is empty.
+
     if(tbl.is('.dataTable')){
+      // We don't use $.fn.DataTable.isDataTable(tbl)) because I want
+      // this to work with and without DataTable loaded.
       tbl.DataTable().clear().destroy();
-    }else{
-      tbody.html('');
+    }else if(tbl.is('.tablesorter')){
+      tbl.trigger('destroy');
     }
+    tbody.html('');
+
     // clear the header.
     var thead=tbl.find('thead').html('');
 
@@ -232,7 +237,24 @@ IMS={
     }
 
     var that=this;
-    tbl.dataTable().on('draw.dt',function(){
+    //tbl.dataTable();
+
+    tbl.tablesorter({
+      theme: "bootstrap",
+      widthFixed: true,
+      headerTemplate: '{content} {icon}',
+      widgets: ["uitheme","zebra"],
+    });
+
+/*
+    .tablesorterPager({
+      container: $(".ts-pager"),
+      cssGoto: ".pagenum",
+      output: '{startRow} - {endRow} / {filteredRows} ({totalRows})'
+    });
+*/
+
+    tbl.on('draw.dt',function(){
       that.update_danger(tbl);
     });
     this.update_danger(tbl)
@@ -259,6 +281,7 @@ IMS={
                   IMS.update_participants);
       });
     });
+    console.log('yo!');
   },
 
   // Perhaps this should be update interaction_participants?
@@ -445,6 +468,14 @@ IMS._table.prototype={
 // This part is specific to home.php, if we ever need ims.js elsewhere
 // it will need to be abstracted or moved there.
 $(document).ready(function(){
+
+
+  // Will only stay if we end up using tablesorter
+  $.extend($.tablesorter.themes.bootstrap,{
+    table:'',
+    even:'ui-state-default',
+    odd:'ui-state-default',
+  });
 
   // should bury this in IMS.* somehow
   $("#pubmed").select2({
