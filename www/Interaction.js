@@ -26,6 +26,8 @@ IMS.Interaction.prototype.dts=function(){
   ];
 };
 
+
+
 IMS.Interaction.prototype.prop=function(prop,tag){
   if('state'==prop){
     if(this.history){
@@ -39,8 +41,13 @@ IMS.Interaction.prototype.prop=function(prop,tag){
           for(var row in results){
             history.push(new IMS.Interaction_history(results[row]));
           }
-          tag.replaceWith(history[0].modification_type());
-          that.history=history;
+          console.log(history);
+          if(0==history.length){
+            tag.html("No History Found");
+          }else{
+            tag.replaceWith(history[0].modification_type());
+            that.history=history;
+          }
 
           // do this next line more intelegently
           $('#interactions').trigger('updateAll');

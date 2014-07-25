@@ -189,7 +189,7 @@ IMS={
         // Here we gotta get the object first.
         var i=IMS.active(tag);
         i.prop(prop,tag);
-        tag.html('Wuzza ' + prop + '?');
+        tag.html('Fetching ' + prop + '?');
       }
     });
   },
@@ -281,7 +281,6 @@ IMS={
                   IMS.update_participants);
       });
     });
-    console.log('yo!');
   },
 
   // Perhaps this should be update interaction_participants?
