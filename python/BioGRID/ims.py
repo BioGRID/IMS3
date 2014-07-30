@@ -138,7 +138,6 @@ class _Table(object):
     @classmethod
     def id_column(cls):
         return '%s_id' % cls.__name__.lower()
-        #return '%s_id' % self.__class__.__name__.lower()
 
     def id(self):
         try:
@@ -179,6 +178,31 @@ class _Table(object):
             # work correctly
             raise NotImplementedError('No updating parts!')
         return self.id()
+    def load(self):
+        """Set the id if already in database, or stores it."""
+
+        if hasattr(self,'_unique'):
+            # If we know the unique items, only check those
+            cols=self._unique
+        else:
+            cols=self.row.keys()
+
+        where=[]
+        vals=[]
+        for col in cols:
+            where.append('%s=%%s' % col)
+            vals.append(self[col])
+            
+        sql='SELECT %s AS id FROM %s WHERE %s' % (self.id_column(),self.table(),' AND '.join(where));
+        cur=self.ims_cursor()
+        cur.execute(sql,vals)
+        got=cur.fetchone()
+        if got:
+            self.row[self.id_column()]=got['id']
+        else:
+            self.store()
+        return got
+
     def insert_sql(self,include_id_column=True):
         if(include_id_column):
             cols=copy(self._columns)
@@ -196,6 +220,7 @@ WHERE participant_value=%s AND participant_type_id=%s
 ''',(value,p_type))
         return fetch_one(c,'participant_id')
     def pgid(self,v,p):
+        # v usually points to a value in the quick database
         out=self.get_participant_id(v,p)
         if None==out:
             p=Participant(
@@ -323,6 +348,7 @@ class PTM_note(_Table):
               'ptm_note_status','ptm_id']
 
 class Participant(_Table):
+    _unique=['participant_value','participant_type_id']
     _columns=['participant_id','participant_value','participant_type_id',
               'participant_addeddate','participant_status']
 

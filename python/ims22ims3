@@ -38,6 +38,7 @@ ORDER=[
     # Participant tables
     'Participant','Interaction_participant','Complex',
     'Unknown_participant',
+    'Complex_forced_addition',
 
     # IPLEX tables
     #'Iplex_project',
@@ -86,7 +87,7 @@ for job in jobs:
                     else:
                         raise
 
-        else:
+        else: # not clean
             sqls=file.read()
             file.close()
         # WARNING! Don't use ; is you comments in the SQL files!
@@ -107,3 +108,4 @@ for job in jobs:
         Table=eval('BioGRID.ims2.%s' % job)
         Table.slurp()
         ims3.commit()
+        

@@ -6,12 +6,12 @@ from time import strftime
 import MySQLdb.cursors
 import _mysql_exceptions
 
-// This means you should look it up in the quick_participants table.
+# This means you should look it up in the quick_participants table.
 global PARTICIPANT_TYPE
 PARTICIPANT_TYPE=1
-
 global UNKNOWN_PARTICIPANT_TYPE
-UNKNOWN_PARTICIPANT_TYPE=2
+UNKNOWN_PARTICIPANT_TYPE=0
+
 global DEFAULT_USER_ID
 DEFAULT_USER_ID=1
 
@@ -69,6 +69,13 @@ class _Table(object):
     #     row=c.fetchone()
     #     print interaction_id
     #     return Interaction(row)
+    def pub2pub(self):
+        """Convert IMS2.publication_id to IMS3.publication_id."""
+        sql='''SELECT publication_id FROM publications WHERE
+publication_pubmed_id=%s'''
+        c=self.ims_cursor()
+        c.execute(sql,(self.pubmed_id(),))
+        return BioGRID.ims.fetch_one(c,'publication_id')
     def pubmed_id(self):
         """Returns the PubMed ID as reported from the IMS2 database, a string.
         Otherwise returns None if current object has no
@@ -143,8 +150,8 @@ class Interaction(BioGRID.ims.Interaction,_Table):
         if None==Interaction.IGNORE_ID:
             c=self.ims2_cursor()
             c.execute('SELECT tag_category_id AS id FROM tag_categories WHERE tag_category_name=%s',
-                      ('Ignore Interactions',));
-            Interaction.IGNORE_ID=BioGRID.ims.fetch_one(c,'id');
+                      ('Ignore Interactions',))
+            Interaction.IGNORE_ID=BioGRID.ims.fetch_one(c,'id')
             self.warn('Fetched IGNORE_ID==%d' % Interaction.IGNORE_ID)
 
     def __getitem__(self,name):
@@ -210,11 +217,15 @@ class Participant_role(BioGRID.ims._Table):
     pass
 
 class Unknown_participant(BioGRID.ims.Unknown_participant,_Table):
+    """This does the interaction_forced_additions, for
+    complex_forced_additions see Complex_forced_addition below."""
+
     @classmethod
     def slurp_sql(cls):
         return 'SELECT * FROM interaction_forced_additions'
     @classmethod
-    def get_participant(cls,force,ab):
+    def get_participant(cls,force,ab,pub_id):
+
         if 'Found'==force['interactor_%s_forced_status' % ab]:
             c=cls.ims_cursor()
             sql='''SELECT * FROM participants WHERE
@@ -235,34 +246,47 @@ participant_value=%s AND participant_type_id=%s'''
         up=Unknown_participant(
             {'unknown_participant_identifier':force['interactor_%s_name' % ab],
              'participant_type_id':PARTICIPANT_TYPE,
-             'organis_id':force['interactor_%s_organism_id' % ab],
-             'publication_id':force['publication_id'],
+             'organism_id':force['interactor_%s_organism_id' % ab],
+             'publication_id':pub_id,
              'unknown_participant_status':'active'}
             )
-        up.store()
-        
+        up.load()
+
         p=Participant(
             {'participant_value':up.id(),
              'participant_type_id':UNKNOWN_PARTICIPANT_TYPE,
              'participant_status':'active'}
             )
-        p.store()
+        p.load()
 
         return p
     @classmethod
     def puke(cls,c):
         for force in c.fetchall():
-            #print force
-
             i=Interaction(
                 {'publication_id':force['publication_id'],
                  'interaction_type':Interaction_type.factory('Protein-Protein').id(),
                  'interaction_status':'normal',
                  'interaction_source_id':Interaction_source.factory('BioGRID').id()}
                 )
+            i.row['publication_id']=i.pub2pub()
             i.store()
 
-            foo=cls.get_participant(force,'A')
+            c=i.ims2_cursor()
+            c.execute('''SELECT * FROM interaction_forced_attributes
+WHERE interaction_forced_id=%s''',(force['interaction_forced_id'],))
+            for attr in c.fetchall():
+                ih=Interaction_history(
+                    {'modification_type':'ACTIVATED',
+                     'interaction_id':i.id(),
+                     'user_id':force['user_id'],
+                     'interaction_history_comment':attr['interaction_forced_attribute_value'],
+                     'interaction_history_date':attr['interaction_forced_attribute_timestamp']}
+                    )
+                ih.store()
+
+            pub_id=i.pub2pub()
+            foo=cls.get_participant(force,'A',pub_id)
             a_id=foo.id()
             a=Interaction_participant(
                 {'interaction_id':i.id(),
@@ -272,7 +296,7 @@ participant_value=%s AND participant_type_id=%s'''
                 )
             a.store()
 
-            bar=cls.get_participant(force,'B')
+            bar=cls.get_participant(force,'B',pub_id)
             b_id=bar.id()
             b=Interaction_participant(
                 {'interaction_id':i.id(),
@@ -629,7 +653,7 @@ class Complex(BioGRID.ims._Table,_Table):
         while raw:
             cpx=Complex(raw)
             i=Interaction(
-                {'publication_id':cpx['publication_id'],
+                {'publication_id':cpx.pub2pub(),
                  'interaction_type_id':complex_id,
                  'interaction_source_id':source_id}
                 )
@@ -648,14 +672,15 @@ class Complex(BioGRID.ims._Table,_Table):
                 ip.store()
 
                 for log in cpx.logs():
-                    log['interaction_id']=i.id()
+                    #print i.id()
+                    log['interaction_id']=interaction_id
                     log['interaction_history_comment']=log['complex_history_comment']
                     log['interaction_history_date']=log['complex_history_date']
                     ih=Interaction_history(log)
                     ih.store()
 
                 for note in cpx.notes():
-                    note['interaction_id']=i.id()
+                    note['interaction_id']=interaction_id
                     note['interaction_note_text']=note['complex_qualification']
                     note['interaction_note_status']=note['complex_qualification_status']
                     foo=BioGRID.ims.Interaction_note(note)
@@ -664,5 +689,88 @@ class Complex(BioGRID.ims._Table,_Table):
             raw=c.fetchone()
 
 
+class Complex_forced_addition(BioGRID.ims._Table,_Table):
+    """Slurps the IMS2 table inte the Interactions and Participants
+    table."""
+    @classmethod
+    def puke(cls,c):
+        complex_id=Interaction_type.factory('Complex').id()
+        source_id=Interaction_source.factory('BioGRID').id()
 
+        # loop thourght each forced complex
+        raw=c.fetchone()
+        while raw:
 
+            
+            cpx=Complex_forced_addition(raw)
+            if 0==cpx['complex_organism_id']:
+                # skip complex items with no organism specified
+                cpx.warn('skipping where complex_organism_id=0')
+            else:
+                # Create the Interaction
+                i=Interaction(
+                    {'publication_id':cpx.pub2pub(),
+                     'interaction_type_id':complex_id,
+                     'interaction_source_id':source_id}
+                    )
+                i.store()
+                interaction_id=i.id()
+
+                # Loop proteins in the quick database
+                for gene_id in cpx['complex_participants_success'].split('|'):
+                    ip=Interaction_participant(
+                        {'interaction_id':interaction_id,
+                         'participant_id':i.get_participant_id(gene_id,PARTICIPANT_TYPE),
+                         'participant_role_id':Participant_role.factory('unspecified').id(),
+                         'interaction_participant_addeddate':cpx['complex_forced_timestamp'],
+                         'interaction_participant_status':'active'}
+                        )
+                    ip.store()
+
+                # Add unknown items
+                for part in cpx['complex_participants_errors'].split('|'):
+                    # add it to the fake quick table
+                    up=Unknown_participant(
+                        {'unknown_participant_identifier':part,
+                         'participant_type_id':PARTICIPANT_TYPE,
+                         'organism_id':raw['complex_organism_id'],
+                         'publication_id':i['publication_id'],
+                         'unknown_participant_status':'active'}
+                        )
+                    up.load()
+
+                    # Write the participant...
+                    p=Participant(
+                        {'participant_value':up.id(),
+                         'participant_type_id':UNKNOWN_PARTICIPANT_TYPE,
+                         'participant_addeddate':cpx['complex_forced_timestamp'],
+                         'participant_status':'active'}
+                        )
+                    # ...or fetch it actually.
+                    p.load()
+
+                    # add it to the interaction
+                    ip=Interaction_participant(
+                        {'interaction_id':interaction_id,
+                         'participant_id':p.id(),
+                         'participant_role_id':Participant_role.factory('unspecified').id(),
+                         'interaction_participant_addeddate':cpx['complex_forced_timestamp'],
+                         'interaction_participant_status':'active'}
+                        )
+                    ip.store()
+                    
+                attrs=i.ims2_cursor()
+                attrs.execute('''SELECT * FROM complex_forced_attributes WHERE
+complex_forced_id=%s''',(raw['complex_forced_id'],))
+                for attr in attrs.fetchall():
+                    ih=Interaction_history(
+                        {'modification_type':'ACTIVATED',
+                         'interaction_id':i.id(),
+                         'user_id':raw['user_id'],
+                         'interaction_history_comment':attr['complex_forced_attribute_value'],
+                         'interaction_history_date':attr['complex_forced_attribute_timestamp']}
+                        )
+                    ih.store()
+
+            raw=c.fetchone()
+            
