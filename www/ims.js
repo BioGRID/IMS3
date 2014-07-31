@@ -244,15 +244,8 @@ IMS={
       widthFixed: true,
       headerTemplate: '{content} {icon}',
       widgets: ["uitheme","zebra"],
-    });
-
-/*
-    .tablesorterPager({
-      container: $(".ts-pager"),
-      cssGoto: ".pagenum",
-      output: '{startRow} - {endRow} / {filteredRows} ({totalRows})'
-    });
-*/
+    })
+    .tablesorterPager({container:tbl.prev()});
 
     tbl.on('draw.dt',function(){
       that.update_danger(tbl);
@@ -378,7 +371,8 @@ IMS._table.prototype={
       options+='<option'+selected+'>'+dt+'</option>';
     },this);
 
-    return '<select onchange="IMS.select(this)">'+options+'</select><div>'+divs+'</div>';
+    return '<select onchange="IMS.select(this)">'+options
+         +'</select><div>'+divs+'</div>';
   },
 
 

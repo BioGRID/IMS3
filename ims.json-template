@@ -19,14 +19,15 @@
   },
   "css":[
     "https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css",
-    "https://cdn.datatables.net/1.10.1/css/jquery.dataTables.css",
+    "/tablesorter/addons/pager/jquery.tablesorter.pager.css",
     "/select2/select2.css"
   ],
   "js":[
     "https://code.jquery.com/jquery-1.11.0.min.js",
     "https://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js",
-    "https://cdn.datatables.net/1.10.1/js/jquery.dataTables.js",
-    "https://cdn.datatables.net/plug-ins/be7019ee387/integration/bootstrap/3/dataTables.bootstrap.js",
+    "/tablesorter/js/jquery.tablesorter.min.js",
+    "/tablesorter/js/jquery.tablesorter.widgets.min.js",
+    "/tablesorter/addons/pager/jquery.tablesorter.pager.min.js",
     "/select2/select2.js"
   ],
   "pubmed_update":"2014-06-17"

@@ -41,7 +41,6 @@ IMS.Interaction.prototype.prop=function(prop,tag){
           for(var row in results){
             history.push(new IMS.Interaction_history(results[row]));
           }
-          console.log(history);
           if(0==history.length){
             tag.html("No History Found");
           }else{
