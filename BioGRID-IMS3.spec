@@ -70,6 +70,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Aug 1 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.7.2
+- Trying tablesorter.js instead of DataTables.js
+- Added delay to ajax calls
+
 * Wed Jul 23 2014 Sven Heinicke <sven@genomcis.princeton.edu> - 0.6-1
 - Now displays if interaction is DISABLED or ACTIVATED.
 - Started using DataTables.js.

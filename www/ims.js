@@ -91,12 +91,22 @@ IMS={
     return out;
   },
 
+  query_count:0,
   query:function(request,act){
-    $.ajax(IMS.ajax_query(request,IMS.act)).done(
-      function(data){
-        IMS.report_messages(data.messages);
-        act(data.results);
-      });
+    if(3>IMS.query_count){ // only 3 queries at a time
+      IMS.query_count++;
+      //console.log(IMS.query_count,'up');
+      $.ajax(IMS.ajax_query(request,IMS.act)).done(
+        function(data){
+          IMS.query_count--;
+          //console.log(IMS.query_count,'up');
+          IMS.report_messages(data.messages);
+          act(data.results);
+        });
+    }else{
+      // wait a half second and try again.
+      setTimeout(IMS.query,500,request,act);
+    }
   },
 
   cache:function(request,act,primary_key){
@@ -260,7 +270,8 @@ IMS={
   update_interactions:function(results){
     IMS.Interaction._active={};
     IMS.update_table(results,IMS.Interaction,function(tbody){
-      tbody.find('tr').click(function(){
+      tbody.find('tr')
+      .click(function(){
         var tag=$(this);
         //tag.parent().find('.active').removeClass('active');
         if(IMS._interaction_tr){
