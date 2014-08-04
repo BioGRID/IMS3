@@ -10,23 +10,18 @@ IMS.Participant.prototype.html=function(){
   var clazz='id'+this.data.participant_id+'type'+this.data.participant_type_id;
   var that=this;
   switch(this.data.participant_type_id){
+    // case '0':
+    // fetch unknown interaction here
+    // break;
     case '1':
-    // This is current not being cached, gotta fix that.
-    $.ajax({
-      async:true,
-      type:'GET',
-      url:'query.php',
-      dataType:'json',
-      data:{
-        table:'quick_identifiers',
-        quick_identifier_type:'OFFICIAL SYMBOL',
-        gene_id:this.data.participant_value,
-      }
-    }).done(function(data){
-      IMS.report_messages(data.messages);
-      qi=new IMS.Quick_identifier(data.results[0]);
-      $('.'+clazz).html(qi.html());
-      //console.log(that.data.participant_value);
+    IMS.query
+    ({
+      table:'quick_identifiers',
+      quick_identifier_type:'OFFICIAL SYMBOL',
+      gene_id:this.data.participant_value},
+     function(data){
+       qi=new IMS.Quick_identifier(data[0]);
+       $('.'+clazz).html(qi.html());
     });
   }
   return '<span class="'+clazz+'">'+clazz+'</span>';
