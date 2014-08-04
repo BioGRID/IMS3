@@ -10,6 +10,7 @@ if(stream_resolve_include_path('version.php')){
 }
 
 
+
 global $errors_reported;
 $errors_reported=FALSE;
 global $errors;
@@ -273,6 +274,28 @@ class Interactions extends _Table
   const PRIMARY_KEY='interaction_id';
   const STATUS_COLUMN='interaction_status';
   const DEFAULT_STATUS='normal';
+
+  public function fetch(){
+    $out=current($this->data);
+    next($this->data);
+    return $out;
+  }
+
+  public function query(){
+    $r=parent::query();
+    $this->data=[];
+    while($v=$this->statement->fetch(\PDO::FETCH_ASSOC)){
+      $ih=new Interaction_history
+	($this->cfg,['interaction_id'=>$v['interaction_id'],'limit'=>1]);
+      $ih->query();
+      $mt=$ih->fetch();
+      $v['modification_type']=$mt?$mt['modification_type']:false;
+      $this->data[]=$v;
+    }
+    reset($this->data);
+    return $this->data;
+  }
+
 }
 
 class Interaction_history extends _Table
@@ -419,7 +442,6 @@ function messages2json(){
 function pdo2json($r){
   global $errors;
   $first=TRUE;
-
   print '{"results":[';
   while($v=$r->fetch()){
     if($first){

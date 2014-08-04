@@ -195,12 +195,16 @@ IMS={
         IMS.cache(request,function(raw){
           tag.replaceWith(new Table(raw[0]).html());
         },primary_key);
-      }else{
+      }
+      /*
+      else{
         // Here we gotta get the object first.
         var i=IMS.active(tag);
         i.prop(prop,tag);
         tag.html('Fetching ' + prop + '?');
       }
+       */
+
     });
   },
 
