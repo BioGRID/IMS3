@@ -20,6 +20,8 @@ $ims=new IMS\config('ims.json');
 <script src="Publication.js"></script>
 <script src="Quick_identifier.js"></script>
 <script src="Quick_identifier_type.js"></script>
+<script src="Quick_organism.js"></script>
+<script src="Unknown_participant.js"></script>
 </head><body>
 
 <h1 id="title"><?php print $ims->title(); ?> <small>Ver:<?php print $ims->version(); ?></small></h1>

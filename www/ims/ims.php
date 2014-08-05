@@ -249,6 +249,12 @@ class _Quick extends _Table{
   const DB='quick';
 }
 
+class Quick_organisms extends _Quick
+{
+  const TABLE='quick_organisms';
+  const PRIMARY_KEY='organism_id';
+}
+
 class Quick_identifiers extends _Quick
 {
   const TABLE='quick_identifiers';
@@ -326,6 +332,14 @@ class Interaction_participants extends _Table
   const TABLE='interaction_participants';
   const PRIMARY_KEY='interaction_participant_id';
   const STATUS_COLUMN='interaction_participant_status';
+  const DEFAULT_STATUS='active';
+}
+
+class Unknown_participants extends _Table
+{
+  const TABLE='unknown_participants';
+  const PRIMARY_KEY='unknown_participant_id';
+  const STATUS_COLUMN='unknown_participant_status';
   const DEFAULT_STATUS='active';
 }
 
@@ -427,6 +441,10 @@ function table_factory($cfg,$qs)
     return new Quick_identifiers($cfg,$qs);
   case 'quick_identifier_types':
     return new Quick_identifier_types($cfg,$qs);
+  case 'quick_organisms':
+    return new Quick_organisms($cfg,$qs);
+  case 'unknown_participants':
+    return new Unknown_participants($cfg,$qs);
   }
   trigger_error("Can't access requested data",E_USER_ERROR);
   return NULL;

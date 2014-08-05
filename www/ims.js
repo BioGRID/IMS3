@@ -109,6 +109,10 @@ IMS={
     }
   },
 
+  /*
+   * Send a request that will only get one row.  Checks a store to see
+   * if we already have it.
+   */
   cache:function(request,act,primary_key){
     var store=localStorage;
     switch(primary_key){
@@ -118,7 +122,7 @@ IMS={
     var have=store.getItem(primary_key);
     have=(null==have)?{}:JSON.parse(have);
     if(have[request[primary_key]]){
-      act([have[request[primary_key]]]);
+      return act([have[request[primary_key]]]);
     }else{
       IMS.query(request,function(data){
         // Hurry up and update the user feedback.
@@ -128,10 +132,12 @@ IMS={
         have=store.getItem(primary_key);
         have=(null==have)?{}:JSON.parse(have);
 
+        // for now we only can cache one item at a time.
         have[data[0][primary_key]]=data[0];
         store.setItem(primary_key,JSON.stringify(have));
       });
     }
+    return false;
   },
 
   /*

@@ -9,10 +9,18 @@ IMS.Participant.prototype._const={
 IMS.Participant.prototype.html=function(){
   var clazz='id'+this.data.participant_id+'type'+this.data.participant_type_id;
   var that=this;
+
   switch(this.data.participant_type_id){
-    // case '0':
-    // fetch unknown interaction here
-    // break;
+    case '0':
+    IMS.query
+    ({
+      table:'unknown_participants',
+      unknown_participant_id:this.data.participant_value},
+     function(data){
+       up=new IMS.Unknown_participant(data[0]);
+       $('.'+clazz).html(up.html());
+     });
+    break;
     case '1':
     IMS.query
     ({
