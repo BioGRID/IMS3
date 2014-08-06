@@ -17,3 +17,13 @@
 thead{
     border-bottom:3px solid black;
 }
+caption{
+    caption-side:bottom;
+}
+dl.footnotes dd{
+    margin-left:2em;
+    text-align:left;
+}
+dl.footnotes dt{
+    width:1em;
+}

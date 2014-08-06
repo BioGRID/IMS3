@@ -17,6 +17,7 @@ IMS.Unknown_participant.prototype.html=function(){
       $('.'+clazz).replaceWith(html);
       return html;
     },'organism_id');
+  $('.footnotes .asterisk').removeClass('hide');
   if(!html){
     html='<span class="'+clazz+'">'+org+'</span>';
   }

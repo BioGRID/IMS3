@@ -105,7 +105,12 @@ $ims=new IMS\config('ims.json');
        <option value="40">40</option>
      </select>
    </div> 
-    <table id="participants" class="table"><thead/><tbody/></table>
+
+    <table id="participants" class="table"><caption>
+	<dl class="footnotes dl-horizontal">
+	  <dt class="asterisk hide">*</dt><dd class="asterisk hide">Unknown Participant</dd>
+	</dl>
+      </caption><thead/><tbody/></table>
   </div>
 
   <div class="tab-pane" id="conversion">

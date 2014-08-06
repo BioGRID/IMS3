@@ -165,7 +165,9 @@ IMS={
   // Accepts a Publication object, and make it what we are looking at.
   set_publication:function(pub){
     // clear some thingsfrom the last publication
-    $("#participants").html('<thead/><tbody/>');
+    $("#participants thead").html('');
+    $("#participants tbody").html('');
+    $("#participants .footnotes *").addClass('hide');
     $(".participant-count").html('');
 
     IMS.pub_id=pub.primary_id();
@@ -234,7 +236,7 @@ IMS={
 
     // clear the header.
     var thead=tbl.find('thead').html('');
-
+    tbl.find('.footnotes *').addClass('hide');
 
     // Populate the table with results.
     for(var row in results){

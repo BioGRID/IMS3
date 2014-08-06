@@ -30,6 +30,8 @@ Requires: php-mysql
 %{__install} -m 755 www/Publication.js $RPM_BUILD_ROOT%{ims_wwwdir}/Publication.js
 %{__install} -m 755 www/Quick_identifier.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_identifier.js
 %{__install} -m 755 www/Quick_identifier_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_identifier_type.js
+%{__install} -m 755 www/Quick_organism.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_organism.js
+%{__install} -m 755 www/Unknown_participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Unknown_participant.js
 %{__install} -m 755 www/ims.css $RPM_BUILD_ROOT%{ims_wwwdir}/ims.css
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{ims_phpdir}
 %{__install} -m 755 www/ims/ims.php $RPM_BUILD_ROOT%{ims_phpdir}/ims.php
@@ -59,6 +61,8 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/Publication.js
 %{ims_wwwdir}/Quick_identifier.js
 %{ims_wwwdir}/Quick_identifier_type.js
+%{ims_wwwdir}/Quick_organism.js
+%{ims_wwwdir}/Unknown_participant.js
 %{ims_wwwdir}/ims.css
 %{ims_phpdir}
 %{ims_phpdir}/ims.php
