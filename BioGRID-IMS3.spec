@@ -70,7 +70,10 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Fri Aug 1 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.7.2
+* Wed Aug 6 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.8-1
+- Server side now figures out if an interaction is activated or not
+
+* Fri Aug 1 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.7-2
 - Trying tablesorter.js instead of DataTables.js
 - Added delay to ajax calls
 
