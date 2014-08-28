@@ -24,7 +24,10 @@ $ims=new IMS\config('ims.json');
 <script src="Unknown_participant.js"></script>
 </head><body>
 
+<div class="container">
 <h1 id="title"><?php print $ims->title(); ?> <small>Ver:<?php print $ims->version(); ?></small></h1>
+<p class="h6" id="user"></p>
+</div>
 
 <div class="container">
 <ul class="nav nav-tabs">

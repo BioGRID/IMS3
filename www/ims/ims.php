@@ -71,6 +71,10 @@ class config
     return IMS3_VERSION;
   }
 
+  function expires(){
+    return time()+$this->config->expires;
+  }
+
   function html_head(){
     $out=[];
     foreach($this->config->css as $css){
@@ -91,6 +95,22 @@ class config
     }
     return date($cur) <= date($this->config->pubmed_update);
   }
+
+  function user($user_name){
+    $user=new User($this,['user_name'=>$user_name]);
+    $user->query();
+    return $user;
+  }
+  function verify_user(){
+    // as user_name is unique their can be only one
+    $user=$this->user($_COOKIE['name'])->fetch();
+    if($_COOKIE['auth']==$user['user_cookie']){
+      return $user;
+    }
+    return null;
+  }
+  
+
 }
 
 
@@ -411,6 +431,15 @@ class Publications extends _Table
     return $out;
   }
 }
+
+
+class User extends _Table
+{
+  const TABLE='users';
+  const PRIMARY_KEY='user_id';
+  
+}
+
 
 function table_factory($cfg,$qs)
 /* Will return an object for a given table. Or Null if not a valid

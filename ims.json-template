@@ -30,5 +30,6 @@
     "/tablesorter/addons/pager/jquery.tablesorter.pager.min.js",
     "/select2/select2.js"
   ],
-  "pubmed_update":"2014-06-17"
+  "pubmed_update":"2014-06-17",
+  "expires":86400
 }

@@ -1,7 +1,7 @@
 
 # Version Numbers, generally to be passed to RPMBUILD
-VERSION:=0.9
-RELEASE:=dev
+VERSION:=0.8
+RELEASE:=3
 
 # Organize phony Targets
 CLEANING_T:=ims3clean mostlyclean clean distclean

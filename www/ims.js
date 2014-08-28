@@ -65,7 +65,48 @@ IMS={
     return {msg:'E_UNKNOWN('+errno+')',class:'danger'};
   },
 
+  /*
+   * User authenication functions
+   */
 
+  // Just delete the cookies.
+  logout:function(){
+    date=new Date();
+    date.setTime(0);
+    expires='=; expires='+date.toGMTString();
+    document.cookie='auth'+expires;
+    document.cookie='name'+expires;
+    IMS.login_html();
+  },
+
+  // Try to log in.
+  login:function(but){
+    var user=$(but).siblings('[name=name]').val();
+    var pass=$(but).siblings('[name=password]').val();
+    $.ajax(IMS.ajax_query({name:user,pass:pass},
+                          {type:'POST',url:'user.php'}))
+    .done(IMS.loggedin_html);
+  },
+
+  // What to print if we are not logged in.
+  login_html:function(){
+    $('#user').html('Username: <input type="text" name="name"> '
+                   +'Password: <input type="password" name="password"> '
+                   +'<button onclick="IMS.login(this)">Login</button>');
+  },
+
+  // This should only get run if we are sure we are logged it.
+  loggedin_html:function(){
+    // The JavaScript cookie interface really sucks.
+    var c='; '+document.cookie;
+    var kv=c.split('; name=');
+    var user=kv.pop().split(';').shift();
+
+    $("#user").html
+    ('Logged in as '
+    +user
+    +' <button onclick="IMS.logout()">Logout</button>');
+  },
 
   /*
    * Abstracted access to the query.php CGI script.
@@ -79,10 +120,13 @@ IMS={
       type:'GET',
       url:'query.php',
       dataType:'json',
-      data:request,
-      table:request.table,
+      //data:request,
+      //table:request.table,
       cache:true,
     };
+    if(request){
+      out.data=request;
+    }
     if(also){
       for(var key in also){
         out[key]=also[key];
@@ -91,6 +135,7 @@ IMS={
     return out;
   },
 
+  // Do the ajax call
   query_count:0,
   query:function(request,act){
     if(3>IMS.query_count){ // only 3 queries at a time
@@ -473,7 +518,7 @@ IMS._table.prototype={
      '</a></h2></div>' + // panel-heading
      '<div id="{dt}" class="panel-collapse collapse' +
      '">' +
-     '<div class="panel-body">{dd}</div>'+
+     '<div class="panel-body">{dd}</div>' +
      '</div>' + // panel-collapse
      '</div>');
   },
@@ -492,6 +537,11 @@ $(document).ready(function(){
     even:'ui-state-default',
     odd:'ui-state-default',
   });
+
+  // check if we are already logged in or not.
+  $.ajax(IMS.ajax_query({},{url:'user.php'}))
+  .success(IMS.loggedin_html)
+  .fail(IMS.login_html);
 
   // should bury this in IMS.* somehow
   $("#pubmed").select2({
@@ -573,5 +623,6 @@ $(document).ready(function(){
        quick_identifier_type:$('#id-from>select').val(),
        quick_identifier_value:from},from2bg);
   });
+
 
 }); // ready
