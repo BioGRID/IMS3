@@ -76,6 +76,7 @@ IMS={
     expires='=; expires='+date.toGMTString();
     document.cookie='auth'+expires;
     document.cookie='name'+expires;
+    $('.user').addClass('hidden');
     IMS.login_html();
   },
 
@@ -83,9 +84,11 @@ IMS={
   login:function(but){
     var user=$(but).siblings('[name=name]').val();
     var pass=$(but).siblings('[name=password]').val();
+    console.log(user,pass);
     $.ajax(IMS.ajax_query({name:user,pass:pass},
                           {type:'POST',url:'user.php'}))
-    .done(IMS.loggedin_html);
+    .success(IMS.loggedin_html)
+    ;
   },
 
   // What to print if we are not logged in.
@@ -101,6 +104,7 @@ IMS={
     var c='; '+document.cookie;
     var kv=c.split('; name=');
     var user=kv.pop().split(';').shift();
+    $('.user').removeClass('hidden');
 
     $("#user").html
     ('Logged in as '
@@ -141,7 +145,7 @@ IMS={
     if(3>IMS.query_count){ // only 3 queries at a time
       IMS.query_count++;
       //console.log(IMS.query_count,'up');
-      $.ajax(IMS.ajax_query(request,IMS.act)).done(
+      $.ajax(IMS.ajax_query(request,IMS.act)).success(
         function(data){
           IMS.query_count--;
           //console.log(IMS.query_count,'up');

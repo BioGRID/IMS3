@@ -27,15 +27,18 @@ if('POST'==$_SERVER['REQUEST_METHOD']){
   }else{
     // tried to auth, but it failed
     header(FAIL);
+    exit(1);
   }
 }else{
   $user=$cfg->verify_user();
   if($user){
-    // This will evetually return data about what papers it wants the
-    // user to work on.
-    print json_encode($user);
   }else{
     // either not logged in, or the cookie was wrong.
     header(FAIL);
+    exit(1);
   }
 }
+
+// This will evetually return data about what papers it wants the
+// user to work on.
+print json_encode($user);

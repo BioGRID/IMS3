@@ -75,45 +75,52 @@ $ims=new IMS\config('ims.json');
     <h1>Publication</h1>
     <input type="hidden" id="pubmed" style="width:100%">
     <blockquote class="dropdown" id="publication"></blockquote>
-    <h2>Interactions <span class="interaction-count"></span></h2>
-    <div class="pager">
-      Page: <select class="gotoPage"></select>
-      <button class="first" title="First page">⇤</button>
-      <button class="prev" title="Previous page">←</button>
-      <span class="pagedisplay"></span>
-      <button class="next" title="Next page">→</button>
-      <button class="last" title="Last page">⇥</button>
-      <select class="pagesize">
-	<option value="5">5</option>
-	<option selected="selected" value="10">10</option>
-	<option value="20">20</option>
-	<option value="30">30</option>
-	<option value="40">40</option>
-      </select>
-    </div> 
-   <table id="interactions" class="table table-hover"><thead/><tbody/></table>
-   <h3>Participants <span class="participant-count"></span></h3>
-   <div class="pager">
-     Page: <select class="gotoPage"></select>
-     <button class="first" title="First page">⇤</button>
-     <button class="prev" title="Previous page">←</button>
-     <span class="pagedisplay"></span>
-     <button class="next" title="Next page">→</button>
-     <button class="last" title="Last page">⇥</button>
-     <select class="pagesize">
-       <option value="5">5</option>
-       <option selected="selected" value="10">10</option>
-       <option value="20">20</option>
-       <option value="30">30</option>
-       <option value="40">40</option>
-     </select>
-   </div> 
 
-    <table id="participants" class="table"><caption>
-	<dl class="footnotes dl-horizontal">
-	  <dt class="asterisk hide">*</dt><dd class="asterisk hide">Unknown Participant</dd>
-	</dl>
-      </caption><thead/><tbody/></table>
+    <!-- div class="hidden user">
+      <p>Some somehow have tables for adding interactions here.</p>
+    </div -->
+
+    <div>
+      <h2>Interactions <span class="interaction-count"></span></h2>
+      <div class="pager">
+	Page: <select class="gotoPage"></select>
+	<button class="first" title="First page">⇤</button>
+	<button class="prev" title="Previous page">←</button>
+	<span class="pagedisplay"></span>
+	<button class="next" title="Next page">→</button>
+	<button class="last" title="Last page">⇥</button>
+	<select class="pagesize">
+	  <option value="5">5</option>
+	  <option selected="selected" value="10">10</option>
+	  <option value="20">20</option>
+	  <option value="30">30</option>
+	  <option value="40">40</option>
+	</select>
+      </div> 
+      <table id="interactions" class="table table-hover"><thead/><tbody/></table>
+      <h3>Participants <span class="participant-count"></span></h3>
+      <div class="pager">
+	Page: <select class="gotoPage"></select>
+	<button class="first" title="First page">⇤</button>
+	<button class="prev" title="Previous page">←</button>
+	<span class="pagedisplay"></span>
+	<button class="next" title="Next page">→</button>
+	<button class="last" title="Last page">⇥</button>
+	<select class="pagesize">
+	  <option value="5">5</option>
+	  <option selected="selected" value="10">10</option>
+	  <option value="20">20</option>
+	  <option value="30">30</option>
+	  <option value="40">40</option>
+	</select>
+      </div> 
+
+      <table id="participants" class="table"><caption>
+	  <dl class="footnotes dl-horizontal">
+	    <dt class="asterisk hide">*</dt><dd class="asterisk hide">Unknown Participant</dd>
+	  </dl>
+	</caption><thead/><tbody/></table>
+    </div>
   </div>
 
   <div class="tab-pane" id="conversion">
