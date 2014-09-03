@@ -29,6 +29,7 @@ ORDER=[
 
     # Publication Tables
     'Publication_query','Publication','Project_publication',
+    #'Pubmed_mapping',
 
     # Interaction tables
     'Interaction_source','Interaction_quantitation_type',

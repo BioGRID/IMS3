@@ -472,6 +472,9 @@ class Publication_query(BioGRID.ims.Publication_query,_Table):
         and IMS3."""
         return self.row['pubmed_query_id']
 
+class Pubmed_mapping(BioGRID.ims.Pubmed_mapping,_Table):
+    _rename={'publication_pubmed_id':'pubmed_id'}
+
 class Project_publication(BioGRID.ims.Project_publication,_Table):
     """Make sure the Publicatin table is loaded before this!"""
     _rename={'project_publication_addeddate':'project_pubmed_timestamp',

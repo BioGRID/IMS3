@@ -313,6 +313,10 @@ class Publication_query(_Table):
               'publication_query_addeddate','publication_query_lastrun',
               'publication_query_type','publication_query_status']
 
+class Pubmed_mapping(_Table):
+    _columns=['external_database_id','external_database_url',
+              'external_database_name','publication_pubmed_id']
+
 class Project_publication(_Table):
     _columns=['project_id','publication_id',
               'project_publication_addeddate',
