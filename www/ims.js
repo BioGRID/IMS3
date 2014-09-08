@@ -16,10 +16,12 @@ IMS={
     return this.pub_id;
   },
 
+  /*
   // Looks up constant data from _table objects, not Table instances.
   constant:function(Table,get){
     return Table.prototype._const[get];
   },
+   */
 
   // Report errors, usually from the query.php script, on the log page.
   report_messages:function(messages){
@@ -76,6 +78,8 @@ IMS={
     expires='=; expires='+date.toGMTString();
     document.cookie='auth'+expires;
     document.cookie='name'+expires;
+
+    // only show user class items to logged in people.
     $('.user').addClass('hidden');
     IMS.login_html();
   },
@@ -84,7 +88,6 @@ IMS={
   login:function(but){
     var user=$(but).siblings('[name=name]').val();
     var pass=$(but).siblings('[name=password]').val();
-    console.log(user,pass);
     $.ajax(IMS.ajax_query({name:user,pass:pass},
                           {type:'POST',url:'user.php'}))
     .success(IMS.loggedin_html)
@@ -104,6 +107,8 @@ IMS={
     var c='; '+document.cookie;
     var kv=c.split('; name=');
     var user=kv.pop().split(';').shift();
+
+    // show logged in users some hidden stuff.
     $('.user').removeClass('hidden');
 
     $("#user").html
@@ -230,6 +235,7 @@ IMS={
   // itemscope.
   active:function(tag){
     var item=tag.parentsUntil('tr[itemscope]').parent();
+    console.log( IMS[item.attr('itemtype')] );
     var pk=IMS[item.attr('itemtype')]
            ._active[item.find('[itemprop=primary-key]').text()];
     return pk;
@@ -246,12 +252,12 @@ IMS={
       if(Table){
         // Stuff we can figure out without actually accessing the
         // object in scope.
-        var primary_key=IMS.constant(Table,'primary_key');
-        var request={table:IMS.constant(Table,'table')};
-        request[primary_key]=tag.text();
+        var primary_col=Table.prototype.primary_col();
+        var request={table:Table.prototype.table()};
+        request[primary_col]=tag.text();
         IMS.cache(request,function(raw){
           tag.replaceWith(new Table(raw[0]).html());
-        },primary_key);
+        },primary_col);
       }
       /*
       else{
@@ -265,11 +271,13 @@ IMS={
     });
   },
 
+
   // Abstracted was to dump results from query.php into an HTML table.
   update_table:function(results,Table,other){
-    $(IMS.constant(Table,'count_class')).html('('+results.length+')');
+    //$(IMS.constant(Table,'count_class')).html('('+results.length+')');
 
-    var tbl=$(IMS.constant(Table,'table_id'));
+    tbl=$(Table.prototype.table_id('#'));
+
     var tbody=tbl.find('tbody');
     // If the table is under control by dataTable, clear and destroy
     // it! Otherwise, just make sure the body is empty.
@@ -329,7 +337,6 @@ IMS={
 
   _interaction_tr:null, // selected interaction in the table
   update_interactions:function(results){
-    IMS.Interaction._active={};
     IMS.update_table(results,IMS.Interaction,function(tbody){
       tbody.find('tr')
       .click(function(){
@@ -374,28 +381,51 @@ IMS={
   /*
    * To hold prototype for row data.
    */
-  _table:function(){
+  _table:function(data){
+    if(data){
+      this.data=data;
+    }
+
     // Here to make select2 happy
     this.__defineGetter__('id',function(){
       return this.primary_id();
-    })
+    });
+
   }
 }
 
 
 IMS._table.prototype={
+
+  /*
+   *  Return stuff child's _const
+   */
+
+  // Returns the ID for a HTML table where this should be used.
+  table_id:function(prefix){
+    if(!prefix){
+      prefix='';
+    }
+    return prefix + this._const.table_id;
+  },
+
   // Returns the SQL table.
   table:function(){
     return this._const.table;
   },
+
+  // Return's the SQL table primary key column.
+  primary_col:function(){
+    return this._const.primary_col;
+  },
+
+  /*
+   * instance specific functions.
+   */
+
   type:function(){
     table=this.table();
     return table.charAt(0).toUpperCase()+table.slice(1);
-  },
-  // returns the column name that contains the primary_id of the
-  // table.
-  primary_col:function(){
-    return this._const.primary_key;
   },
   // Returns the items contained in the primary_col of the row.
   primary_id:function(){
@@ -458,7 +488,7 @@ IMS._table.prototype={
    */
 
   itemprop:function(dt){
-    if(dt==this._const.primary_key){
+    if(dt==this.primary_col()){
       return ' itemprop="primary-key"';
     }else if(!this.data[dt]){
       return ' itemprop="' + dt + '"';
@@ -570,6 +600,7 @@ $(document).ready(function(){
           var out=[];
           for(var row in data.results){
             out.push(new IMS.Publication(data.results[row]));
+            $('.ifpub').removeClass('hidden');
           }
           return {results:out};
         }
@@ -628,5 +659,14 @@ $(document).ready(function(){
        quick_identifier_value:from},from2bg);
   });
 
+
+  $('#add_interaction')
+  .click(function(){
+    IMS.query({table:'interaction_types'},function(r){
+      // perhaps we should cache the results for future use?
+
+
+    });
+  });
 
 }); // ready

@@ -4,7 +4,7 @@ IMS.Participant=function(data){
 IMS.Participant.prototype=new IMS._table();
 IMS.Participant.prototype._const={
   table:'participants',
-  primary_key:'participant_id',
+  primary_col:'participant_id',
 }
 IMS.Participant.prototype.html=function(){
   var clazz='id'+this.data.participant_id+'type'+this.data.participant_type_id;

@@ -4,7 +4,7 @@ IMS.Interaction_source=function(data){
 IMS.Interaction_source.prototype=new IMS._table();
 IMS.Interaction_source.prototype._const={
   table:'interaction_sources',
-  primary_key:'interaction_source_id'
+  primary_col:'interaction_source_id'
 }
 IMS.Interaction_source.prototype.html=function(){
   url=this.data.interaction_source_url;

@@ -76,12 +76,13 @@ $ims=new IMS\config('ims.json');
     <input type="hidden" id="pubmed" style="width:100%">
     <blockquote class="dropdown" id="publication"></blockquote>
 
-    <!-- div class="hidden user">
-      <p>Some somehow have tables for adding interactions here.</p>
-    </div -->
-
-    <div>
+    <div class="ifpub hidden">
       <h2>Interactions <span class="interaction-count"></span></h2>
+
+      <div class="hidden user">
+	<button id="add_interaction">&#x2380;</button>
+      </div>
+
       <div class="pager">
 	Page: <select class="gotoPage"></select>
 	<button class="first" title="First page">⇤</button>
@@ -120,7 +121,8 @@ $ims=new IMS\config('ims.json');
 	    <dt class="asterisk hide">*</dt><dd class="asterisk hide">Unknown Participant</dd>
 	  </dl>
 	</caption><thead/><tbody/></table>
-    </div>
+    </div><!-- ifpub -->
+
   </div>
 
   <div class="tab-pane" id="conversion">

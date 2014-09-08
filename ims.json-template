@@ -4,17 +4,17 @@
     "ims":{
       "user":"imsadmin",
       "passwd":"your password here",
-      "db":"sven"
+      "schema":"sven"
     },
     "quick":{
       "user":"imsadmin",
       "passwd":"your password here",
-      "db":"biogrid_quick_20130521"
+      "schema":"biogrid_quick_20130521"
     },
     "ims2":{
       "user":"imsadmin",
       "passwd":"your password here",
-      "db":"biogrid_ims_snapshot"
+      "schema":"biogrid_ims_snapshot"
     }
   },
   "css":[

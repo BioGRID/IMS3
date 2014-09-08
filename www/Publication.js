@@ -8,10 +8,9 @@ IMS.Publication=function(data){
   });
 },
 
-
 IMS.Publication.prototype=new IMS._table();
 IMS.Publication.prototype._const={
-  primary_key:'publication_id'
+  primary_col:'publication_id'
 }
 IMS.Publication.prototype.format_item=function(){
   return this.data.publication_pubmed_id + ' - ' +
@@ -20,4 +19,3 @@ IMS.Publication.prototype.format_item=function(){
 IMS.Publication.prototype.pmid=function(){
   return this.data['publication_pubmed_id'];
 }
-

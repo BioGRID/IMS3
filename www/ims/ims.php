@@ -53,11 +53,15 @@ class config
     set_include_path($saved_include_path);
   }
 
+  function schema($db){
+    return $this->config->dbs->$db->schema;
+  }
+
   public $pdos=[];
   function pdo($db){
     if(!isset($this->pdos[$db])){
       $c=$this->config->dbs->$db;
-      $this->pdos[$db]=new \PDO('mysql:host=localhost;dbname='.$c->db,
+      $this->pdos[$db]=new \PDO('mysql:host=localhost;dbname='.$c->schema,
 			      $c->user,$c->passwd);
     }
     return $this->pdos[$db];
@@ -131,11 +135,32 @@ class _Table
     $this->qs=$qs;
   }
 
+  public function schema(){
+    $c=get_called_class();
+    return $this->cfg->schema($c::DB);
+  }
+
   public function pdo(){
     $c=get_called_class();
     return $this->cfg->pdo($c::DB);
   }
 
+  public function status_options(){
+    $c=get_called_class();
+    $dbh=$this->pdo();
+    $sql='SELECT COLUMN_TYPE FROM information_schema.columns '
+      . "WHERE table_name='" . $c::TABLE . "' "
+      . "AND column_name='" . $c::STATUS_COLUMN . "' "
+      . "AND table_schema='" . $this->schema() . "'";
+    $s=$dbh->prepare($sql);
+    $s->execute();
+    $v=$s->fetch();
+    $out=explode(',',str_replace("'",'',ltrim(rtrim($v[0],')'),'enum(')));
+    print "\n";
+
+    return $out;
+  }
+  
 
   public function _ineq($tainted,$qm){
     $vs=explode('|',$tainted);
@@ -265,6 +290,27 @@ class _Table
   }
 } // _Table
 
+// this is a class that is used to get data about tables, that works
+// like a _Table class, but it isn't an actual table in the database.
+class Schema extends _Table{
+  public function query(){
+    $table=table_factory($this->cfg,['table'=>$this->qs['table_name']]);
+    $this->fetched=$table->status_options();
+  }
+  public function fetch(){
+    $out=$this->fetched;
+    if($out){
+      $this->fetched=false;
+      return
+	[
+	 'table'=>$this->qs['table_name'],
+	 'statuses'=>$out,
+	 ];
+    }
+    return $out;
+  }
+}
+
 class _Quick extends _Table{
   const DB='quick';
 }
@@ -329,6 +375,10 @@ class Interaction_history extends _Table
   const TABLE='interaction_history';
   const PRIMARY_KEY='interaction_history_id';
   const ORDER_BY='interaction_history_date DESC';
+
+  // Not really the status column, as it should not change, but it
+  // sortta like a status column.
+  const STATUS_COLUMN='modification_type';
 }
 
 class Interaction_sources extends _Table
@@ -472,6 +522,8 @@ function table_factory($cfg,$qs)
     return new Quick_identifier_types($cfg,$qs);
   case 'quick_organisms':
     return new Quick_organisms($cfg,$qs);
+  case 'schema':
+    return new Schema($cfg,$qs);
   case 'unknown_participants':
     return new Unknown_participants($cfg,$qs);
   }
