@@ -4,7 +4,7 @@ IMS.Interaction=function(data){
 
 IMS.Interaction.prototype=new IMS._table();
 IMS.Interaction.prototype._const={
-  table_id:'interactions',
+  html_id:'interactions',
   table:'interaction',
   primary_col:'interaction_id',
 };

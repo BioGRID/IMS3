@@ -6,6 +6,9 @@ IMS={
    * First, a bunch af utilities.
    */
 
+  // these decrement
+  new_interaction_id:0,
+
   // Returns the current publication_id.
   // What page publication we are currently looking at
   pub_id:null,
@@ -90,8 +93,9 @@ IMS={
     var pass=$(but).siblings('[name=password]').val();
     $.ajax(IMS.ajax_query({name:user,pass:pass},
                           {type:'POST',url:'user.php'}))
-    .success(IMS.loggedin_html)
-    ;
+    .success(IMS.loggedin_html);
+
+
   },
 
   // What to print if we are not logged in.
@@ -271,12 +275,21 @@ IMS={
     });
   },
 
+  //
+  add_row:function(thead,tbody,result){
+    if(0==thead.children().length){
+      thead.append(result.th());
+    }
+    var html=$.parseHTML(result.td());
+    tbody.append(html);
+    return $(html);
+  },
 
   // Abstracted was to dump results from query.php into an HTML table.
   update_table:function(results,Table,other){
     //$(IMS.constant(Table,'count_class')).html('('+results.length+')');
 
-    tbl=$(Table.prototype.table_id('#'));
+    var tbl=Table.prototype.tag_html();
 
     var tbody=tbl.find('tbody');
     // If the table is under control by dataTable, clear and destroy
@@ -298,10 +311,7 @@ IMS={
     // Populate the table with results.
     for(var row in results){
       var i=new Table(results[row]);
-      if(0==row){
-        thead.append(i.th());
-      }
-      tbody.append(i.td());
+      IMS.add_row(thead,tbody,i);
     }
 
     // So we can use some CSS to align the numbers right but still
@@ -333,25 +343,47 @@ IMS={
 
     // Return the tbody so we can add events, et al.
     return tbody;
+  }, // update_table
+
+  populate_select:function(Table){
+    IMS.query
+    ({table:Table.prototype.table()},
+     function(results){
+       var opts='';
+       for(row in results){
+         result=new Table(results[row]);
+         opts+=result.option_html();
+       }
+       Table.prototype.tag_html().html('').append(opts);
+     });
+  },
+
+  click_interaction:function(){
+    var tag=$(this);
+    //tag.parent().find('.active').removeClass('active');
+    if(IMS._interaction_tr){
+      IMS._interaction_tr.removeClass('active');
+    }
+    IMS._interaction_tr=tag;
+    tag.addClass('active');
+    var interaction_id=tag.find('[itemprop=primary-key]').text();
+    if(0<interaction_id){
+      // get edges from database
+      IMS.query({interaction_id:interaction_id,
+                 table:'interaction_participants'},
+                IMS.update_participants);
+    }else{
+      // For interactions not in the database yet.
+
+      console.log('yup');
+    }
+
   },
 
   _interaction_tr:null, // selected interaction in the table
   update_interactions:function(results){
     IMS.update_table(results,IMS.Interaction,function(tbody){
-      tbody.find('tr')
-      .click(function(){
-        var tag=$(this);
-        //tag.parent().find('.active').removeClass('active');
-        if(IMS._interaction_tr){
-          IMS._interaction_tr.removeClass('active');
-        }
-        IMS._interaction_tr=tag;
-        tag.addClass('active');
-        var interaction_id=tag.find('[itemprop=primary-key]').text();
-        IMS.query({interaction_id:interaction_id,
-                   table:'interaction_participants'},
-                  IMS.update_participants);
-      });
+      tbody.find('tr').click(IMS.click_interaction);
     });
   },
 
@@ -398,16 +430,8 @@ IMS={
 IMS._table.prototype={
 
   /*
-   *  Return stuff child's _const
+   *  stuff that can be usen statically.
    */
-
-  // Returns the ID for a HTML table where this should be used.
-  table_id:function(prefix){
-    if(!prefix){
-      prefix='';
-    }
-    return prefix + this._const.table_id;
-  },
 
   // Returns the SQL table.
   table:function(){
@@ -417,6 +441,10 @@ IMS._table.prototype={
   // Return's the SQL table primary key column.
   primary_col:function(){
     return this._const.primary_col;
+  },
+
+  tag_html:function(){
+    return $('#' + this._const.html_id);
   },
 
   /*
@@ -440,6 +468,10 @@ IMS._table.prototype={
   // Returns HTML suitable for inlined usage.
   html:function(){
     return this.primary_col()+'='+this.primary_id();
+  },
+  option_html:function(){
+    return '<option value="' + this.primary_id() + '">' +
+      this.html() + '</option>';
   },
 
   // Return a list of definition term names, that then can be fed to
@@ -577,7 +609,8 @@ $(document).ready(function(){
   .success(IMS.loggedin_html)
   .fail(IMS.login_html);
 
-  // should bury this in IMS.* somehow
+
+  // Set up select2 pubmed search.
   $("#pubmed").select2({
     minimumInputLength:3,
     formatResult:function(obj){
@@ -610,8 +643,37 @@ $(document).ready(function(){
 
 
   /*
-   * Here we populate the pull down box on the ID Conersion page.
+   * Stuff for creating new Interactions and Participants
    */
+
+  IMS.populate_select(IMS.Interaction_type);
+  IMS.populate_select(IMS.Participant_role);
+
+  /*
+  IMS.Interaction_type.prototype.options();
+
+
+  $('#add_interaction').click(function(){
+    var tbl=$('#interactions');
+    var result=new IMS.Interaction({
+      interaction_id:--IMS.new_interaction_id,
+      interaction_type_id:$('#interaction_types').val(),
+      interaction_source_id:1,
+      interaction_status:'new',
+    });
+    IMS.add_row(tbl.find('thead'),tbl.find('tbody'),result).
+      click(IMS.click_interaction);
+    IMS.update_danger(tbl);
+    tbl.trigger('update'); // for tablesorter
+  })
+*/
+
+
+  /*
+   * ID conversion page stuff
+   */
+
+  // Here we populate the pull down box on the ID Conersion page.
   var sel=$('#id-from>select,#id-to>select');
   IMS.query(
     {table:'quick_identifier_types'},
@@ -622,11 +684,8 @@ $(document).ready(function(){
       }
     });
 
-  /*
-   * Here is what happends when you actually click to convert IDs of a
-   * document.
-   */
-
+  // Here is what happends when you actually click to convert IDs of a
+  // document.
   var bg2id=function(results){
     $('#id-to>dl').html('<dt>IDs Returned</dt><dd>'+results.length+'</dd>');
     var to=$('#id-to>textarea');
@@ -659,14 +718,5 @@ $(document).ready(function(){
        quick_identifier_value:from},from2bg);
   });
 
-
-  $('#add_interaction')
-  .click(function(){
-    IMS.query({table:'interaction_types'},function(r){
-      // perhaps we should cache the results for future use?
-
-
-    });
-  });
 
 }); // ready

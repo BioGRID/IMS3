@@ -77,11 +77,14 @@ $ims=new IMS\config('ims.json');
     <blockquote class="dropdown" id="publication"></blockquote>
 
     <div class="ifpub hidden">
-      <h2>Interactions <span class="interaction-count"></span></h2>
+      <h2>
+	Interactions
+	<span class="hidden user">
+	  <select id="interaction_types"></select>
+	  <button id="add_interaction">&#x2386;</button>
+	</span>
+      </h2>
 
-      <div class="hidden user">
-	<button id="add_interaction">&#x2380;</button>
-      </div>
 
       <div class="pager">
 	Page: <select class="gotoPage"></select>
@@ -99,7 +102,13 @@ $ims=new IMS\config('ims.json');
 	</select>
       </div> 
       <table id="interactions" class="table table-hover"><thead/><tbody/></table>
-      <h3>Participants <span class="participant-count"></span></h3>
+      <h3>
+	Participants
+	<span class="hidden user">
+	  <select id="participant_role"></select>
+	  <button id="add_interaction">&#x2386;</button>
+	</span>
+      </h3>
       <div class="pager">
 	Page: <select class="gotoPage"></select>
 	<button class="first" title="First page">⇤</button>

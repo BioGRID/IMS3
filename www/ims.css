@@ -27,8 +27,6 @@ dl.footnotes dd{
 dl.footnotes dt{
     width:1em;
 }
-/*
-#add_interaction{
-    float:right;
+.user{
+    font-size:medium;
 }
-*/
