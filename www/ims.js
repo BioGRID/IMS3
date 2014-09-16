@@ -2,28 +2,12 @@
 // objects related to the database.
 IMS={
 
-  /*
-   * First, a bunch af utilities.
-   */
-
-  // these decrement
+  // Stores the current IMS.Publication object
+  pub:null,
   new_interaction_id:0,
 
-  // Returns the current publication_id.
-  // What page publication we are currently looking at
-  pub_id:null,
-  publication_id:function(){
-    if(!this.pub_id){
-      this.pub_id=Number($('$publication_id div').text());
-    }
-    return this.pub_id;
-  },
-
   /*
-  // Looks up constant data from _table objects, not Table instances.
-  constant:function(Table,get){
-    return Table.prototype._const[get];
-  },
+   * First, a bunch af utilities.
    */
 
   // Report errors, usually from the query.php script, on the log page.
@@ -228,10 +212,10 @@ IMS={
     $("#participants .footnotes *").addClass('hide');
     $(".participant-count").html('');
 
-    IMS.pub_id=pub.primary_id();
+    IMS.pub=pub;
     $("#publication").html(pub.select('publication_abstract'));
 
-    IMS.query({publication_id:this.pub_id,table:'interactions'},
+    IMS.query({publication_id:pub.primary_id(),table:'interactions'},
               IMS.update_interactions);
   },
 
@@ -700,6 +684,12 @@ $(document).ready(function(){
     tbl.trigger('update'); // for tablesorter
   });
 
+  $('#add_participant').click(function(){
+    var tbl=IMS.Interaction_participant.prototype.tag_html();
+    var result=new IMS.Interaction_participant({
+
+    });
+  });
 
 
   /*

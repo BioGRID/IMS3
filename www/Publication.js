@@ -1,6 +1,9 @@
 IMS.Publication=function(data){
   this.data=data;
 
+  // decrements on newly created interactions
+  this.new_id=0;
+
   // Move this up to IMS._table if we need to use select2 for a
   // different items other then publication.
   this.__defineGetter__('text',function(){

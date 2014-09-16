@@ -106,7 +106,7 @@ $ims=new IMS\config('ims.json');
 	Participants
 	<span class="hidden user">
 	  <select id="participant_role"></select>
-	  <button id="add_interaction">&#x2386;</button>
+	  <button id="add_participant">&#x2386;</button>
 	</span>
       </h3>
       <div class="pager">

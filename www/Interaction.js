@@ -1,5 +1,6 @@
 IMS.Interaction=function(data){
   this.data=data;
+  this.new_id=0;
 }
 
 IMS.Interaction.prototype=new IMS._table();
