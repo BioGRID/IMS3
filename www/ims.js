@@ -277,16 +277,18 @@ IMS={
 
   //
   add_row:function(thead,tbody,result){
+    result.remember();
     if(0==thead.children().length){
       thead.append(result.th());
     }
-    var html=$.parseHTML(result.td());
-    tbody.append(html);
-    return $(html);
+    var td=$($.parseHTML(result.td()));
+    tbody.append(td);
+    result._td=td;
+    return td;
   },
 
   // Abstracted was to dump results from query.php into an HTML table.
-  update_table:function(results,Table,other){
+  redo_table:function(results,Table){
     //$(IMS.constant(Table,'count_class')).html('('+results.length+')');
 
     var tbl=Table.prototype.tag_html();
@@ -309,9 +311,14 @@ IMS={
     tbl.find('.footnotes *').addClass('hide');
 
     // Populate the table with results.
+    var out=[];
     for(var row in results){
-      var i=new Table(results[row]);
+      var i=results[row];
+      if(!results.table){
+        i=new Table(results[row]);
+      }
       IMS.add_row(thead,tbody,i);
+      out.push(i);
     }
 
     // So we can use some CSS to align the numbers right but still
@@ -319,11 +326,6 @@ IMS={
     tbody
     .find('.primary-key')
     .wrapInner('<span></span>');
-
-    // We have something else to do!
-    if(other){
-      other(tbody);
-    }
 
     var that=this;
     //tbl.dataTable();
@@ -341,9 +343,9 @@ IMS={
     });
     this.update_danger(tbl)
 
-    // Return the tbody so we can add events, et al.
-    return tbody;
-  }, // update_table
+    // return created items
+    return out;
+  }, // redo_table
 
   populate_select:function(Table){
     IMS.query
@@ -352,46 +354,61 @@ IMS={
        var opts='';
        for(row in results){
          result=new Table(results[row]);
-         opts+=result.option_html();
+         opts+=result.option_html(9);
        }
        Table.prototype.tag_html().html('').append(opts);
      });
   },
 
+
+  // What happens when we click on an intercation <tr> tag.
   click_interaction:function(){
+
+    // First we which tag is highlighted
     var tag=$(this);
-    //tag.parent().find('.active').removeClass('active');
     if(IMS._interaction_tr){
+      // removing highlighting if on is active.
       IMS._interaction_tr.removeClass('active');
     }
     IMS._interaction_tr=tag;
     tag.addClass('active');
-    var interaction_id=tag.find('[itemprop=primary-key]').text();
-    if(0<interaction_id){
-      // get edges from database
-      IMS.query({interaction_id:interaction_id,
-                 table:'interaction_participants'},
-                IMS.update_participants);
-    }else{
-      // For interactions not in the database yet.
 
-      console.log('yup');
+    // get the IMS.Interaction object of the clicked interaction
+    var interaction_id=tag.find('[itemprop=primary-key]').text();
+    var interaction=IMS.remembered(IMS.Interaction,interaction_id);
+
+
+    if(interaction.participants){
+      // If we already have participants, display them
+      IMS.redo_table(interaction.participants,IMS.Interaction_participant);
+    }else if(0<interaction_id){
+      // If we don't have any participants, and we are saved in the
+      // database, check the database for participants.
+      IMS.query(
+        {
+          interaction_id:interaction_id,
+          table:'interaction_participants'
+        },function(results){
+            interaction.participants=results;
+            IMS.redo_table(results,IMS.Interaction_participant);
+          }
+      );
+    }else{
+      // New interaction! Lets just clean the participant table.
+      IMS.redo_table([],IMS.Interaction_participant);
     }
 
   },
 
   _interaction_tr:null, // selected interaction in the table
   update_interactions:function(results){
-    IMS.update_table(results,IMS.Interaction,function(tbody){
-      tbody.find('tr').click(IMS.click_interaction);
-    });
-  },
+    IMS._remember={};
+    var inter=IMS.redo_table(results,IMS.Interaction);
+    for(var action in inter){
+      inter[action]._td.click(IMS.click_interaction);
+    }
 
-  // Perhaps this should be update interaction_participants?
-  update_participants:function(results){
-    IMS.update_table(results,IMS.Interaction_participant);
   },
-
 
 
   /*
@@ -423,6 +440,14 @@ IMS={
       return this.primary_id();
     });
 
+  },
+
+
+  // store Interactions and Participants objects currently in tables.
+  _remember:{},
+  // fetch remembered data
+  remembered:function(Table,table_id){
+    return IMS._remember[Table.prototype.primary_col()][table_id];
   }
 }
 
@@ -450,6 +475,15 @@ IMS._table.prototype={
   /*
    * instance specific functions.
    */
+
+  // Remember an items some place.
+  remember:function(){
+    var pc=this.primary_col();
+    if(!IMS._remember[pc]){
+      IMS._remember[pc]={};
+    }
+    IMS._remember[pc][this.primary_id()]=this;
+  },
 
   type:function(){
     table=this.table();
@@ -649,24 +683,23 @@ $(document).ready(function(){
   IMS.populate_select(IMS.Interaction_type);
   IMS.populate_select(IMS.Participant_role);
 
-  /*
-  IMS.Interaction_type.prototype.options();
-
-
+  // how to add an interaction
   $('#add_interaction').click(function(){
-    var tbl=$('#interactions');
+    var tbl=IMS.Interaction.prototype.tag_html();
     var result=new IMS.Interaction({
       interaction_id:--IMS.new_interaction_id,
       interaction_type_id:$('#interaction_types').val(),
       interaction_source_id:1,
-      interaction_status:'new',
+      interaction_status:'normal',
+      modification_type:'not saved'
     });
+
     IMS.add_row(tbl.find('thead'),tbl.find('tbody'),result).
       click(IMS.click_interaction);
     IMS.update_danger(tbl);
     tbl.trigger('update'); // for tablesorter
-  })
-*/
+  });
+
 
 
   /*
