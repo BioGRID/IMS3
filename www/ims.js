@@ -4,7 +4,6 @@ IMS={
 
   // Stores the current IMS.Publication object
   pub:null,
-  new_interaction_id:0,
 
   /*
    * First, a bunch af utilities.
@@ -267,7 +266,7 @@ IMS={
     }
     var td=$($.parseHTML(result.td()));
     tbody.append(td);
-    result._td=td;
+    result._tr=td;
     return td;
   },
 
@@ -345,21 +344,18 @@ IMS={
   },
 
 
-  // What happens when we click on an intercation <tr> tag.
   click_interaction:function(){
-
-    // First we which tag is highlighted
-    var tag=$(this);
-    if(IMS._interaction_tr){
-      // removing highlighting if on is active.
-      IMS._interaction_tr.removeClass('active');
-    }
-    IMS._interaction_tr=tag;
-    tag.addClass('active');
-
     // get the IMS.Interaction object of the clicked interaction
-    var interaction_id=tag.find('[itemprop=primary-key]').text();
+    var interaction_id=$(this).find('[itemprop=primary-key]').text();
     var interaction=IMS.remembered(IMS.Interaction,interaction_id);
+
+    // Toggle highlighted tr
+    if(IMS.pub.interaction){
+      // removing highlighting if on is active.
+      IMS.pub.interaction._tr.removeClass('active');
+    }
+    IMS.pub.interaction=interaction;
+    interaction._tr.addClass('active');
 
 
     if(interaction.participants){
@@ -367,7 +363,7 @@ IMS={
       IMS.redo_table(interaction.participants,IMS.Interaction_participant);
     }else if(0<interaction_id){
       // If we don't have any participants, and we are saved in the
-      // database, check the database for participants.
+      // database, che5Ack the database for participants.
       IMS.query(
         {
           interaction_id:interaction_id,
@@ -384,12 +380,11 @@ IMS={
 
   },
 
-  _interaction_tr:null, // selected interaction in the table
   update_interactions:function(results){
     IMS._remember={};
     var inter=IMS.redo_table(results,IMS.Interaction);
     for(var action in inter){
-      inter[action]._td.click(IMS.click_interaction);
+      inter[action]._tr.click(IMS.click_interaction);
     }
 
   },
@@ -669,15 +664,15 @@ $(document).ready(function(){
 
   // how to add an interaction
   $('#add_interaction').click(function(){
-    var tbl=IMS.Interaction.prototype.tag_html();
     var result=new IMS.Interaction({
-      interaction_id:--IMS.new_interaction_id,
+      interaction_id:--IMS.pub.new_id,
       interaction_type_id:$('#interaction_types').val(),
       interaction_source_id:1,
       interaction_status:'normal',
-      modification_type:'not saved'
+      modification_type:'new'
     });
 
+    var tbl=IMS.Interaction.prototype.tag_html();
     IMS.add_row(tbl.find('thead'),tbl.find('tbody'),result).
       click(IMS.click_interaction);
     IMS.update_danger(tbl);
@@ -685,10 +680,24 @@ $(document).ready(function(){
   });
 
   $('#add_participant').click(function(){
-    var tbl=IMS.Interaction_participant.prototype.tag_html();
-    var result=new IMS.Interaction_participant({
+    var i=IMS.pub.interaction;
+    if(!i){
+      alert('No interaction selected');
+      return;
+    }
 
+    // Create the new, empty, participant tag
+    var result=new IMS.Interaction_participant({
+      interaction_participant_id:--i.new_id,
+      participant_role_id:$('#participant_role').val(),
+      interaction_participant_status:'active',
+      interaction_participant_addeddate:'new'
     });
+
+    var tbl=IMS.Interaction_participant.prototype.tag_html();
+    IMS.add_row(tbl.find('thead'),tbl.find('tbody'),result);
+    IMS.update_danger(tbl);
+    tbl.trigger('update');
   });
 
 
