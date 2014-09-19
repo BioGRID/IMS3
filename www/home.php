@@ -158,4 +158,33 @@ $ims=new IMS\config('ims.json');
   </div>
 </div>
 
+<div class="modal fade" id="participant_selector">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+	<h1>Participant Selector</h1>
+      </div><div class="modal-body">
+
+	<ul class="nav nav-tabs">
+	  <li class="active"><a href="#quick_participants" data-toggle="tab">Quick Participants</a></li>
+	  <li><a href="#force_participants" data-toggle="tab">Forced Participants</a></li>
+	</ul>
+
+	<div class="tab-content container">
+	  <div class="tab-pane active" id="quick_participants">
+	    <p>Quick</p>
+	  </div>
+	  <div class="tab-pane" id="force_participants">
+	    <p>Use the force Luke.</p>
+	  </div>
+	</div>
+
+      </div><div class="modal-footer">
+	<p>footer</p>
+      </div>
+    </div>
+  </div>
+<div>
+
+
 </body></html>

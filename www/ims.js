@@ -99,9 +99,9 @@ IMS={
     $('.user').removeClass('hidden');
 
     $("#user").html
-    ('Logged in as '
+    ('Logged in as <code>'
     +user
-    +' <button onclick="IMS.logout()">Logout</button>');
+    +'</code> <button onclick="IMS.logout()">Logout</button>');
   },
 
   /*
@@ -237,23 +237,19 @@ IMS={
       var Table=IMS[prop.charAt(0).toUpperCase()+prop.slice(1)];
 
       if(Table){
-        // Stuff we can figure out without actually accessing the
-        // object in scope.
-        var primary_col=Table.prototype.primary_col();
-        var request={table:Table.prototype.table()};
-        request[primary_col]=tag.text();
-        IMS.cache(request,function(raw){
-          tag.replaceWith(new Table(raw[0]).html());
-        },primary_col);
+        var col=Table.prototype.primary_col();
+        var val=tag.text();
+        if(Table.prototype.ok(col,val,tag)){
+          // Stuff we can figure out without actually accessing the
+          // object in scope.
+          var primary_col=col;
+          var request={table:Table.prototype.table()};
+          request[primary_col]=val;
+          IMS.cache(request,function(raw){
+            tag.replaceWith(new Table(raw[0]).html());
+          },primary_col);
+        }
       }
-      /*
-      else{
-        // Here we gotta get the object first.
-        var i=IMS.active(tag);
-        i.prop(prop,tag);
-        tag.html('Fetching ' + prop + '?');
-      }
-       */
 
     });
   },
@@ -297,7 +293,7 @@ IMS={
     var out=[];
     for(var row in results){
       var i=results[row];
-      if(!results.table){
+      if(!i.table){
         i=new Table(results[row]);
       }
       IMS.add_row(thead,tbody,i);
@@ -358,7 +354,7 @@ IMS={
     interaction._tr.addClass('active');
 
 
-    if(interaction.participants){
+    if(0<interaction.participants.length){
       // If we already have participants, display them
       IMS.redo_table(interaction.participants,IMS.Interaction_participant);
     }else if(0<interaction_id){
@@ -369,8 +365,8 @@ IMS={
           interaction_id:interaction_id,
           table:'interaction_participants'
         },function(results){
-            interaction.participants=results;
-            IMS.redo_table(results,IMS.Interaction_participant);
+            interaction.participants=IMS.redo_table
+            (results,IMS.Interaction_participant);
           }
       );
     }else{
@@ -449,6 +445,12 @@ IMS._table.prototype={
 
   tag_html:function(){
     return $('#' + this._const.html_id);
+  },
+
+  // To check if we want to do something weird in a column in the
+  // IMS.update_danger() function.
+  ok:function(col,val,tag){
+    return true;
   },
 
   /*
@@ -689,10 +691,13 @@ $(document).ready(function(){
     // Create the new, empty, participant tag
     var result=new IMS.Interaction_participant({
       interaction_participant_id:--i.new_id,
+      interaction_id:i.primary_id(),
+      participant_id:'add',
       participant_role_id:$('#participant_role').val(),
       interaction_participant_status:'active',
       interaction_participant_addeddate:'new'
     });
+    i.participants.push(result);
 
     var tbl=IMS.Interaction_participant.prototype.tag_html();
     IMS.add_row(tbl.find('thead'),tbl.find('tbody'),result);
