@@ -20,7 +20,6 @@ class Config:
     """Loads stuff from JSON configure file and provides access."""
 
     def __init__(self,path='ims.json'):
-        print path
         self.json=json.loads(open(path).read())
         self.dbs={}
     def _db(self,section):
@@ -28,7 +27,10 @@ class Config:
             return self.dbs[section]
         except KeyError:
             db=self.json['dbs'][section]
-            self.dbs[section]=MySQLdb.connect(**db)
+            self.dbs[section]=MySQLdb.connect(
+                user=db['user'],
+                passwd=db['passwd'],
+                db=db['schema'])
 
             warnings.warn('Connecting to DB %s' % section)
         # If it don't work now we want to die
