@@ -8,7 +8,7 @@ import _mysql_exceptions
 
 # This means you should look it up in the quick_participants table.
 global PARTICIPANT_TYPE
-PARTICIPANT_TYPE=1
+#PARTICIPANT_TYPE=1
 global UNKNOWN_PARTICIPANT_TYPE
 UNKNOWN_PARTICIPANT_TYPE=None
 
@@ -211,6 +211,9 @@ class Interaction_history(BioGRID.ims.Interaction_history,_Table):
                           % (self.pubmed_id(),self['user_id']))
 
 class Interaction_type(BioGRID.ims._Table):
+    pass
+
+class Participant_type(BioGRID.ims.Participant_type):
     pass
 
 class Participant_role(BioGRID.ims._Table):
@@ -613,6 +616,11 @@ class PTM_note(BioGRID.ims.PTM_note,_Table):
         return super(PTM_note,self).store()
 
 class Participant(BioGRID.ims.Participant,_Table):
+    def __init__(self,passthru):
+        super(Participant,self).__init__(passthru);
+        global PARTICIPANT_TYPE
+        PARTICIPANT_TYPE=Participant_type.factory('Gene').id();
+
     @classmethod
     def slurp_sql(cls):
         return '''

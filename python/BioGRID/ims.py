@@ -358,6 +358,10 @@ class Participant(_Table):
     _columns=['participant_id','participant_value','participant_type_id',
               'participant_addeddate','participant_status']
 
+class Participant_type(_Table):
+    _colums=['participant_type_name','participant_type_status',
+             'participant_type_addeddate']
+
 class Unknown_participant(_Table):
     _columns=['unknown_participant_identifier','participant_type_id',
               'organism_id','publication_id',
