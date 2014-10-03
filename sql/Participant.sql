@@ -2,7 +2,7 @@
 CREATE TABLE IF NOT EXISTS participant_types(
        participant_type_id	  BIGINT(10)PRIMARY KEY AUTO_INCREMENT,
        participant_type_name	  VARCHAR(255)UNIQUE,
-       participant_type_status	  ENUM('active','inactive'),
+       participant_type_status	  ENUM('active','inactive')NOT NULL DEFAULT 'active',
        participant_type_addeddate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
