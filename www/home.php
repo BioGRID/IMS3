@@ -17,6 +17,7 @@ $ims=new IMS\config('ims.json');
 <script src="Interaction_type.js"></script>
 <script src="Participant.js"></script>
 <script src="Participant_role.js"></script>
+<script src="Participant_type.js"></script>
 <script src="Publication.js"></script>
 <script src="Quick_identifier.js"></script>
 <script src="Quick_identifier_type.js"></script>
@@ -172,7 +173,7 @@ $ims=new IMS\config('ims.json');
 
 	<div class="tab-content container">
 	  <div class="tab-pane active" id="quick_participants">
-	    <p>Quick</p>
+	    <select id="quick_type"></select>
 	  </div>
 	  <div class="tab-pane" id="force_participants">
 	    <p>Use the force Luke.</p>

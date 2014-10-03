@@ -421,6 +421,14 @@ class Participant_roles extends _Table
   const DEFAULT_STATUS='active';
 }
 
+class Participant_types extends _Table
+{
+  const TABLE='participant_types';
+  const PRIMARY_KEY='participant_type_id';
+  const STATUS_COLUMN='participant_type_status';
+  const DEFAULT_STATUS='active';
+}
+
 class Participants extends _Table
 {
   const TABLE='participants';
@@ -514,6 +522,8 @@ function table_factory($cfg,$qs)
     return new Interaction_types($cfg,$qs);
   case 'participants':
     return new Participants($cfg,$qs);
+  case 'participant_types':
+    return new Participant_types($cfg,$qs);
   case 'publications':
     return new Publications($cfg,$qs);
   case 'quick_identifiers':

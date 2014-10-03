@@ -663,6 +663,7 @@ $(document).ready(function(){
 
   IMS.populate_select(IMS.Interaction_type);
   IMS.populate_select(IMS.Participant_role);
+  IMS.populate_select(IMS.Participant_type);
 
   // how to add an interaction
   $('#add_interaction').click(function(){
