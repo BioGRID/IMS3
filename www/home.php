@@ -81,7 +81,7 @@ $ims=new IMS\config('ims.json');
       <h2>
 	Interactions
 	<span class="hidden user">
-	  <select id="interaction_types"></select>
+	  <select class="interaction_types"></select>
 	  <button id="add_interaction">&#x2386;</button>
 	</span>
       </h2>
@@ -102,11 +102,11 @@ $ims=new IMS\config('ims.json');
 	  <option value="40">40</option>
 	</select>
       </div> 
-      <table id="interactions" class="table table-hover"><thead/><tbody/></table>
+      <table class="interactions table table-hover"><thead/><tbody/></table>
       <h3>
 	Participants
 	<span class="hidden user">
-	  <select id="participant_role"></select>
+	  <select class="participant_role"></select>
 	  <button id="add_participant">&#x2386;</button>
 	</span>
       </h3>
@@ -126,7 +126,7 @@ $ims=new IMS\config('ims.json');
 	</select>
       </div> 
 
-      <table id="participants" class="table"><caption>
+      <table class="participants table"><caption>
 	  <dl class="footnotes dl-horizontal">
 	    <dt class="asterisk hide">*</dt><dd class="asterisk hide">Unknown Participant</dd>
 	  </dl>
@@ -171,9 +171,15 @@ $ims=new IMS\config('ims.json');
 	  <li><a href="#force_participants" data-toggle="tab">Forced Participants</a></li>
 	</ul>
 
+	<div class="container">
+	  <select class="quick_type"></select>
+	  <select class="quick_organism"></select>
+	</div>
+
 	<div class="tab-content container">
 	  <div class="tab-pane active" id="quick_participants">
-	    <select id="quick_type"></select>
+	    <input type="hidden" id="quick" style="width:75%">
+	    
 	  </div>
 	  <div class="tab-pane" id="force_participants">
 	    <p>Use the force Luke.</p>

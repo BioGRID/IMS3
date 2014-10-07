@@ -205,11 +205,11 @@ IMS={
 
   // Accepts a Publication object, and make it what we are looking at.
   set_publication:function(pub){
-    // clear some thingsfrom the last publication
-    $("#participants thead").html('');
-    $("#participants tbody").html('');
-    $("#participants .footnotes *").addClass('hide');
-    $(".participant-count").html('');
+    // clear some things from the last publication
+    $(".participants thead").html('');
+    $(".participants tbody").html('');
+    $(".participants .footnotes *").addClass('hide');
+    //$(".participant-count").html('');
 
     IMS.pub=pub;
     $("#publication").html(pub.select('publication_abstract'));
@@ -270,7 +270,8 @@ IMS={
   redo_table:function(results,Table){
     //$(IMS.constant(Table,'count_class')).html('('+results.length+')');
 
-    var tbl=Table.prototype.tag_html();
+    //var tbl=Table.prototype.tag_html(); // dep
+    var tbl=Table.prototype.$('table');
 
     var tbody=tbl.find('tbody');
     // If the table is under control by dataTable, clear and destroy
@@ -335,7 +336,13 @@ IMS={
          result=new Table(results[row]);
          opts+=result.option_html(9);
        }
-       Table.prototype.tag_html().html('').append(opts);
+       //Table.prototype.tag_html().html('').append(opts);
+       var sel=Table.prototype.$('select');
+       if(1!=sel.length){
+         alert('Unable to populate '.Table.prototype._const.table);
+       }else{
+         sel.html('').append(opts);
+       }
      });
   },
 
@@ -440,12 +447,27 @@ IMS._table.prototype={
 
   // Return's the SQL table primary key column.
   primary_col:function(){
-    return this._const.primary_col;
+    out=this._const.primary_col;
+    if(!out){
+      console.log('No primary_col specified.');
+    }
+    return out;
   },
 
+  // using $ to imply it returns jQuery tags.
+  $:function(tag){
+    return $(tag+'.'+this._const.html_class);
+  },
+
+  /*
   tag_html:function(){
     return $('#' + this._const.html_id);
   },
+  tag_select:function(){
+    var clazz=this._const.html_class
+    return $('select.' + clazz);
+  },
+   */
 
   // To check if we want to do something weird in a column in the
   // IMS.update_danger() function.
@@ -485,8 +507,11 @@ IMS._table.prototype={
     return this.primary_col()+'='+this.primary_id();
   },
   option_html:function(){
-    return '<option value="' + this.primary_id() + '">' +
-      this.html() + '</option>';
+    var sel=(this._const.default==this.id)?' SELECTED':'';
+
+    return '<option' + sel
+         + ' value="' + this.primary_id() + '">'
+         + this.html() + '</option>';
   },
 
   // Return a list of definition term names, that then can be fed to
@@ -629,7 +654,9 @@ $(document).ready(function(){
   $("#pubmed").select2({
     minimumInputLength:3,
     formatResult:function(obj){
-      return obj.format_item();
+      var out=obj.format_item();
+      //console.log(out);
+      return out;
     },
     formatSelection:function(pub){
       IMS.set_publication(pub); // maybe this should be in a button
@@ -657,6 +684,38 @@ $(document).ready(function(){
   }); // select2
 
 
+  $("#quick").select2({
+    minimumInputLength:3,
+    formatResult:function(obj){
+      var out=obj.format_item();
+      //console.log(out);
+      return out;
+    },
+    formatSelection:function(obj){
+      return obj.format_item();
+    },
+    ajax:IMS.ajax_query(
+      function(term,page){
+        return{
+          limit:10,
+          table:'quick_identifiers',
+          organism_id:$('.quick_organism').val(),
+          q:term
+        }
+      },{
+        results:function(data){
+          IMS.report_messages(data.messages);
+          var out=[];
+          for(var row in data.results){
+            out.push(new IMS.Quick_identifier(data.results[row]));
+          }
+          return {results:out};
+        }
+      }
+    ) // ajax_query
+  }); // select2
+
+
   /*
    * Stuff for creating new Interactions and Participants
    */
@@ -664,18 +723,20 @@ $(document).ready(function(){
   IMS.populate_select(IMS.Interaction_type);
   IMS.populate_select(IMS.Participant_role);
   IMS.populate_select(IMS.Participant_type);
+  IMS.populate_select(IMS.Quick_organism);
 
   // how to add an interaction
   $('#add_interaction').click(function(){
     var result=new IMS.Interaction({
       interaction_id:--IMS.pub.new_id,
-      interaction_type_id:$('#interaction_types').val(),
+      interaction_type_id:$('.interaction_types').val(),
       interaction_source_id:1,
       interaction_status:'normal',
       modification_type:'new'
     });
 
-    var tbl=IMS.Interaction.prototype.tag_html();
+    //var tbl=IMS.Interaction.prototype.tag_html(); // dep
+    var tbl=IMS.Interaction.prototype.$('table');
     IMS.add_row(tbl.find('thead'),tbl.find('tbody'),result).
       click(IMS.click_interaction);
     IMS.update_danger(tbl);
@@ -694,13 +755,14 @@ $(document).ready(function(){
       interaction_participant_id:--i.new_id,
       interaction_id:i.primary_id(),
       participant_id:'add',
-      participant_role_id:$('#participant_role').val(),
+      participant_role_id:$('.participant_role').val(),
       interaction_participant_status:'active',
       interaction_participant_addeddate:'new'
     });
     i.participants.push(result);
 
-    var tbl=IMS.Interaction_participant.prototype.tag_html();
+    //var tbl=IMS.Interaction_participant.prototype.tag_html(); // dep
+    var tbl=IMS.Interaction_participant.prototype.$('Table');
     IMS.add_row(tbl.find('thead'),tbl.find('tbody'),result);
     IMS.update_danger(tbl);
     tbl.trigger('update');

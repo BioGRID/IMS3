@@ -4,9 +4,14 @@ IMS.Participant_type=function(data){
 IMS.Participant_type.prototype=new IMS._table();
 IMS.Participant_type.prototype._const={
   table:'participant_types',
-  primayr_col:'participant_type_id',
-  html_id:'quick_type'
+  primary_col:'participant_type_id',
+  html_class:'quick_type',
 }
+
+/*
+ * nonstatic
+ */
+
 IMS.Participant_type.prototype.html=function(){
   return this.data.participant_type_name;
 }

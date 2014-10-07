@@ -6,8 +6,13 @@ IMS.Interaction_participant.prototype=new IMS._table();
 IMS.Interaction_participant.prototype._const={
   table:'interaction_participants',
   primary_col:'interaction_participant_id',
-  html_id:'participants',
+  html_class:'participants'
 };
+
+/*
+ * static
+ */
+
 IMS.Interaction_participant.prototype.dts=function(){
   return [
     'interaction_participant_id',

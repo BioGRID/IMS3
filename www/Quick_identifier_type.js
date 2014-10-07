@@ -4,8 +4,13 @@ IMS.Quick_identifier_type=function(data){
 IMS.Quick_identifier_type.prototype=new IMS._table();
 IMS.Quick_identifier_type.prototype._const={
   table:'quick_identifiers',
-  primary_key:'quick_identifier_type',
+  primary_col:'quick_identifier_type',
 }
+
+/*
+ * nonstatic
+ */
+
 IMS.Quick_identifier_type.prototype.html=function(){
   return this.data[this._const.primary_key];
 }

@@ -6,10 +6,15 @@ IMS.Interaction=function(data){
 
 IMS.Interaction.prototype=new IMS._table();
 IMS.Interaction.prototype._const={
-  html_id:'interactions',
   table:'interaction',
   primary_col:'interaction_id',
+  html_class:'interactions'
 };
+
+/*
+ * static
+ */
+
 IMS.Interaction.prototype.dts=function(){
   return [
     'interaction_id',

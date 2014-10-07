@@ -319,12 +319,14 @@ class Quick_organisms extends _Quick
 {
   const TABLE='quick_organisms';
   const PRIMARY_KEY='organism_id';
+  const ORDER_BY='organism_common_name';
 }
 
 class Quick_identifiers extends _Quick
 {
   const TABLE='quick_identifiers';
   const PRIMARY_KEY='gene_id'; // not unique
+  const SEARCH_COLUMN='quick_identifier_value';
 }
 
 class Quick_identifier_types extends _Quick
