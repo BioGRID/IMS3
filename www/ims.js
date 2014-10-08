@@ -157,6 +157,8 @@ IMS={
   cache:function(request,act,primary_key){
     var store=localStorage;
     switch(primary_key){
+      // There could be a bunch of participants, so lets not remember
+      // them but for this session.
       case 'participant_id':
       store=sessionStorage;
     }
@@ -209,7 +211,6 @@ IMS={
     $(".participants thead").html('');
     $(".participants tbody").html('');
     $(".participants .footnotes *").addClass('hide');
-    //$(".participant-count").html('');
 
     IMS.pub=pub;
     $("#publication").html(pub.select('publication_abstract'));
@@ -256,7 +257,6 @@ IMS={
 
   //
   add_row:function(thead,tbody,result){
-    result.remember();
     if(0==thead.children().length){
       thead.append(result.th());
     }
@@ -268,9 +268,7 @@ IMS={
 
   // Abstracted was to dump results from query.php into an HTML table.
   redo_table:function(results,Table){
-    //$(IMS.constant(Table,'count_class')).html('('+results.length+')');
-
-    //var tbl=Table.prototype.tag_html(); // dep
+    // get the HTML table
     var tbl=Table.prototype.$('table');
 
     var tbody=tbl.find('tbody');
@@ -350,7 +348,7 @@ IMS={
   click_interaction:function(){
     // get the IMS.Interaction object of the clicked interaction
     var interaction_id=$(this).find('[itemprop=primary-key]').text();
-    var interaction=IMS.remembered(IMS.Interaction,interaction_id);
+    var interaction=IMS.pub.interactions[interaction_id];
 
     // Toggle highlighted tr
     if(IMS.pub.interaction){
@@ -384,10 +382,11 @@ IMS={
   },
 
   update_interactions:function(results){
-    IMS._remember={};
     var inter=IMS.redo_table(results,IMS.Interaction);
     for(var action in inter){
-      inter[action]._tr.click(IMS.click_interaction);
+      var i=inter[action];
+      IMS.pub.interactions[i.id]=i;
+      i._tr.click(IMS.click_interaction);
     }
 
   },
@@ -424,13 +423,6 @@ IMS={
 
   },
 
-
-  // store Interactions and Participants objects currently in tables.
-  _remember:{},
-  // fetch remembered data
-  remembered:function(Table,table_id){
-    return IMS._remember[Table.prototype.primary_col()][table_id];
-  }
 }
 
 
@@ -478,15 +470,6 @@ IMS._table.prototype={
   /*
    * instance specific functions.
    */
-
-  // Remember an items some place.
-  remember:function(){
-    var pc=this.primary_col();
-    if(!IMS._remember[pc]){
-      IMS._remember[pc]={};
-    }
-    IMS._remember[pc][this.primary_id()]=this;
-  },
 
   type:function(){
     table=this.table();
@@ -734,8 +717,8 @@ $(document).ready(function(){
       interaction_status:'normal',
       modification_type:'new'
     });
+    IMS.pub.interactions[result.id]=result;
 
-    //var tbl=IMS.Interaction.prototype.tag_html(); // dep
     var tbl=IMS.Interaction.prototype.$('table');
     IMS.add_row(tbl.find('thead'),tbl.find('tbody'),result).
       click(IMS.click_interaction);
@@ -761,7 +744,6 @@ $(document).ready(function(){
     });
     i.participants.push(result);
 
-    //var tbl=IMS.Interaction_participant.prototype.tag_html(); // dep
     var tbl=IMS.Interaction_participant.prototype.$('Table');
     IMS.add_row(tbl.find('thead'),tbl.find('tbody'),result);
     IMS.update_danger(tbl);

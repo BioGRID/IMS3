@@ -7,6 +7,10 @@ IMS.Participant.prototype._const={
   primary_col:'participant_id',
 }
 
+/*
+ * static
+ */
+
 
 IMS.Participant.prototype.ok=function(col,val,tag){
   if((this.primary_col()==col) && (val=='add')){

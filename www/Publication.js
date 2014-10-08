@@ -4,8 +4,8 @@ IMS.Publication=function(data){
   // decrements on newly created interactions
   this.new_id=0;
 
-  // current selected interaction
-  this.interaction=null;
+  this.interactions={};  // list of interactions
+  this.interaction=null; // current selected interaction
 
   // Move this up to IMS._table if we need to use select2 for a
   // different items other then publication.
@@ -26,7 +26,6 @@ IMS.Publication.prototype._const={
 /*
  * static
  */
-
 
 // Verbose description mostly used for select2
 IMS.Publication.prototype.format_item=function(){
