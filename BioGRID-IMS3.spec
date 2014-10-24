@@ -19,6 +19,7 @@ Requires: php-mysql
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{ims_wwwdir}
 %{__install} -m 755 www/home.php $RPM_BUILD_ROOT%{ims_wwwdir}/home.php
 %{__install} -m 755 www/query.php $RPM_BUILD_ROOT%{ims_wwwdir}/query.php
+%{__install} -m 755 www/user.php $RPM_BUILD_ROOT%{ims_wwwdir}/user.php
 %{__install} -m 755 www/ims.js $RPM_BUILD_ROOT%{ims_wwwdir}/ims.js
 %{__install} -m 755 www/Interaction.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction.js
 %{__install} -m 755 www/Interaction_history.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_history.js
@@ -27,6 +28,7 @@ Requires: php-mysql
 %{__install} -m 755 www/Interaction_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_type.js
 %{__install} -m 755 www/Participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant.js
 %{__install} -m 755 www/Participant_role.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant_role.js
+%{__install} -m 755 www/Participant_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant_type.js
 %{__install} -m 755 www/Publication.js $RPM_BUILD_ROOT%{ims_wwwdir}/Publication.js
 %{__install} -m 755 www/Quick_identifier.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_identifier.js
 %{__install} -m 755 www/Quick_identifier_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_identifier_type.js
@@ -50,6 +52,7 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}
 %{ims_wwwdir}/home.php
 %{ims_wwwdir}/query.php
+%{ims_wwwdir}/user.php
 %{ims_wwwdir}/ims.js
 %{ims_wwwdir}/Interaction.js
 %{ims_wwwdir}/Interaction_history.js
@@ -58,6 +61,7 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/Interaction_type.js
 %{ims_wwwdir}/Participant.js
 %{ims_wwwdir}/Participant_role.js
+%{ims_wwwdir}/Participant_type.js
 %{ims_wwwdir}/Publication.js
 %{ims_wwwdir}/Quick_identifier.js
 %{ims_wwwdir}/Quick_identifier_type.js

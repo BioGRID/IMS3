@@ -33,6 +33,8 @@ IMS.Quick_identifier.prototype.format_item=function(){
 IMS.Quick_identifier.prototype.toString=function(){
   return this.data.quick_identifier_value;
 }
+
+// this is what actually gets displayed in the Participant table.
 IMS.Quick_identifier.prototype.html=function(){
   var org=this.data.organism_common_name;
   var id=this.data.quick_identifier_value;

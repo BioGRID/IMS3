@@ -289,14 +289,14 @@ IMS={
     tbl.find('.footnotes *').addClass('hide');
 
     // Populate the table with results.
-    var out=[];
+    var out={};
     for(var row in results){
       var i=results[row];
       if(!i.table){
         i=new Table(results[row]);
       }
       IMS.add_row(thead,tbody,i);
-      out.push(i);
+      out[i.id]=i;
     }
 
     // So we can use some CSS to align the numbers right but still
@@ -331,7 +331,7 @@ IMS={
      function(results){
        var opts='';
        for(row in results){
-         result=new Table(results[row]);
+         var result=new Table(results[row]);
          opts+=result.option_html(9);
        }
        //Table.prototype.tag_html().html('').append(opts);
@@ -370,8 +370,8 @@ IMS={
           interaction_id:interaction_id,
           table:'interaction_participants'
         },function(results){
-            interaction.participants=IMS.redo_table
-            (results,IMS.Interaction_participant);
+            interaction.participants=
+              IMS.redo_table(results,IMS.Interaction_participant);
           }
       );
     }else{
@@ -505,8 +505,10 @@ IMS._table.prototype={
   dd:function(dt){
     if(this.data[dt]){
       return this.data[dt];
+    }else if(this.data[dt+'_id']){
+      return '<span class="bg-danger">'+this.data[dt+'_id']+'</span>';
     }
-    return '<span class="bg-danger">'+this.data[dt+'_id']+'</span>';
+    return '<span class="bg-danger">This is a bug &#10233 &#128027</span>';
   },
 
 
@@ -726,28 +728,43 @@ $(document).ready(function(){
     tbl.trigger('update'); // for tablesorter
   });
 
+
   $('#add_participant').click(function(){
     var i=IMS.pub.interaction;
     if(!i){
       alert('No interaction selected');
       return;
     }
+    $('#participant_selector').modal();
+  });
 
-    // Create the new, empty, participant tag
-    var result=new IMS.Interaction_participant({
-      interaction_participant_id:--i.new_id,
-      interaction_id:i.primary_id(),
-      participant_id:'add',
-      participant_role_id:$('.participant_role').val(),
-      interaction_participant_status:'active',
-      interaction_participant_addeddate:'new'
-    });
-    i.participants.push(result);
+  $('#participant_selector .ok').click(function(){
+    var i=IMS.pub.interaction;
 
-    var tbl=IMS.Interaction_participant.prototype.$('Table');
-    IMS.add_row(tbl.find('thead'),tbl.find('tbody'),result);
-    IMS.update_danger(tbl);
-    tbl.trigger('update');
+    IMS.query(
+      {participant_value:$('#quick').val(),
+       participant_type_id:$('.quick_type').val(),
+       table:'participants'},
+      function(results){
+        // need to check we only have one result.
+        var ip=new IMS.Interaction_participant({
+          interaction_participant_id:--i.new_id,
+          interaction_id:i.primary_id(),
+          participant_id:results[0].participant_id,
+          participant_role_id:$('.participant_role').val(),
+          interaction_participant_status:'active',
+          interaction_participant_addeddate:'new'
+        });
+        i.participants[ip.id]=ip;
+        i.participant=ip;
+
+        var tbl=ip.$('table');
+        IMS.add_row(tbl.find('thead'),tbl.find('tbody'),ip); //.click(IMS.click_participant)
+        IMS.update_danger(tbl);
+        tbl.trigger('update');
+
+        $('#participant_selector').modal('hide');
+      });
   });
 
 

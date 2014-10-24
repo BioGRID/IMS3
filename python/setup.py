@@ -2,7 +2,7 @@ from distutils.core import setup
 from glob import glob
 
 setup(name='python-BioGRID-IMS',
-      version='0.1',
+      version='0.2',
       author='Sven Heinicke',
       author_email='sven@genomics.princeton.edu',
       url='http://wiki.thebiogrid.org/doku.php/interaction_management_system',

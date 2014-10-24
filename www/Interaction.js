@@ -1,7 +1,9 @@
 IMS.Interaction=function(data){
   this.data=data;
   this.new_id=0;
-  this.participants=[];
+
+  this.participants={};  // list of participants (er, Interaction_participants)
+  this.participant=null; // selected participant (ibid.)
 }
 
 IMS.Interaction.prototype=new IMS._table();

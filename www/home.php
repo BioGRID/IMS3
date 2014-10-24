@@ -126,7 +126,7 @@ $ims=new IMS\config('ims.json');
 	</select>
       </div> 
 
-      <table class="participants table"><caption>
+      <table class="participants table table-hover"><caption>
 	  <dl class="footnotes dl-horizontal">
 	    <dt class="asterisk hide">*</dt><dd class="asterisk hide">Unknown Participant</dd>
 	  </dl>
@@ -170,7 +170,7 @@ $ims=new IMS\config('ims.json');
 	  <li class="active"><a href="#quick_participants" data-toggle="tab">Quick Participants</a></li>
 	  <li><a href="#force_participants" data-toggle="tab">Forced Participants</a></li>
 	</ul>
-
+	
 	<div class="container">
 	  <select class="quick_type"></select>
 	  <select class="quick_organism"></select>
@@ -178,7 +178,7 @@ $ims=new IMS\config('ims.json');
 
 	<div class="tab-content container">
 	  <div class="tab-pane active" id="quick_participants">
-	    <input type="hidden" id="quick" style="width:75%">
+	    <input type="hidden" id="quick" style="width:60ex">
 	    
 	  </div>
 	  <div class="tab-pane" id="force_participants">
@@ -187,7 +187,10 @@ $ims=new IMS\config('ims.json');
 	</div>
 
       </div><div class="modal-footer">
-	<p>footer</p>
+	<p>
+	  <button class="btn btn-default" data-dismiss="modal">Cancel</a>
+	  <button class="btn btn-primary ok">OK</button>
+	</p>
       </div>
     </div>
   </div>

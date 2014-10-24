@@ -1,7 +1,7 @@
 
 # Version Numbers, generally to be passed to RPMBUILD
-VERSION:=0.8
-RELEASE:=3
+VERSION:=0.9
+RELEASE:=1
 
 # Organize phony Targets
 CLEANING_T:=ims3clean mostlyclean clean distclean
@@ -39,11 +39,10 @@ VERSION_PHP=www/ims/version.php
 $(VERSION_PHP): Makefile
 	echo -e '<?php\ndefine("IMS3_VERSION","${VERSION}-${RELEASE}");' > $@
 
-
 # Creates python and IMS3 rpms.
 rpms: python-rpms rpm
 
-rpm: $(RPM_FILE)
+rpm: $(RPM_FILE) $(VERSION_PHP)
 
 # Create IMS3 RPM file
 $(RPM_FILE): $(TAR_FILE)

@@ -25,3 +25,4 @@ IMS.Interaction_participant.prototype.dts=function(){
     'interaction_participant_status',
   ];
 }
+

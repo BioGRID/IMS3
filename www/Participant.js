@@ -11,17 +11,15 @@ IMS.Participant.prototype._const={
  * static
  */
 
-
+/*
 IMS.Participant.prototype.ok=function(col,val,tag){
   if((this.primary_col()==col) && (val=='add')){
-    console.log(col,val);
     tag.html('<button data-toggle="modal" data-target="#participant_selector">add</button>');
-
     return false;
   }
   return true;
 }
-
+*/
 
 IMS.Participant.prototype.html=function(){
   var clazz='id'+this.data.participant_id+'type'+this.data.participant_type_id;
@@ -51,14 +49,3 @@ IMS.Participant.prototype.html=function(){
   }
   return '<span class="'+clazz+'">'+clazz+'</span>';
 }
-
-
-/*
-
-$(document).ready(function(){
-  // prep the HTML in home.php to select a participant
-
-  console.log('yup, got it');
-});
-
-*/
