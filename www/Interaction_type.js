@@ -16,3 +16,10 @@ IMS.Interaction_type.prototype._const={
 IMS.Interaction_type.prototype.html=function(){
   return this.data.interaction_type_name;
 }
+
+/*
+
+	      <h2>Bait</h2>
+	      <select class="quick_organism"></select>
+	      <textarea></textarea>
+*/
