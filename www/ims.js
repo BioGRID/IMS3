@@ -151,10 +151,11 @@ IMS={
   },
 
   /*
-   * Send a request that will only get one row.  Checks a store to see
-   * if we already have it.
+   *  Where to store what item.  The primary_key var is actually the
+   * name of the primary_key column of an SQL table, to the
+   * primary_key value.
    */
-  cache:function(request,act,primary_key){
+  whichStore:function(primary_key){
     var store=localStorage;
     switch(primary_key){
       // There could be a bunch of participants, so lets not remember
@@ -162,22 +163,44 @@ IMS={
       case 'participant_id':
       store=sessionStorage;
     }
+    return store;
+  },
+
+
+  _storeItems:function(datum,primary_col){
+    var store=IMS.whichStore(primary_col);
+    for(var i in datum){
+      var data=datum[i];
+
+      // Create a place to store the data incase we don't already have
+      // a place.
+      var have=store.getItem(primary_col);
+      have=(null==have)?{}:JSON.parse(have);
+
+      // for now we only can cache one item at a time.
+      have[data[primary_col]]=data;
+      store.setItem(primary_col,JSON.stringify(have));
+    }
+  },
+
+
+  /*
+   * Send a request that will only get one row.  Checks a store to see
+   * if we already have it.
+   */
+  cache:function(request,act,primary_key){
+    var store=IMS.whichStore(primary_key);
     var have=store.getItem(primary_key);
+
     have=(null==have)?{}:JSON.parse(have);
     if(have[request[primary_key]]){
       return act([have[request[primary_key]]]);
     }else{
-      IMS.query(request,function(data){
+      IMS.query(request,function(datum){
         // Hurry up and update the user feedback.
-        act(data);
+        act(datum);
 
-        // We do this again since the ajax query is asynchronous.
-        have=store.getItem(primary_key);
-        have=(null==have)?{}:JSON.parse(have);
-
-        // for now we only can cache one item at a time.
-        have[data[0][primary_key]]=data[0];
-        store.setItem(primary_key,JSON.stringify(have));
+        IMS._storeItems(datum,primary_key);
       });
     }
     return false;
@@ -326,22 +349,29 @@ IMS={
   }, // redo_table
 
   populate_select:function(Table){
+    var sel=Table.prototype.$('select');
+
     IMS.query
     ({table:Table.prototype.table()},
      function(results){
+       IMS._storeItems(results,Table.prototype.primary_col());
+
        var opts='';
        for(row in results){
          var result=new Table(results[row]);
          opts+=result.option_html(9);
        }
        //Table.prototype.tag_html().html('').append(opts);
-       var sel=Table.prototype.$('select');
-       if(1!=sel.length){
-         alert('Unable to populate '.Table.prototype._const.table);
+       if(0==sel.length){
+         alert('Unable to populate ' + Table.prototype._const.table);
        }else{
          sel.html('').append(opts);
        }
      });
+
+    // returned item might not be filled yet, but the above IMS.query
+    // should fix that.
+    return sel;
   },
 
 
@@ -705,9 +735,15 @@ $(document).ready(function(){
    * Stuff for creating new Interactions and Participants
    */
 
-  IMS.populate_select(IMS.Interaction_type);
+  /*
+
   IMS.populate_select(IMS.Participant_role);
   IMS.populate_select(IMS.Participant_type);
+   */
+  IMS.populate_select(IMS.Interaction_type).
+    change(function(){
+    console.log($(this).val());
+  });
   IMS.populate_select(IMS.Quick_organism);
 
   // how to add an interaction
