@@ -183,6 +183,12 @@ IMS={
     }
   },
 
+  asyncItem:function(Table,pk,act){
+    var r={table:Table.prototype.table()};
+    var pc=Table.prototype.primary_col();
+    r[pc]=pk;
+    IMS.cache(r,act,pc);
+  },
 
   /*
    * Send a request that will only get one row.  Checks a store to see
@@ -348,7 +354,7 @@ IMS={
     return out;
   }, // redo_table
 
-  populate_select:function(Table){
+  populate_select:function(Table,act){
     var sel=Table.prototype.$('select');
 
     IMS.query
@@ -366,6 +372,9 @@ IMS={
          alert('Unable to populate ' + Table.prototype._const.table);
        }else{
          sel.html('').append(opts);
+         if(act){
+           act.call(sel);
+         }
        }
      });
 
@@ -740,12 +749,11 @@ $(document).ready(function(){
   IMS.populate_select(IMS.Participant_role);
   IMS.populate_select(IMS.Participant_type);
    */
-  IMS.populate_select(IMS.Interaction_type).
-    change(function(){
-    console.log($(this).val());
-  });
+  IMS.populate_select(IMS.Interaction_type,IMS.Interaction_type.fieldsets).
+    change(IMS.Interaction_type.fieldsets);
   IMS.populate_select(IMS.Quick_organism);
 
+  /*
   // how to add an interaction
   $('#add_interaction').click(function(){
     var result=new IMS.Interaction({
@@ -763,7 +771,7 @@ $(document).ready(function(){
     IMS.update_danger(tbl);
     tbl.trigger('update'); // for tablesorter
   });
-
+   */
 
   $('#add_participant').click(function(){
     var i=IMS.pub.interaction;

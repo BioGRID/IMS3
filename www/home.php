@@ -25,12 +25,12 @@ $ims=new IMS\config('ims.json');
 <script src="Unknown_participant.js"></script>
 </head><body>
 
-<div class="container">
+<div class="container-fluid">
 <h1 id="title"><?php print $ims->title(); ?> <small>Ver:<?php print $ims->version(); ?></small></h1>
 <p class="h6" id="user"></p>
 </div>
 
-<div class="container">
+<div class="container-fluid">
 <ul class="nav nav-tabs">
   <li><a href="#log_tab" data-toggle="tab">Log (<span class="log-count">0</span>)</a></li>
   <li class="active"><a href="#interaction_tab" data-toggle="tab">Interactions</a></li>
@@ -38,7 +38,7 @@ $ims=new IMS\config('ims.json');
 </ul>
 </div>
 
-<div class="tab-content container">
+<div class="tab-content container-fluid">
 
   <div class="tab-pane" id="log_tab">
     <h1>Messages</h1>
@@ -69,7 +69,6 @@ $ims=new IMS\config('ims.json');
 	</div><!-- .modal-content -->
       </div><!-- .modal-dialog -->
     </div><!-- .modal #localStorage -->
-
   </div><!-- #log_tab -->
 
   <div class="tab-pane active" id="interaction_tab">
@@ -78,15 +77,29 @@ $ims=new IMS\config('ims.json');
     <blockquote class="dropdown" id="publication"></blockquote>
 
     <div class="ifpub hidden">
-      <h2>
-	Interactions
-	<span class="hidden user">
-	  <select class="interaction_types"></select>
-	  <button id="add_interaction">&#x2386;</button>
-	</span>
-      </h2>
+      <h1>Create Interaction
+	<select class="interaction_types h5"></select>
+      </h1>
 
-
+      <div class="container-fluid hidden user">
+	<div class="row">
+	  <fieldset class="col-md-4 colA">
+	    <legend>A</legend>
+	    <select class="quick_organism"></select>
+	    <textarea></textarea>
+	  </fieldset>
+	  <fieldset class="col-md-4 colB" disabled>
+	    <legend>B</legend>
+	    <select class="quick_organism"></select>
+	    <textarea></textarea>
+	  </fieldset>
+	  <div class="col-md-4">
+	    <p>Fav ontology terms go here.</p>
+	  </div>
+	</div><!-- .row -->
+      </div>
+      
+      <h2>Interactions</h2>
       <div class="pager">
 	Page: <select class="gotoPage"></select>
 	<button class="first" title="First page">⇤</button>
@@ -103,13 +116,8 @@ $ims=new IMS\config('ims.json');
 	</select>
       </div> 
       <table class="interactions table table-hover"><thead/><tbody/></table>
-      <h3>
-	Participants
-	<span class="hidden user">
-	  <select class="participant_role"></select>
-	  <button id="add_participant">&#x2386;</button>
-	</span>
-      </h3>
+
+      <h2>Participants</h2>
       <div class="pager">
 	Page: <select class="gotoPage"></select>
 	<button class="first" title="First page">⇤</button>
@@ -159,7 +167,7 @@ $ims=new IMS\config('ims.json');
   </div>
 </div>
 
-<div class="modal fade" id="participant_selector">
+<!-- div class="modal fade" id="participant_selector">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
@@ -171,12 +179,12 @@ $ims=new IMS\config('ims.json');
 	  <li><a href="#force_participants" data-toggle="tab">Forced Participants</a></li>
 	</ul>
 	
-	<div class="container">
+	<div class="container-fluid">
 	  <select class="quick_type"></select>
 	  <select class="quick_organism"></select>
 	</div>
 
-	<div class="tab-content container">
+	<div class="tab-content container-fluid">
 	  <div class="tab-pane active" id="quick_participants">
 	    <input type="hidden" id="quick" style="width:60ex">
 	    
@@ -194,7 +202,7 @@ $ims=new IMS\config('ims.json');
       </div>
     </div>
   </div>
-<div>
+<div -->
 
 
 </body></html>
