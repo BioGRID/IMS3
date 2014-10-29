@@ -16,3 +16,19 @@ IMS.Participant_role.prototype._const={
 IMS.Participant_role.prototype.html=function(){
   return this.data.participant_role_name;
 }
+
+/*
+ * static
+ */
+
+// Which column should this role be represented in the Create
+// Interaction section.  The switch in an participant_role_id SQL
+// column.  See Participant.sql and Interaction_type.js files.
+IMS.Participant_role.prototype.col=function(){
+  var col='A';
+  switch(this.primary_id()){
+    case '3': // hit
+    col='B';
+  }
+  return $('fieldset.col'+col);
+}

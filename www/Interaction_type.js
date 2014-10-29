@@ -42,7 +42,7 @@ IMS.Interaction_type.prototype.html=function(){
 
 // Numbers in the list returned by this function are
 // participant_role_id as defined in the participant_roles table, from
-// the Particiant.sql file.
+// the Particiant.sql file.  Check out Participant_role.js too.
 IMS.Interaction_type.prototype.roles=function(){
   switch(this.data.interaction_type_name){
     case('Complex'):
@@ -56,26 +56,22 @@ IMS.Interaction_type.prototype.roles=function(){
 
 
 IMS.Interaction_type.prototype.fieldsets=function(){
-  var cols=[$('fieldset.colA'),$('fieldset.colB')];
+  // first disable everything
+  $('fieldset.interactions').
+    attr('disabled',true).
+    removeAttr('id').
+    find('legend').text('unused');
+
   var roles=this.roles();
+  for(var i in roles){
+    var pk=roles[i];
 
-  for(var i in cols){
-    var col=cols[i];
-
-    if(roles[i]){
-      var pk=roles[i];
-      IMS.asyncItem(IMS.Participant_role,pk,function(datum){
-        r=new IMS.Participant_role(datum[0]);
-        col.attr('disabled',false);
-        col.attr('id','col_' + r.primary_id());
-        col.find('legend').text(r.html());
-      })
-
-    }else{
-      col.attr('disabled',true);
-      col.removeAttr('id');
-      col.find('legend').text('unused');
-    }
+    IMS.asyncItem(IMS.Participant_role,pk,function(datum){
+      r=new IMS.Participant_role(datum[0]);
+      r.col().
+        attr('disabled',false).
+        attr('id','col_' + r.primary_id()).
+        find('legend').text(r.html());
+      });
   }
-
 }
