@@ -31,3 +31,9 @@ IMS.Interaction.prototype.dts=function(){
   ];
 };
 
+
+// types should be loaded at startup, so I'm not worried about them
+// not being there.
+IMS.Interaction.prototype.type=function(){
+  return IMS.getItem(IMS.Interaction_type,this.data.interaction_type_id);
+}

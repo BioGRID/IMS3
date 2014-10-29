@@ -13,8 +13,8 @@ IMS.Interaction_type.fieldsets=function(sel){
   IMS.asyncItem
   (IMS.Interaction_type,val,
    function(datum){
-         var me=new IMS.Interaction_type(datum[0]);
-         me.fieldsets();
+     var me=new IMS.Interaction_type(datum[0]);
+     me.fieldsets();
    });
 }
 
@@ -30,38 +30,52 @@ IMS.Interaction_type.prototype._const={
   html_class:'interaction_types'
 }
 
+
 /*
  * nonstatic
  */
+
 
 IMS.Interaction_type.prototype.html=function(){
   return this.data.interaction_type_name;
 }
 
-IMS.Interaction_type.prototype.fieldsets=function(){
-  var A=$('fieldset.colA');
-  var B=$('fieldset.colB');
-
-  // The items 'unspecified', 'bait', and 'prey' are
-  // participant_role_name entries.  If they change in the database,
-  // you will have to change them here.  But there is no connection in
-  // the database about what interaction_type wants what
-  // participant_role.
-
+// Numbers in the list returned by this function are
+// participant_role_id as defined in the participant_roles table, from
+// the Particiant.sql file.
+IMS.Interaction_type.prototype.roles=function(){
   switch(this.data.interaction_type_name){
     case('Complex'):
-    A.attr('disabled',false);
-    A.find('legend').text('unspecified');
-    B.attr('disabled',true);
-    B.find('legend').text('disabled');
+    return [1]; // unspecified
     break;
     case('Protein-Protein'):
-    A.attr('disabled',false);
-    A.find('legend').text('bait');
-    B.attr('disabled',false);
-    B.find('legend').text('prey');
-    break;
-    default:
-    alert('Unknown participant_type selected.');
+    return [2,3]; // bait, hit
   }
+  alert('Unknown participant_type selected.');
+}
+
+
+IMS.Interaction_type.prototype.fieldsets=function(){
+  var cols=[$('fieldset.colA'),$('fieldset.colB')];
+  var roles=this.roles();
+
+  for(var i in cols){
+    var col=cols[i];
+
+    if(roles[i]){
+      var pk=roles[i];
+      IMS.asyncItem(IMS.Participant_role,pk,function(datum){
+        r=new IMS.Participant_role(datum[0]);
+        col.attr('disabled',false);
+        col.attr('id','col_' + r.primary_id());
+        col.find('legend').text(r.html());
+      })
+
+    }else{
+      col.attr('disabled',true);
+      col.removeAttr('id');
+      col.find('legend').text('unused');
+    }
+  }
+
 }

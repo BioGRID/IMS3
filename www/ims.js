@@ -190,6 +190,22 @@ IMS={
     IMS.cache(r,act,pc);
   },
 
+  // Returns the on item from a local store.  If not it store it
+  // carps.
+  getItem:function(Table,pk){
+    var pc=Table.prototype.primary_col();
+    var store=IMS.whichStore(pc);
+    var have=store.getItem(pc);
+    if(have){
+      have=JSON.parse(have);
+      var out=have[pk];
+      if(out){
+        return new Table(out);
+      }
+    }
+    alert('Request for ' + pc + " not loaded from database or doesn't exist.");
+  },
+
   /*
    * Send a request that will only get one row.  Checks a store to see
    * if we already have it.
@@ -745,13 +761,30 @@ $(document).ready(function(){
    */
 
   /*
-
   IMS.populate_select(IMS.Participant_role);
   IMS.populate_select(IMS.Participant_type);
    */
   IMS.populate_select(IMS.Interaction_type,IMS.Interaction_type.fieldsets).
     change(IMS.Interaction_type.fieldsets);
   IMS.populate_select(IMS.Quick_organism);
+
+  $('#stage_interaction').click(function(){
+    var n=new IMS.Interaction({
+      interaction_id:--IMS.pub.new_id,
+      interaction_type_id:$('.interaction_types').val(),
+      interaction_source_id:1,
+      interaction_status:'normal',
+      modification_type:'new'
+    });
+    var t=n.type();
+    var r=t.roles();
+    var fs=[]; // fieldset content
+    for(var i in r){
+      var role=r[i];
+
+    }
+
+  });
 
   /*
   // how to add an interaction

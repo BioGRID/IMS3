@@ -25,7 +25,9 @@ CREATE TABLE IF NOT EXISTS participant_roles(
        participant_role_status	  ENUM('active','inactive')NOT NULL DEFAULT 'active'
 );
 
-INSERT INTO participant_roles(participant_role_name)VALUES
-       ('unspecified'),
+-- These are refereed to by participant_role_id in the
+-- Interaction_type.js file.  If they change this changes too.
+INSERT INTO participant_roles(participant_role_id,participant_role_name)VALUES
+       (1,'unspecified'),
+       (2,'bait'),(3,'hit');
 --       ('ancillary'),('suppressor'),('suppressed'),
-       ('bait'),('prey');

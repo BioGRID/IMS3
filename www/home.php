@@ -83,13 +83,13 @@ $ims=new IMS\config('ims.json');
 
       <div class="container-fluid hidden user">
 	<div class="row">
-	  <fieldset class="col-md-4 colA">
-	    <legend>A</legend>
+	  <fieldset class="col-md-4 interactions colA">
+	    <legend>Column A</legend>
 	    <select class="quick_organism"></select>
 	    <textarea></textarea>
 	  </fieldset>
-	  <fieldset class="col-md-4 colB" disabled>
-	    <legend>B</legend>
+	  <fieldset class="col-md-4 interactions colB" disabled>
+	    <legend>Column B</legend>
 	    <select class="quick_organism"></select>
 	    <textarea></textarea>
 	  </fieldset>
@@ -97,6 +97,9 @@ $ims=new IMS\config('ims.json');
 	    <p>Fav ontology terms go here.</p>
 	  </div>
 	</div><!-- .row -->
+	<p>
+	  <button id="stage_interaction">Stage Interaction</button>
+	</p>
       </div>
       
       <h2>Interactions</h2>
