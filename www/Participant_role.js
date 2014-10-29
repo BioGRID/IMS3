@@ -10,12 +10,12 @@ IMS.Participant_role.prototype._const={
 }
 
 /*
- * nonstatic
+ * Strictly static.
  */
 
-IMS.Participant_role.prototype.html=function(){
-  return this.data.participant_role_name;
-}
+// A place to hold all roles by pk, so we don't make too many dup
+// instances.
+IMS.Participant_role.s={};
 
 /*
  * static
@@ -31,4 +31,43 @@ IMS.Participant_role.prototype.col=function(){
     col='B';
   }
   return $('fieldset.col'+col);
+}
+
+/*
+ * nonstatic
+ */
+
+IMS.Participant_role.prototype.html=function(){
+  return this.data.participant_role_name;
+}
+
+/*
+ * Still nonstatic, this items are to extract data from the HTML
+ * forms.
+ */
+
+// Returns the potentital participants in fieldset's textarea that, if
+// verified, will have this role.
+IMS.Participant_role.prototype.participants=function(){
+  var out=this.col().find('textarea').val().trim().split(/\s+/);
+
+  if((1==out.length) && (0==out[0].length)){
+    return [];
+  }
+
+  return out;
+}
+
+// Returns the current organism_id of the select organism.
+IMS.Participant_role.prototype.organism_id=function(){
+  return this.col().find('.quick_organism').val();
+}
+
+// Set up the fieldsets to reflect what we want.
+IMS.Participant_role.prototype.fieldset=function(){
+  this.col().
+    attr('disabled',false).
+    attr('id','col_' + this.primary_id()).
+    find('legend').text(this.html());
+
 }

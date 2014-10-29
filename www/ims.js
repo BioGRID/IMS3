@@ -203,6 +203,7 @@ IMS={
         return new Table(out);
       }
     }
+    console.log(pc);
     alert('Request for ' + pc + " not loaded from database or doesn't exist.");
   },
 
@@ -777,35 +778,20 @@ $(document).ready(function(){
       modification_type:'new'
     });
     var t=n.type();
-    var r=t.roles();
-    var fs=[]; // fieldset content
-    for(var i in r){
-      var role=r[i];
+    var ok=t.verify_counts();
 
+    if(ok){
+      // if we are here the counts should be correct, now we need to
+      // check the database to make sure the participants are valid.
+      alert('Yea!');
     }
 
-  });
 
-  /*
-  // how to add an interaction
-  $('#add_interaction').click(function(){
-    var result=new IMS.Interaction({
-      interaction_id:--IMS.pub.new_id,
-      interaction_type_id:$('.interaction_types').val(),
-      interaction_source_id:1,
-      interaction_status:'normal',
-      modification_type:'new'
-    });
-    IMS.pub.interactions[result.id]=result;
+  })
 
-    var tbl=IMS.Interaction.prototype.$('table');
-    IMS.add_row(tbl.find('thead'),tbl.find('tbody'),result).
-      click(IMS.click_interaction);
-    IMS.update_danger(tbl);
-    tbl.trigger('update'); // for tablesorter
-  });
-   */
 
+
+/*
   $('#add_participant').click(function(){
     var i=IMS.pub.interaction;
     if(!i){
@@ -814,6 +800,7 @@ $(document).ready(function(){
     }
     $('#participant_selector').modal();
   });
+*/
 
   $('#participant_selector .ok').click(function(){
     var i=IMS.pub.interaction;

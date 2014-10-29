@@ -52,3 +52,6 @@ fieldset textarea{
     margin-left:auto;
     margin-right:auto;
 }
+legend{
+    text-transform:capitalize;
+}
