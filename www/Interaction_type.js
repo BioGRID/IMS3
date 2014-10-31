@@ -89,6 +89,15 @@ IMS.Interaction_type.prototype.roles_forEach=function(act){
 } // roles_forEach
 
 
+
+// Sucks data out of the forms.  Checks that the number of
+// participants entered in each column is valid.  If not alerts() the
+// user.  if it is it returs a datastructure of the content thus:
+// {
+//  'A'=[org_id,part1,[part2,[part3]...]],
+//  'B'=[org_id,part1,[part2,[part3]...]]
+// }
+// Or just 'A'=... if a complex.
 IMS.Interaction_type.prototype.verify_counts=function(){
   var pps=[]; // potential participants by role
   var org=[]; // organism_ids by role
@@ -97,7 +106,6 @@ IMS.Interaction_type.prototype.verify_counts=function(){
           org[i]=role.organism_id();
         });
 
-  console.log(pps);
   if(this.data.interaction_type_name == 'Complex'){
     if (1 != pps.length){
       alert('Only one list of Participants please (bug).');
@@ -132,6 +140,41 @@ IMS.Interaction_type.prototype.verify_counts=function(){
 
   }
 
-  // return pps and org is some data structure.
-  return true;
+  // as pps and org should be the same length we can use the same
+  // index to loop through them.
+  var cns=['A','B']; // column names
+  var out={}
+  for(var i in pps){
+    out[cns[i]]=[org[i]].concat(pps[i]);
+  }
+  return out;
+}
+
+// takes output from true verify_count() and checks them with the
+// database.
+IMS.Interaction_type.prototype.verify_db=function(verified,success){
+      $.ajax(
+        {
+          type:'POST',
+          url:'verify.php',
+          dataType:'json',
+          data:verified
+        }
+      ).success(function(r){
+        var ok=r.ok;
+        delete r.ok;
+        if(0==Object.keys(r).length){
+          // all worked!
+          success(ok);
+        }else{
+          // Make more user friendly error message.
+          alert(JSON.stringify(r));
+        }
+
+      }).fail(function(){
+        alert('There is a bug verifying genes, please complain.');
+      });
+
+
+
 }

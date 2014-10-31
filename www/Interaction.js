@@ -35,5 +35,28 @@ IMS.Interaction.prototype.dts=function(){
 // types should be loaded at startup, so I'm not worried about them
 // not being there.
 IMS.Interaction.prototype.type=function(){
-  return IMS.getItem(IMS.Interaction_type,this.data.interaction_type_id);
+  if(!this._type){
+    this._type=IMS.getItem(IMS.Interaction_type,this.data.interaction_type_id);
+  }
+  return this._type;
+}
+
+// Stage the data if it's valid.
+IMS.Interaction.prototype.stage=function(){
+  t=this.type()
+  var ok=t.verify_counts();
+  if(ok){
+    // if we are here the counts should be correct, now we need to
+    // check the database to make sure the participants are valid.
+    var that=this;
+    t.verify_db(ok,function(verified){
+      // now we assume everything in verifies is, um, verified.
+      that._stage(verified);
+    });
+  }
+}
+
+// Blindly add the data.  Do this next
+IMS.Interaction.prototype._stage=function(v){
+  alert(JSON.stringify(v));
 }

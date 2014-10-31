@@ -174,8 +174,7 @@ class _Table
     return ' IN('.implode(',',$in).')';
   }
 
-  # Currently only being used by Publication whet making queries to
-  # PubMed
+  # Modify a table, use with caution.
   public function update($pk,$to){
     $c=get_called_class();
     $dbh=$this->pdo();
@@ -500,7 +499,7 @@ class User extends _Table
   
 }
 
-
+// wee but of a buffer so you can't query any table you would like.
 function table_factory($cfg,$qs)
 /* Will return an object for a given table. Or Null if not a valid
    table. */

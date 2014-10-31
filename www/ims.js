@@ -777,17 +777,8 @@ $(document).ready(function(){
       interaction_status:'normal',
       modification_type:'new'
     });
-    var t=n.type();
-    var ok=t.verify_counts();
-
-    if(ok){
-      // if we are here the counts should be correct, now we need to
-      // check the database to make sure the participants are valid.
-      alert('Yea!');
-    }
-
-
-  })
+    n.stage();
+  });
 
 
 
