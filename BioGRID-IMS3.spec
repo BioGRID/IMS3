@@ -20,6 +20,7 @@ Requires: php-mysql
 %{__install} -m 755 www/home.php $RPM_BUILD_ROOT%{ims_wwwdir}/home.php
 %{__install} -m 755 www/query.php $RPM_BUILD_ROOT%{ims_wwwdir}/query.php
 %{__install} -m 755 www/user.php $RPM_BUILD_ROOT%{ims_wwwdir}/user.php
+%{__install} -m 755 www/verify.php $RPM_BUILD_ROOT%{ims_wwwdir}/verify.php
 %{__install} -m 755 www/ims.js $RPM_BUILD_ROOT%{ims_wwwdir}/ims.js
 %{__install} -m 755 www/Interaction.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction.js
 %{__install} -m 755 www/Interaction_history.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_history.js
@@ -53,6 +54,7 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/home.php
 %{ims_wwwdir}/query.php
 %{ims_wwwdir}/user.php
+%{ims_wwwdir}/verify.php
 %{ims_wwwdir}/ims.js
 %{ims_wwwdir}/Interaction.js
 %{ims_wwwdir}/Interaction_history.js
@@ -78,37 +80,5 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Wed Aug 6 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.8-1
-- Server side now figures out if an interaction is activated or not
-
-* Fri Aug 1 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.7-2
-- Trying tablesorter.js instead of DataTables.js
-- Added delay to ajax calls
-
-* Wed Jul 23 2014 Sven Heinicke <sven@genomcis.princeton.edu> - 0.6-1
-- Now displays if interaction is DISABLED or ACTIVATED.
-- Started using DataTables.js.
-- Moved all third party JS files to CDN apart from select2.
-
-* Wed Jul 16 2014 Sven Heinicke <sven@genomcis.princeton.edu> - 0.5-3
-- Added ID Conversion tab, that mostly works.
-- Removed query limits for all by select2.
-
-* Wed Jul 09 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.4-2
-- Now trusts the OFFICAL SYMBOL in the quick_identifiers table.
-
-* Tue Jul 08 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.4-2
-- You can now drill down to interactors.
-
-* Mon Jun 30 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.4-1
-- Got publications columns to display more cleanly.
-
-* Thu Jun 26 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.2-1
-- Use more bootstrap stuff.
-
-* Tue Jun 24 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.1-1
-- Now fetches interaction_type and intering_sources.
-
-* Thu Jun 19 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.0-1
-- Initial build.
-
+* Thu Jun 19 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.10
+- Holding off change log until I think we have usable software.
