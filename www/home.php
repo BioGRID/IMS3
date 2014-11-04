@@ -85,11 +85,13 @@ $ims=new IMS\config('ims.json');
 	<div class="row">
 	  <fieldset class="col-md-4 interactions colA">
 	    <legend>Column A</legend>
+	    <input type="hidden" name="role">
 	    <select class="quick_organism"></select>
 	    <textarea></textarea>
 	  </fieldset>
 	  <fieldset class="col-md-4 interactions colB" disabled>
 	    <legend>Column B</legend>
+	    <input type="hidden" name="role">
 	    <select class="quick_organism"></select>
 	    <textarea></textarea>
 	  </fieldset>

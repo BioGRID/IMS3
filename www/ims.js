@@ -9,6 +9,11 @@ IMS={
    * First, a bunch af utilities.
    */
 
+  // get a unique list of items via Array.prototype.filter()
+  unique:function(v,i,a){
+    return i==a.indexOf(v);
+  },
+
   // Report errors, usually from the query.php script, on the log page.
   report_messages:function(messages){
     // Add the number of new messages to the current message count.
@@ -155,9 +160,9 @@ IMS={
    * name of the primary_key column of an SQL table, to the
    * primary_key value.
    */
-  whichStore:function(primary_key){
+  whichStore:function(primary_col){
     var store=localStorage;
-    switch(primary_key){
+    switch(primary_col){
       // There could be a bunch of participants, so lets not remember
       // them but for this session.
       case 'participant_id':
@@ -203,9 +208,10 @@ IMS={
         return new Table(out);
       }
     }
-    console.log(pc);
+    //console.log(pc);
     alert('Request for ' + pc + " not loaded from database or doesn't exist.");
   },
+
 
   /*
    * Send a request that will only get one row.  Checks a store to see
@@ -414,8 +420,7 @@ IMS={
     IMS.pub.interaction=interaction;
     interaction._tr.addClass('active');
 
-
-    if(0<interaction.participants.length){
+    if(0<Object.keys(interaction.participants).length){
       // If we already have participants, display them
       IMS.redo_table(interaction.participants,IMS.Interaction_participant);
     }else if(0<interaction_id){
@@ -770,28 +775,11 @@ $(document).ready(function(){
   IMS.populate_select(IMS.Quick_organism);
 
   $('#stage_interaction').click(function(){
-    var n=new IMS.Interaction({
-      interaction_id:--IMS.pub.new_id,
-      interaction_type_id:$('.interaction_types').val(),
-      interaction_source_id:1,
-      interaction_status:'normal',
-      modification_type:'new'
+    var it_id=$('.interaction_types').val(); // interaction_type_id
+    IMS.Interaction_type.async(function(it){
+      it.stage();
     });
-    n.stage();
   });
-
-
-
-/*
-  $('#add_participant').click(function(){
-    var i=IMS.pub.interaction;
-    if(!i){
-      alert('No interaction selected');
-      return;
-    }
-    $('#participant_selector').modal();
-  });
-*/
 
   $('#participant_selector .ok').click(function(){
     var i=IMS.pub.interaction;
@@ -817,8 +805,6 @@ $(document).ready(function(){
         IMS.add_row(tbl.find('thead'),tbl.find('tbody'),ip); //.click(IMS.click_participant)
         IMS.update_danger(tbl);
         tbl.trigger('update');
-
-        $('#participant_selector').modal('hide');
       });
   });
 

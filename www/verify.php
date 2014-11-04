@@ -4,6 +4,21 @@ require_once('ims/ims.php');
 header('Contest-type: text/plain');
 $cfg=new IMS\config('ims.json');
 
+# convert gene_id to participant_id
+function id_gene2part($gene_id,$cfg){
+  $qs=
+    [
+     'participant_type_id' => 1,
+     'participant_value'   => $gene_id,
+     ];
+
+  $p=new IMS\Participants($cfg,$qs);
+  $p->query();
+  $v=$p->fetch();
+  return $v['participant_id'];
+}
+
+
 # Each key in $_POST should contain a list.  Item zero being an
 # organism_id number, the rest being quick_identifier_value entries.
 
@@ -34,14 +49,13 @@ foreach($_POST as $col => $values){
       array_push($miss,$value);
       break;
     case 1:
-      array_push($ok[$col],[$got[0] => $value]);
+      array_push($ok[$col],[id_gene2part($got[0],$cfg) => $value]);
       break;
     default:
-      array_push($mult,$value);
+      array_push($mult,[$value => $got]);
     }
   }
 }
-
 
 // make a report for output
 $out=[];

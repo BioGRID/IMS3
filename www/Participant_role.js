@@ -65,9 +65,7 @@ IMS.Participant_role.prototype.organism_id=function(){
 
 // Set up the fieldsets to reflect what we want.
 IMS.Participant_role.prototype.fieldset=function(){
-  this.col().
-    attr('disabled',false).
-    attr('id','col_' + this.primary_id()).
-    find('legend').text(this.html());
-
+  var col= this.col().attr('disabled',false);
+  col.find('legend').text(this.html());
+  col.find('[name=role]').attr('value',this.primary_id());
 }

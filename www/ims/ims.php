@@ -394,6 +394,7 @@ class Interaction_types extends _Table
 {
   const TABLE='interaction_types';
   const PRIMARY_KEY='interaction_type_id';
+  #const NAME_COLUMN='participant_type_name';
   const STATUS_COLUMN='interaction_type_status';
   const DEFAULT_STATUS='active';
 }

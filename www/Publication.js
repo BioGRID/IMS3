@@ -35,3 +35,17 @@ IMS.Publication.prototype.format_item=function(){
 IMS.Publication.prototype.pmid=function(){
   return this.data.publication_pubmed_id;
 }
+
+// generates a new interaction.
+IMS.Publication.prototype.new_interaction=function(){
+  var i=new IMS.Interaction({
+    interaction_id:--this.new_id,
+    interaction_type_id:$('.interaction_types').val(),
+    interaction_source_id:1,
+    interaction_status:'normal',
+    modification_type:'new',
+    publication_id:this.pmid(),
+  });
+  this.interactions[i.primary_id()]=i;
+  return i;
+}

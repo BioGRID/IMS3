@@ -6,14 +6,28 @@ IMS.Interaction_type=function(data){
  * Strictly static!
  */
 
-// When we change what interaction type we are changeing.
+// Get the currently selected Interaction_type.primary_id
+IMS.Interaction_type.selected_id=function(){
+  return $(".interaction_types").val();
+},
+
+// run callback with the currently select Interactian_type object as
+// an argument.
+IMS.Interaction_type.async=function(callback){
+  var T=IMS.Interaction_type;
+  IMS.asyncItem(T,T.selected_id(),function(datum){
+    callback(new T(datum[0]));
+  })
+},
+
+// When we change what interaction type we are entering.
 IMS.Interaction_type.fieldsets=function(sel){
   var val=$(this).val();
 
-  $('fieldset.interactions').
-    attr('disabled',true).
-    removeAttr('id').
-    find('legend').text('unused');
+  // clear data about the columny
+  var col=$('fieldset.interactions').attr('disabled',true);
+  col.find('legend').text('unused');
+  col.find('[name=role]').removeAttr('value');
 
   IMS.asyncItem
   (IMS.Interaction_type,val,
@@ -25,6 +39,8 @@ IMS.Interaction_type.fieldsets=function(sel){
      });
    });
 }
+
+
 
 
 /*
@@ -174,7 +190,114 @@ IMS.Interaction_type.prototype.verify_db=function(verified,success){
       }).fail(function(){
         alert('There is a bug verifying genes, please complain.');
       });
+}
+
+// Stage the data, if it's valid.
+IMS.Interaction_type.prototype.stage=function(){
+  var ok=this.verify_counts();
+  if(ok){
+    // if we are here the counts should be correct, now we need to
+    // check the database to make sure the participants are valid.
+    var that=this;
+    this.verify_db(ok,function(verified){
+      // now we assume everything in verifies is, um, verified.
+      that._stage(verified);
+    });
+  }
+}
+
+// We now assume the data is verified
+IMS.Interaction_type.prototype._stage=function(verified){
+  // Will have to worry about having multiple types when I get
+  // multiple type to work with.
+  //var participant_type_id=1; // Gene, defined in Participant.sql
+
+  // First get a unique list of participants_ids
+  var participant_values=[];
+  for(var col in verified){
+    for(var part in verified[col]){
+      participant_values.push(Object.keys(verified[col][part])[0]);
+    }
+  }
+  participant_values=participant_values.filter(IMS.unique);
+
+  // Fetch data about each participant from the database
+  var it=this; // interaction_type
+  IMS.query({table:'participants',participant_id:participant_values.join('|')},function(result){
+    var ps={}; // participants
+    for(var o in result){
+      var p=new IMS.Participant(result[o]);
+      ps[p.primary_id()]=p;
+    }
+    // Confirm here that for every member of participant_values we
+    // have a items in the ps var.  We don't do this yet!!
+
+    //now we should have a unique Object of all the participants, we
+    //need to create interaction_participant instances.  First, when
+    //we only have one role, Complex:
+    roles=it.roles;
+    var tbl;
+    switch(roles.length){
+      case 1:
+      // here, we have one interaction with as many participants as
+      // are entered.
+      var r=roles[0];
+      var i=IMS.pub.new_interaction();
+      for(var p in ps){
+        i.new_interaction_participant(r.primary_id(),p);
+      }
+      tbl=i.add_row();
+      break;
+      case 2:
+      tbl=it.add_pairs(verified);
+      break;
+      default:
+      alert("Danger Jill Robinson");
+    }
+    IMS.update_danger(tbl);
+
+  });
+
+}
 
 
 
+IMS.Interaction_type.prototype.add_pairs=function(verified){
+  var tbl;
+  var A=verified.A;
+  var B=verified.B;
+  var roleAid=this.roles[0].primary_id();
+  var roleBid=this.roles[1].primary_id();
+
+  if(A.length==B.length){
+    for(var n in A){
+      var a=A[n];
+      var b=B[n];
+      var i=IMS.pub.new_interaction();
+      i.new_interaction_participant(roleAid,Object.keys(a)[0]);
+      i.new_interaction_participant(roleBid,Object.keys(b)[0]);
+      tbl=i.add_row();
+    }
+  }else if(1==A.length){
+    var a=A[0];
+    for(var n in B){
+      var b=B[n];
+      var i=IMS.pub.new_interaction();
+      i.new_interaction_participant(roleAid,Object.keys(a)[0]);
+      i.new_interaction_participant(roleBid,Object.keys(b)[0]);
+      tbl=i.add_row();
+    }
+  }else if(1==B.length){
+    var b=B[0];
+    for(var n in A){
+      var a=A[n];
+      var i=IMS.pub.new_interaction();
+      i.new_interaction_participant(roleAid,Object.keys(a)[0]);
+      i.new_interaction_participant(roleBid,Object.keys(b)[0]);
+      tbl=i.add_row();
+    }
+  }else{
+    alert('If you see this something went wrong.');
+  }
+  return tbl;
 }

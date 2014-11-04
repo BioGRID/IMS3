@@ -13,6 +13,7 @@ IMS.Interaction.prototype._const={
   html_class:'interactions'
 };
 
+
 /*
  * static
  */
@@ -31,32 +32,28 @@ IMS.Interaction.prototype.dts=function(){
   ];
 };
 
+/*
+ * non static
+ */
 
-// types should be loaded at startup, so I'm not worried about them
-// not being there.
-IMS.Interaction.prototype.type=function(){
-  if(!this._type){
-    this._type=IMS.getItem(IMS.Interaction_type,this.data.interaction_type_id);
-  }
-  return this._type;
+IMS.Interaction.prototype.new_interaction_participant=function(role_id,participant_id){
+  var ip=new IMS.Interaction_participant({
+    interaction_participant_id:--this.new_id,
+    interaction_id:this.primary_id(),
+    participant_id:participant_id,
+    participant_role_id:role_id,
+    interaction_participant_status:'active',
+    interaction_participant_addeddate:'not added',
+  });
+  this.participants[ip.primary_id()]=ip;
+  return ip;
 }
 
-// Stage the data if it's valid.
-IMS.Interaction.prototype.stage=function(){
-  t=this.type()
-  var ok=t.verify_counts();
-  if(ok){
-    // if we are here the counts should be correct, now we need to
-    // check the database to make sure the participants are valid.
-    var that=this;
-    t.verify_db(ok,function(verified){
-      // now we assume everything in verifies is, um, verified.
-      that._stage(verified);
-    });
-  }
-}
-
-// Blindly add the data.  Do this next
-IMS.Interaction.prototype._stage=function(v){
-  alert(JSON.stringify(v));
+IMS.Interaction.prototype.add_row=function(){
+  var tbl=this.$('table');
+  var thead=tbl.find('thead');
+  var tbody=tbl.find('tbody');
+  IMS.add_row(thead,tbody,this).click(IMS.click_interaction);
+  //tbl.trigger('update');
+  return tbl;
 }
