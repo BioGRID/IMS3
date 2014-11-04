@@ -6,12 +6,13 @@ CREATE TABLE IF NOT EXISTS participant_types(
        participant_type_addeddate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-INSERT INTO participant_types(participant_type_name)VALUES('Gene');
+-- See Interaction.js for a if this participant_type_id value.
+INSERT INTO participant_types(participant_type_id,participant_type_name)VALUES(1,'Gene');
 
 CREATE TABLE IF NOT EXISTS participants(
        participant_id	     BIGINT(10)PRIMARY KEY AUTO_INCREMENT,
        participant_value     BIGINT(10)NOT NULL, -- phony foreign key
-       participant_type_id   BIGINT(10)NULL, -- null meant unknow participant
+       participant_type_id   BIGINT(10)NULL, -- null means unknown participant
        participant_addeddate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
        participant_status    ENUM('active','inactive')NOT NULL DEFAULT 'active',
        FOREIGN KEY(participant_type_id)REFERENCES participant_types(participant_type_id),
