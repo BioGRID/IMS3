@@ -706,6 +706,7 @@ $(document).ready(function(){
     },
     formatSelection:function(pub){
       IMS.set_publication(pub); // maybe this should be in a button
+      $('.ifpub').removeClass('hidden');
       return pub.format_item();
     },
     ajax:IMS.ajax_query(
@@ -721,7 +722,6 @@ $(document).ready(function(){
           var out=[];
           for(var row in data.results){
             out.push(new IMS.Publication(data.results[row]));
-            $('.ifpub').removeClass('hidden');
           }
           return {results:out};
         }
