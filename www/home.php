@@ -99,9 +99,7 @@ $ims=new IMS\config('ims.json');
 	    <p>Fav ontology terms go here.</p>
 	  </div>
 	</div><!-- .row -->
-	<p>
-	  <button id="stage_interaction">Stage Interaction</button>
-	</p>
+	<p><button id="commit">Commit</button></p>
       </div>
       
       <h2>Interactions</h2>

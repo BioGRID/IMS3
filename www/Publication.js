@@ -36,16 +36,23 @@ IMS.Publication.prototype.pmid=function(){
   return this.data.publication_pubmed_id;
 }
 
-// generates a new interaction.
-IMS.Publication.prototype.new_interaction=function(){
-  var i=new IMS.Interaction({
-    interaction_id:--this.new_id,
-    interaction_type_id:$('.interaction_types').val(),
-    interaction_source_id:1,
-    interaction_status:'normal',
-    modification_type:'new',
-    publication_id:this.pmid(),
+IMS.Publication.prototype.commit=function(){
+  // first we get the interaction_type
+  var it_id=$('.interaction_types').val();
+  IMS.Interaction_type.async(function(){
+    // get a list of valid interaction pairs
+    var got=this.organize();
+    var request={
+      type:'POST',
+      url:'commit.php',
+      dataType:'json',
+      data:{'interactions':got},
+    }
+    $.ajax(request).
+      fail(function(){
+      alert('something when wrong commiting the interactions');
+    }).success(function(){
+      alert('yea');
+    });
   });
-  this.interactions[i.primary_id()]=i;
-  return i;
 }

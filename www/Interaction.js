@@ -57,3 +57,15 @@ IMS.Interaction.prototype.add_row=function(){
   //tbl.trigger('update');
   return tbl;
 }
+
+/*
+IMS.Interaction.prototype.data_summary=function(){
+  out=this.data;
+  out.participants=[];
+  for(var ip_id in this.participants){
+    ip=this.participants[ip_id];
+    out.participants.push(ip.data);
+  }
+  return out;
+}
+*/

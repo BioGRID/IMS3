@@ -2,9 +2,6 @@
 require_once('ims/ims.php');
 $cfg=new IMS\config('ims.json');
 
-// Header to use if we fail.
-const FAIL='HTTP/1.1 403 Forbidden';
-
 if('POST'==$_SERVER['REQUEST_METHOD']){
   // Only check password if we are POSTed to.
 
@@ -26,17 +23,11 @@ if('POST'==$_SERVER['REQUEST_METHOD']){
 	]);
   }else{
     // tried to auth, but it failed
-    header(FAIL);
+    header('HTTP/1.1 403 Forbidden');
     exit(1);
   }
 }else{
-  $user=$cfg->verify_user();
-  if($user){
-  }else{
-    // either not logged in, or the cookie was wrong.
-    header(FAIL);
-    exit(1);
-  }
+  $user=$cfg->verify_user_or_die();
 }
 
 // This will evetually return data about what papers it wants the

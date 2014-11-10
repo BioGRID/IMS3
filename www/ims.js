@@ -188,11 +188,11 @@ IMS={
     }
   },
 
-  asyncItem:function(Table,pk,act){
+  asyncItem:function(Table,pk,callback){
     var r={table:Table.prototype.table()};
     var pc=Table.prototype.primary_col();
     r[pc]=pk;
-    IMS.cache(r,act,pc);
+    IMS.cache(r,callback,pc);
   },
 
   // Returns the on item from a local store.  If not it store it
@@ -705,6 +705,7 @@ $(document).ready(function(){
       return out;
     },
     formatSelection:function(pub){
+      // When we are here we have selected a pubmed paper.
       IMS.set_publication(pub); // maybe this should be in a button
       $('.ifpub').removeClass('hidden');
       return pub.format_item();
@@ -774,11 +775,8 @@ $(document).ready(function(){
     change(IMS.Interaction_type.fieldsets);
   IMS.populate_select(IMS.Quick_organism);
 
-  $('#stage_interaction').click(function(){
-    var it_id=$('.interaction_types').val(); // interaction_type_id
-    IMS.Interaction_type.async(function(it){
-      it.stage();
-    });
+  $('#commit').click(function(){
+    IMS.pub.commit();
   });
 
   $('#participant_selector .ok').click(function(){

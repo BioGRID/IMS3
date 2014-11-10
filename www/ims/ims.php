@@ -114,6 +114,14 @@ class config
     return null;
   }
   
+  function verify_user_or_die(){
+    $user=$this->verify_user();
+    if(!$user){
+      header('HTTP/1.1 403 Forbidden');
+      exit(1);
+    }
+    return $user;
+  }
 
 }
 
@@ -173,6 +181,40 @@ class _Table
     }
     return ' IN('.implode(',',$in).')';
   }
+
+  /*
+  # Insert new row inte a table.  Assumes only one at a time.
+  public function insert(){
+    $c=get_called_class();
+    if(array_key_exists($c::PRIMARY_KEY,$this->qs)){
+      # the row already exists, use update!
+      return false;
+    }
+    $dbh=$this->pdo();
+
+    $cols=array_keys($this->qs);
+    $vals=array_values($this->qs);
+
+    $sql='INSERT INTO ' . $c::TABLE . '(';
+    foreach($cols as $col){
+      $sql .= $dbh->quote($col) . ',';
+    }
+    $sql=rtrim($sql,',') . # remove trailing commma
+      ')VALUES(';
+    foreach($vals as $val){
+      $sql .= $dbh->quote($val) . ',';
+    }
+    $sql=rtrim($sql,',') . # remove trailing commma
+      ')';
+
+    print $sql;
+    $s=$dbh->prepare($sql);
+    $s->execute();
+    $id=$dbh->lastInsertId();
+    $this->qs[$c::PRIMARY_KEY]=$id;
+    return $id;
+  }
+  */
 
   # Modify a table, use with caution.
   public function update($pk,$to){
