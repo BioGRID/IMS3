@@ -271,6 +271,13 @@ IMS={
               IMS.update_interactions);
   },
 
+  reset_publication:function(){
+    if(IMS.pub){
+      // a little weird but it works.
+      IMS.set_publication(IMS.pub);
+    }
+  },
+
   // try to get an active object from a HTML tag burried in a
   // itemscope.
   active:function(tag){

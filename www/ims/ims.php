@@ -10,7 +10,6 @@ if(stream_resolve_include_path('version.php')){
 }
 
 
-
 global $errors_reported;
 $errors_reported=FALSE;
 global $errors;
@@ -182,40 +181,6 @@ class _Table
     return ' IN('.implode(',',$in).')';
   }
 
-  /*
-  # Insert new row inte a table.  Assumes only one at a time.
-  public function insert(){
-    $c=get_called_class();
-    if(array_key_exists($c::PRIMARY_KEY,$this->qs)){
-      # the row already exists, use update!
-      return false;
-    }
-    $dbh=$this->pdo();
-
-    $cols=array_keys($this->qs);
-    $vals=array_values($this->qs);
-
-    $sql='INSERT INTO ' . $c::TABLE . '(';
-    foreach($cols as $col){
-      $sql .= $dbh->quote($col) . ',';
-    }
-    $sql=rtrim($sql,',') . # remove trailing commma
-      ')VALUES(';
-    foreach($vals as $val){
-      $sql .= $dbh->quote($val) . ',';
-    }
-    $sql=rtrim($sql,',') . # remove trailing commma
-      ')';
-
-    print $sql;
-    $s=$dbh->prepare($sql);
-    $s->execute();
-    $id=$dbh->lastInsertId();
-    $this->qs[$c::PRIMARY_KEY]=$id;
-    return $id;
-  }
-  */
-
   # Modify a table, use with caution.
   public function update($pk,$to){
     $c=get_called_class();
@@ -324,11 +289,47 @@ class _Table
     return $this->statement->fetch(\PDO::FETCH_ASSOC);
   }
 
+  # Group results by primary_key id (usually unique, but not in all
+  # the quick database tables, the carps if we don't only have one.
+  public function fetch_only_one($error_hint){
+    $c=get_called_class();
+    $got=[];
+    while($v=$this->fetch()){
+      $got[$v[$c::PRIMARY_KEY]]=$v;
+      # Have some kind of max number of fetches here?
+    }
+    if(1 != count($got)){
+      throw New \Exception
+	(sprintf("Expecting 1 result got %d for '%s'",
+		 count($got), $error_hint));
+    }
+    return array_values($got)[0];
+  }
+
   public function message($row,$msg){
     $c=get_called_class();
     return sprintf('Where %s=%d %s',$c::PRIMARY_KEY,$row[$c::PRIMARY_KEY],
 		   $msg);
   }
+
+  public function insert(){
+    $c=get_called_class();
+    $dbh=$this->pdo();
+
+    // Should figure a way to cache this result, but for now
+    $sth=$dbh->prepare($c::INSERT_SQL);
+
+    $ip=[]; # input_parameters
+    foreach($this->qs as $k => $v){
+      $ip[":$k"]=$v;
+    }
+    if(!$sth->execute($ip)){
+      return false;
+    }
+    return $dbh->lastInsertId();
+  }
+
+
 } // _Table
 
 // this is a class that is used to get data about tables, that works
@@ -389,7 +390,8 @@ class Interactions extends _Table
   const PRIMARY_KEY='interaction_id';
   const STATUS_COLUMN='interaction_status';
   const DEFAULT_STATUS='normal';
-
+  const INSERT_SQL='INSERT INTO interactions(publication_id,interaction_type_id,interaction_source_id)VALUES(:publication_id,:interaction_type_id,1)';
+  
   public function fetch(){
     $out=current($this->data);
     next($this->data);
@@ -418,6 +420,7 @@ class Interaction_history extends _Table
   const TABLE='interaction_history';
   const PRIMARY_KEY='interaction_history_id';
   const ORDER_BY='interaction_history_date DESC';
+  const INSERT_SQL='INSERT INTO interaction_history(modification_type,interaction_id,user_id,interaction_history_comment)VALUES(:modification_type,:interaction_id,:user_id,:interaction_history_comment)';
 
   // Not really the status column, as it should not change, but it
   // sortta like a status column.
@@ -447,6 +450,7 @@ class Interaction_participants extends _Table
   const PRIMARY_KEY='interaction_participant_id';
   const STATUS_COLUMN='interaction_participant_status';
   const DEFAULT_STATUS='active';
+  const INSERT_SQL='INSERT INTO interaction_participants(interaction_id,participant_id,participant_role_id)VALUES(:interaction_id,:participant_id,:participant_role_id)';
 }
 
 class Unknown_participants extends _Table

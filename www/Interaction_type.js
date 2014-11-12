@@ -111,46 +111,90 @@ IMS.Interaction_type.prototype.organize=function(){
   var got=this.verify_counts();
   var out=[]; // List of really raw interactions
   // out=[
-  // [ type_id, [ roll_id, org_id, part ], [ roll_id, org_id, part ].. ]
-  // [ type_id, [ roll_id, org_id, part ], [ roll_id, org_id, part ].. ]
+  // [ type_id, [ role_id, org_id, part ], [ role_id, org_id, part ].. ]
+  // [ type_id, [ role_id, org_id, part ], [ role_id, org_id, part ].. ]
   // ]
+
+  var part_type_id=1; // Gene, will worry about forced later
 
   var type_id=this.primary_id();
   if('Complex'==this.data.interaction_type_name){
     // Here we only ever return one interaction, with who knowns how
     // many participants.
     out[0]=[type_id];
-    var roll_id=this.roles[0].primary_id();
+    var role_id=this.roles[0].primary_id();
     var org_id=got.A.shift();
     for(var i in got.A){
-      var part=[roll_id,org_id,got.A[i]];
+      var part={
+          role_id:role_id,
+          participant_type_id:part_type_id,
+          organism_id:org_id,
+          quick_participant_value:got.A[i],
+      };
       out[0].push(part);
     }
   }else{
     var type_id=this.primary_id();
     var a_org_id=got.A.shift();
     var b_org_id=got.B.shift();
-    var a_roll_id=this.roles[0].primary_id();
-    var b_roll_id=this.roles[1].primary_id();
+    var a_role_id=this.roles[0].primary_id();
+    var b_role_id=this.roles[1].primary_id();
 
     if(got.A.length==got.B.length){
       while(0!=got.A.length){
-        var a=[a_roll_id,a_org_id,got.A.shift()];
-        var b=[b_roll_id,b_org_id,got.B.shift()];
+        var a_part_value=got.A.shift();
+        var b_part_value=got.B.shift();
+
+        var a={
+          role_id:a_role_id,
+          participant_type_id:part_type_id,
+          organism_id:a_org_id,
+          quick_participant_value:a_part_value,
+        };
+        var b={
+          role_id:b_role_id,
+          participant_type_id:part_type_id,
+          organism_id:b_org_id,
+          quick_participant_value:b_part_value,
+        };
         var i=[type_id,a,b];
         out.push(i);
       }
     }else if(1==got.A.length){
-      var a=[a_roll_id,a_org_id,got.A.shift()];
+      var a_part_value=got.A.shift();
+      var a={
+          role_id:a_role_id,
+          participant_type_id:part_type_id,
+          organism_id:a_org_id,
+          quick_participant_value:a_part_value,
+      };
       while(0!=got.B.length){
-        var b=[b_roll_id,b_org_id,got.B.shift()];
+        var b_part_value=got.B.shift();
+        var b={
+            role_id:b_role_id,
+            participant_type_id:part_type_id,
+            organism_id:b_org_id,
+            quick_participant_value:b_part_value,
+        }
         var i=[type_id,a,b];
         out.push(i);
       }
     }else if(1==got.B.length){
-      var b=[b_roll_id,b_org_id,got.B.shift()];
+      var b_part_value=got.B.shift();
+      var b={
+          role_id:b_role_id,
+          participant_type_id:part_type_id,
+          organism_id:b_org_id,
+          quick_participant_value:b_part_value,
+      }
       while(0!=got.A.length){
-        var a=[a_roll_id,a_org_id,got.A.shift()];
+        var a_part_value=got.A.shift();
+        var a={
+            role_id:a_role_id,
+            participan_type_id:part_type_id,
+            organism_id:b_org_id,
+            quick_participant_value:a_part_value,
+        };
         var i=[type_id,a,b];
         out.push(i);
       }

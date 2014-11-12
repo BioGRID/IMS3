@@ -39,20 +39,24 @@ IMS.Publication.prototype.pmid=function(){
 IMS.Publication.prototype.commit=function(){
   // first we get the interaction_type
   var it_id=$('.interaction_types').val();
+  var pub_id=this.primary_id(); // not pmid
   IMS.Interaction_type.async(function(){
     // get a list of valid interaction pairs
     var got=this.organize();
+    var data={};
+    data[pub_id]=got;
     var request={
       type:'POST',
       url:'commit.php',
       dataType:'json',
-      data:{'interactions':got},
+      data:data,
     }
     $.ajax(request).
       fail(function(){
       alert('something when wrong commiting the interactions');
     }).success(function(){
-      alert('yea');
+      // We got new interactions!  Retset the publications.
+      IMS.reset_publication();
     });
   });
 }
