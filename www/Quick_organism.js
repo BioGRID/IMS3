@@ -14,5 +14,5 @@ IMS.Quick_organism.prototype._const={
  */
 
 IMS.Quick_organism.prototype.html=function(){
-  return this.data.organism_common_name;
+  return this.data.organism_display_name;
 }
