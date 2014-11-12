@@ -52,8 +52,8 @@ IMS.Publication.prototype.commit=function(){
       data:data,
     }
     $.ajax(request).
-      fail(function(){
-      alert('something when wrong commiting the interactions');
+      fail(function(htr){
+      alert(htr.responseText);
     }).success(function(){
       // We got new interactions!  Retset the publications.
       IMS.reset_publication();

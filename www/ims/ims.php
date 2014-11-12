@@ -324,7 +324,10 @@ class _Table
       $ip[":$k"]=$v;
     }
     if(!$sth->execute($ip)){
-      return false;
+      $dbh->rollBack();
+      print "Error inserting inte $c::TABLE";
+      exit(1);
+      #return false;
     }
     return $dbh->lastInsertId();
   }
