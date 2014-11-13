@@ -16,6 +16,15 @@ IMS={
 
   // Report errors, usually from the query.php script, on the log page.
   report_messages:function(messages){
+    for(var row in messages){
+      var msg=messages[row];
+      var t=IMS.php_error(msg['type']);
+
+      alert(t.msg + ': ' + msg['message'] + ' in ' + msg['file'] + ' on line ' + msg['line']);
+    }
+
+
+    /*
     // Add the number of new messages to the current message count.
     mc=$('.log-count');
     count=Number(mc.text());
@@ -33,6 +42,7 @@ IMS={
       list.prepend(html);
     }
     list.prepend("<h2>"+(new Date().toString())+"</h2>");
+     */
   },
 
   // Returns PHP error codes as text, along with bootstrap class.
