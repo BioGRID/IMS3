@@ -23,6 +23,7 @@ $ims=new IMS\config('ims.json');
 <script src="Quick_identifier_type.js"></script>
 <script src="Quick_organism.js"></script>
 <script src="Unknown_participant.js"></script>
+<?php # <script src="convert.js"></script> ?>
 </head><body>
 
 <div class="container-fluid">
@@ -34,7 +35,7 @@ $ims=new IMS\config('ims.json');
 <ul class="nav nav-tabs">
   <?php # <li><a href="#log_tab" data-toggle="tab">Log (<span class="log-count">0</span>)</a></li> ?>
   <li class="active"><a href="#interaction_tab" data-toggle="tab">Interactions</a></li>
-  <li><a href="#conversion" data-toggle="tab">ID Conversion</a></li>
+  <?php # <li><a href="#conversion" data-toggle="tab">ID Conversion</a></li> ?>
 </ul>
 </div>
 
@@ -116,66 +117,8 @@ $ims=new IMS\config('ims.json');
 
   </div>
 
-  <div class="tab-pane" id="conversion">
-    <h1>ID Conversion</h1>
-    <p>This is still very hackey, but hopefully it will improve as
-    time goes by.  Plus, the BioGRID Quick database doesn't have every
-    ID anyway.  The order of the output isn't the same as the order if
-    the input. -Sven</p>
+  <?php # include('ims/html/convert.htm'); ?>
 
-    <div clas="row">
-      <div class="col-md-5" id="id-from">
-	<select></select>
-	<textarea></textarea>
-	<dl class="dl-horizontal"></dl>
-      </div><div class="col-md-2">
-	<button id="conv" class="h1">&#10144;</button>
-      </div><div class="col-md-5" id="id-to">
-	<select></select>
-	<textarea readonly></textarea>
-	<dl class="dl-horizontal"></dl>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-<!-- div class="modal fade" id="participant_selector">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-	<h1>Participant Selector</h1>
-      </div><div class="modal-body">
-
-	<ul class="nav nav-tabs">
-	  <li class="active"><a href="#quick_participants" data-toggle="tab">Quick Participants</a></li>
-	  <li><a href="#force_participants" data-toggle="tab">Forced Participants</a></li>
-	</ul>
-	
-	<div class="container-fluid">
-	  <select class="quick_type"></select>
-	  <select class="quick_organism"></select>
-	</div>
-
-	<div class="tab-content container-fluid">
-	  <div class="tab-pane active" id="quick_participants">
-	    <input type="hidden" id="quick" style="width:60ex">
-	    
-	  </div>
-	  <div class="tab-pane" id="force_participants">
-	    <p>Use the force Luke.</p>
-	  </div>
-	</div>
-
-      </div><div class="modal-footer">
-	<p>
-	  <button class="btn btn-default" data-dismiss="modal">Cancel</a>
-	  <button class="btn btn-primary ok">OK</button>
-	</p>
-      </div>
-    </div>
-  </div>
-<div -->
-
+</div><?php # tab-content ?>
 
 </body></html>
