@@ -20,7 +20,7 @@ Requires: php-mysql
 %{__install} -m 755 www/home.php $RPM_BUILD_ROOT%{ims_wwwdir}/home.php
 %{__install} -m 755 www/query.php $RPM_BUILD_ROOT%{ims_wwwdir}/query.php
 %{__install} -m 755 www/user.php $RPM_BUILD_ROOT%{ims_wwwdir}/user.php
-%{__install} -m 755 www/verify.php $RPM_BUILD_ROOT%{ims_wwwdir}/verify.php
+%{__install} -m 755 www/commit.php $RPM_BUILD_ROOT%{ims_wwwdir}/commit.php
 %{__install} -m 755 www/ims.js $RPM_BUILD_ROOT%{ims_wwwdir}/ims.js
 %{__install} -m 755 www/Interaction.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction.js
 %{__install} -m 755 www/Interaction_history.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_history.js
@@ -54,7 +54,7 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/home.php
 %{ims_wwwdir}/query.php
 %{ims_wwwdir}/user.php
-%{ims_wwwdir}/verify.php
+%{ims_wwwdir}/commit.php
 %{ims_wwwdir}/ims.js
 %{ims_wwwdir}/Interaction.js
 %{ims_wwwdir}/Interaction_history.js
@@ -80,5 +80,5 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Thu Jun 19 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.10
-- Holding off change log until I think we have usable software.
+* Thu Nov 12 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.11
+- Commits created interactions to the database

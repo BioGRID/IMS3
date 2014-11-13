@@ -191,7 +191,7 @@ IMS.Interaction_type.prototype.organize=function(){
         var a_part_value=got.A.shift();
         var a={
             role_id:a_role_id,
-            participan_type_id:part_type_id,
+            participant_type_id:part_type_id,
             organism_id:b_org_id,
             quick_participant_value:a_part_value,
         };
