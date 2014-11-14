@@ -104,19 +104,22 @@ IMS={
   },
 
   // This should only get run if we are sure we are logged it.
-  loggedin_html:function(){
+  loggedin_html:function(raw){
+    var user=new IMS.User(raw);
+
     // The JavaScript cookie interface really sucks.
-    var c='; '+document.cookie;
-    var kv=c.split('; name=');
-    var user=kv.pop().split(';').shift();
+    //var c='; '+document.cookie;
+    //var kv=c.split('; name=');
+    //var user=kv.pop().split(';').shift();
 
     // show logged in users some hidden stuff.
     $('.user').removeClass('hidden');
 
     $("#user").html
-    ('Logged in as <code>'
-    +user
-    +'</code> <button onclick="IMS.logout()">Logout</button>');
+    ('Logged in as ' + user.html()
+    +' <button onclick="IMS.logout()">Logout</button>');
+
+    user.project();
   },
 
   /*
@@ -394,7 +397,14 @@ IMS={
     return out;
   }, // redo_table
 
-  populate_select:function(Table,act){
+  populate_select:function(Table,named){
+    var selected;
+    var callback;
+    if(named){
+      selected=named['selected'];
+      callback=named['callback'];
+    }
+
     var sel=Table.prototype.$('select');
 
     IMS.query
@@ -405,15 +415,14 @@ IMS={
        var opts='';
        for(row in results){
          var result=new Table(results[row]);
-         opts+=result.option_html(9);
+         opts+=result.option_html(selected);
        }
-       //Table.prototype.tag_html().html('').append(opts);
        if(0==sel.length){
          alert('Unable to populate ' + Table.prototype._const.table);
        }else{
          sel.html('').append(opts);
-         if(act){
-           act.call(sel);
+         if(callback){
+           callback.call(sel);
          }
        }
      });
@@ -567,8 +576,9 @@ IMS._table.prototype={
   html:function(){
     return this.primary_col()+'='+this.primary_id();
   },
-  option_html:function(){
-    var sel=(this._const.default==this.id)?' SELECTED':'';
+  option_html:function(selected){
+    //var sel=(this._const.default==this.id)?' SELECTED':'';
+    var sel=(selected==this.id)?' SELECTED':'';
 
     return '<option' + sel
          + ' value="' + this.primary_id() + '">'
@@ -699,7 +709,6 @@ IMS._table.prototype={
 // it will need to be abstracted or moved there.
 $(document).ready(function(){
 
-
   // Will only stay if we end up using tablesorter
   $.extend($.tablesorter.themes.bootstrap,{
     table:'',
@@ -747,39 +756,6 @@ $(document).ready(function(){
     ) // ajax_query
   }); // select2
 
-
-  $("#quick").select2({
-    minimumInputLength:3,
-    formatResult:function(obj){
-      var out=obj.format_item();
-      //console.log(out);
-      return out;
-    },
-    formatSelection:function(obj){
-      return obj.format_item();
-    },
-    ajax:IMS.ajax_query(
-      function(term,page){
-        return{
-          limit:10,
-          table:'quick_identifiers',
-          organism_id:$('.quick_organism').val(),
-          q:term
-        }
-      },{
-        results:function(data){
-          IMS.report_messages(data.messages);
-          var out=[];
-          for(var row in data.results){
-            out.push(new IMS.Quick_identifier(data.results[row]));
-          }
-          return {results:out};
-        }
-      }
-    ) // ajax_query
-  }); // select2
-
-
   /*
    * Stuff for creating new Interactions and Participants
    */
@@ -788,9 +764,11 @@ $(document).ready(function(){
   IMS.populate_select(IMS.Participant_role);
   IMS.populate_select(IMS.Participant_type);
    */
-  IMS.populate_select(IMS.Interaction_type,IMS.Interaction_type.fieldsets).
+  IMS.populate_select(
+    IMS.Interaction_type,
+    {callback:IMS.Interaction_type.fieldsets}).
     change(IMS.Interaction_type.fieldsets);
-  IMS.populate_select(IMS.Quick_organism);
+  //IMS.populate_select(IMS.Quick_organism);
 
   $('#commit').click(function(){
     IMS.pub.commit();
@@ -823,5 +801,9 @@ $(document).ready(function(){
       });
   });
 
+
+  /*
+   * Stuff in the project_tab
+   */
 
 }); // ready

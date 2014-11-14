@@ -252,9 +252,16 @@ class _Table
     return $c::TABLE;
   }
 
+  // this is seperated to allow overloding, as it is in
+  // Project_publications
+  public function _select(){
+    $c=get_called_class();
+    return 'SELECT * FROM ' . $c::TABLE;
+  }
+
   public function sql(){
     $c=get_called_class();
-    $sql='SELECT * FROM ' . $c::TABLE;
+    $sql=$this->_select();
     $where=$this->_where();
     $this->status_match();
 
@@ -541,12 +548,38 @@ class Publications extends _Table
   }
 }
 
+class Project_publications extends _Table
+{
+  const TABLE='project_publications';
+  const PRIMARY_KEY='project_publication_id';
+  const ORDER_BY='publication_pubmed_id';
+
+  // Grab publication_pubmed_id so save an ajax call.
+  public function _select(){
+    $c=get_called_class();
+    return 'SELECT project_publication_id,project_id,publication_id,' .
+      'project_publication_addeddate,project_publication_status,'     .
+      'publication_query_id,publication_pubmed_id FROM '              .
+      $c::TABLE . ' JOIN publications USING(publication_id)';
+  }
+}
+
+class Project_users extends _Table
+{
+  const TABLE='project_users';
+  const PRIMARY_KEY='project_user_id';
+}
+
+class Projects extends _Table
+{
+  const TABLE='projects';
+  const PRIMARY_KEY='project_id';
+}
 
 class User extends _Table
 {
   const TABLE='users';
   const PRIMARY_KEY='user_id';
-  
 }
 
 // wee but of a buffer so you can't query any table you would like.
@@ -577,6 +610,12 @@ function table_factory($cfg,$qs)
     return new Participant_types($cfg,$qs);
   case 'publications':
     return new Publications($cfg,$qs);
+  case 'project_publications':
+    return new Project_publications($cfg,$qs);
+  case 'project_users':
+    return new Project_users($cfg,$qs);
+  case 'projects':
+    return new Projects($cfg,$qs);
   case 'quick_identifiers':
     return new Quick_identifiers($cfg,$qs);
   case 'quick_identifier_types':

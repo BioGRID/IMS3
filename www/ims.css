@@ -55,3 +55,6 @@ fieldset textarea{
 legend{
     text-transform:capitalize;
 }
+#project_publications a:after{
+    content:' ';
+}
