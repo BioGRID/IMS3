@@ -736,6 +736,12 @@ $(document).ready(function(){
       $('.ifpub').removeClass('hidden');
       return pub.format_item();
     },
+    /*
+    initSelection:function(e,c){
+      console.log(e);
+      console.log(c);
+    },
+     */
     ajax:IMS.ajax_query(
       function(term,page){
         return{

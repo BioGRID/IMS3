@@ -30,16 +30,21 @@ Requires: php-mysql
 %{__install} -m 755 www/Participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant.js
 %{__install} -m 755 www/Participant_role.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant_role.js
 %{__install} -m 755 www/Participant_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant_type.js
+%{__install} -m 755 www/Project.js $RPM_BUILD_ROOT%{ims_wwwdir}/Project.js
 %{__install} -m 755 www/Publication.js $RPM_BUILD_ROOT%{ims_wwwdir}/Publication.js
 %{__install} -m 755 www/Quick_identifier.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_identifier.js
 %{__install} -m 755 www/Quick_identifier_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_identifier_type.js
 %{__install} -m 755 www/Quick_organism.js $RPM_BUILD_ROOT%{ims_wwwdir}/Quick_organism.js
 %{__install} -m 755 www/Unknown_participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Unknown_participant.js
+%{__install} -m 755 www/User.js $RPM_BUILD_ROOT%{ims_wwwdir}/User.js
 %{__install} -m 755 www/ims.css $RPM_BUILD_ROOT%{ims_wwwdir}/ims.css
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{ims_phpdir}
 %{__install} -m 755 www/ims/ims.php $RPM_BUILD_ROOT%{ims_phpdir}/ims.php
 %{__install} -m 755 www/ims/version.php $RPM_BUILD_ROOT%{ims_phpdir}/version.php
 %{__install} -m 755 www/ims/pubmed.php $RPM_BUILD_ROOT%{ims_phpdir}/pubmed.php
+%{__install} -m 755 -d $RPM_BUILD_ROOT%{ims_phpdir}/html
+%{__install} -m 755 www/ims/html/interaction.htm $RPM_BUILD_ROOT%{ims_phpdir}/html/interaction.htm
+%{__install} -m 755 www/ims/html/project.htm $RPM_BUILD_ROOT%{ims_phpdir}/html/project.htm
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{_sysconfdir}
 %{__install} -m 755 ims.json-template $RPM_BUILD_ROOT%{_sysconfdir}/ims.json
 
@@ -64,21 +69,29 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/Participant.js
 %{ims_wwwdir}/Participant_role.js
 %{ims_wwwdir}/Participant_type.js
+%{ims_wwwdir}/Project.js
 %{ims_wwwdir}/Publication.js
 %{ims_wwwdir}/Quick_identifier.js
 %{ims_wwwdir}/Quick_identifier_type.js
 %{ims_wwwdir}/Quick_organism.js
 %{ims_wwwdir}/Unknown_participant.js
+%{ims_wwwdir}/User.js
 %{ims_wwwdir}/ims.css
 %{ims_phpdir}
 %{ims_phpdir}/ims.php
 %{ims_phpdir}/version.php
 %{ims_phpdir}/pubmed.php
+%{ims_phpdir}/html
+%{ims_phpdir}/html/interaction.htm
+%{ims_phpdir}/html/project.htm
 
 %defattr(-,root,root,-)
 %doc
 
 
 %changelog
+* Mon Nov 17 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.12
+- Added project page.
+
 * Thu Nov 12 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.11
 - Commits created interactions to the database

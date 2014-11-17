@@ -58,8 +58,8 @@ IMS.Project.prototype._publication_report=function(datum){
     IMS.query({table:'publications',publication_pubmed_id:pmid},
               function(data){
                 $('#pubmed').select2('search',data[0].publication_pubmed_id);
-                var pub=new IMS.Publication(data[0]);
-                IMS.set_publication(pub);
+                //var pub=new IMS.Publication(data[0]);
+                //IMS.set_publication(pub);
               });
     $('[href=#interaction_tab]').tab('show');
   });
