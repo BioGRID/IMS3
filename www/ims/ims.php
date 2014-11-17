@@ -510,7 +510,7 @@ class Publications extends _Table
     }
     if($this->cfg->pubmed_update($out['publication_lastupdated'])){
       $pm=new \PubMedID($out[self::SEARCH_COLUMN]);
-      trigger_error($this->message($out,"fetched MEDLINE for PMID:".$out[self::SEARCH_COLUMN]),E_USER_NOTICE);
+      //trigger_error($this->message($out,"fetched MEDLINE for PMID:".$out[self::SEARCH_COLUMN]),E_USER_NOTICE);
       $date=$pm->date();
       if(NULL==$date){
 	trigger_error($this->message($out,"unknown date format"),E_USER_WARNING);

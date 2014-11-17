@@ -120,7 +120,11 @@ class PubMedID
   }
 
   public function meshterms(){
-    return self::sanitize(implode('|',$this->medline('MH')));
+    // Not every pubmed entry hash meshterms.
+    if($this->medline('MH')){
+      return self::sanitize(implode('|',$this->medline('MH')));
+    }
+    return null;
   }
 
 }
