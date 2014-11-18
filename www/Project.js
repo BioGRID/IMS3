@@ -8,7 +8,8 @@ IMS.Project.prototype._const={
   html_class:'projects',
 
   // everything but processed
-  statuses:['normal','high','error','low'],
+  statuses:['normal','high','error'], // IMS2 only
+  //statuses:['normal','high','error','low'], now in IMS3!
 };
 
 IMS.Project.prototype.html=function(){
