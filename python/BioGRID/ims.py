@@ -366,3 +366,19 @@ class Unknown_participant(_Table):
     _columns=['unknown_participant_identifier','participant_type_id',
               'organism_id','publication_id',
               'unknown_participant_addeddate','unknown_participant_status']
+
+class Ontology(_Table):
+    _columns=['ontology_name','ontology_url','ontology_rootid',
+              'ontology_addeddate','ontology_lastparsed','ontology_status']
+    @classmethod
+    def table(cls):
+        return 'ontologies'
+
+
+
+    # _columns=['ontology_term_official_id','ontology_term_name',
+    #           'ontology_desc','ontology_term_synonymns',
+    #           'ontology_term_replacement','ontology_term_subsets',
+    #           'ontology_term_preferred_name','ontology_id',
+    #           'ontology_term_addeddate','ontology_term_status',
+    #           'ontology_term_childcount','ontology_term_parent']

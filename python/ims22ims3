@@ -47,6 +47,9 @@ ORDER=[
     # PTM Tales
     'PTM_source','PTM_modification','PTM','PTM_relationship',
     'PTM_history','PTM_note',
+
+    # Ontology Tables
+    'Ontology',
 ]
 
 doing_fmt='Loading %s'

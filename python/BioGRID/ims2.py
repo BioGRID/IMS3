@@ -791,3 +791,16 @@ complex_forced_id=%s''',(raw['complex_forced_id'],))
 
             raw=c.fetchone()
             
+
+
+
+class Ontology(BioGRID.ims.Ontology,_Table):
+    _rename={'ontology_name':'phenotype_ontology_name',
+             'ontology_url':'phenotype_ontology_url',
+             #'ontology_rootid':'phenotype_ontology_rootid',
+             'ontology_addeddate':'phenotype_ontology_addeddate',
+             'ontology_lastparsed':'phenotype_ontology_lastparsed',
+             'ontology_status':'phenotype_ontology_status'}
+    @classmethod
+    def ims2_table(cls):
+        return 'phenotypes_ontologies'
