@@ -8,8 +8,7 @@ IMS.Project.prototype._const={
   html_class:'projects',
 
   // everything but processed
-  statuses:['normal','high','error'], // IMS2 only
-  //statuses:['normal','high','error','low'], now in IMS3!
+  statuses:['normal','high','error','low'],
 };
 
 IMS.Project.prototype.html=function(){
@@ -42,19 +41,38 @@ IMS.Project.prototype._publication_report=function(datum){
 
   var sel=$('#project_publications');
   // Clear the line incase we are changing projects.
-  sel.find('p').html('');
+  sel.html('');
+
+  var by_status={};
 
   // Put each publication in it's place.
   for(var i in datum){
     var data=datum[i];
-    var dt='<a class="pmid">' + data.publication_pubmed_id + '</a>';
-    sel.find('.' + data.project_publication_status).append(dt);
+    var status=data.project_publication_status;
+    var pmid=data.publication_pubmed_id;
+
+    if(by_status[status]){
+      by_status[status].push(pmid);
+    }else{
+      by_status[status]=[pmid];
+    }
   }
+
+  for(var s in by_status){
+    sel.append('<h2>'+s+'</h2>');
+
+    var lis='';
+    by_status[s].forEach(function(pmid){
+      lis+='<li class="pubmed">'+pmid+'</li>';
+    });
+    sel.append('<ul class="list-inline">'+lis+'</ul>');
+  }
+
 
   // if we click on a publication switch the tabe to that page, and
   // load the publication.  Select2 is giving me some problems but I
   // wanna get this up for for now.
-  $('#project_publications a').click(function(){
+  sel.find('.pubmed').click(function(){
     var pmid=$(this).text();
     IMS.query({table:'publications',publication_pubmed_id:pmid},
               function(data){

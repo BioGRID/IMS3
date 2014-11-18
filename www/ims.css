@@ -58,3 +58,10 @@ legend{
 #project_publications a:after{
     content:' ';
 }
+
+#project_publications h2{
+    text-transform:capitalize;
+}
+#project_publications h2:after{
+    content:" Priority";
+}
