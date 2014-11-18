@@ -15,7 +15,13 @@ UNKNOWN_PARTICIPANT_TYPE=None
 global DEFAULT_USER_ID
 DEFAULT_USER_ID=1
 
+global BAIT
+BAIT='bait'
+global PREY
+PREY='hit'
+
 class Config(BioGRID.ims.Config):
+
     def ims2db(self):
         """Returns a MySQLdb pointer to the IMS2 database."""
         return self._db('ims2')
@@ -294,7 +300,7 @@ WHERE interaction_forced_id=%s''',(force['interaction_forced_id'],))
             a=Interaction_participant(
                 {'interaction_id':i.id(),
                  'participant_id':a_id,
-                 'participant_role_id':Participant_role.factory('bait').id(),
+                 'participant_role_id':Participant_role.factory(BAIT).id(),
                  'status':'active'}
                 )
             a.store()
@@ -304,7 +310,7 @@ WHERE interaction_forced_id=%s''',(force['interaction_forced_id'],))
             b=Interaction_participant(
                 {'interaction_id':i.id(),
                  'participant_id':b_id,
-                 'participant_role_id':Participant_role.factory('prey').id(),
+                 'participant_role_id':Participant_role.factory(PREY).id(),
                  'status':'active'}
                 )
             b.store()
@@ -403,8 +409,8 @@ WHERE participant_type_id=%s''',(PARTICIPANT_TYPE,))
 (SELECT interaction_id,publication_id,interactor_A_id AS interactor_id,%d AS participant_role_id FROM interactions)
 UNION
 (SELECT interaction_id,publication_id,interactor_B_id AS interactor_id,%d AS participant_role_id FROM interactions)
-''' % (Participant_role.factory('bait').id(),
-       Participant_role.factory('prey').id())
+''' % (Participant_role.factory(BAIT).id(),
+       Participant_role.factory(PREY).id())
     def __getitem__(self,name):
         out=super(Interaction_participant,self).__getitem__(name)
 

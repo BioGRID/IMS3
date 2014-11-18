@@ -28,7 +28,8 @@ CREATE TABLE IF NOT EXISTS participant_roles(
 
 -- These are refereed to by participant_role_id in the
 -- Interaction_type.js, and Participant_role.js files.  If this
--- changes, they change too.
+-- changes, they change too.  There are referenced in ims2.py in the
+-- python code.
 INSERT INTO participant_roles(participant_role_id,participant_role_name)VALUES
        (1,'unspecified'),
        (2,'bait'),(3,'hit');
