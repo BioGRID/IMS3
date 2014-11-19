@@ -38,6 +38,11 @@ class Config:
     def imsdb(self):
         """Returns a MySQLdb object to the IMS3 database."""
         return self._db('ims')
+    def imsdb_name(self):
+        """Returns the name if the IMS3 database."""
+        # need to str(...) here so we don't convert strings into
+        # unicode.
+        return str(self.json['dbs']['ims']['schema'])
     def imsdb_cursor(self,cur=MySQLdb.cursors.DictCursor):
         return self.imsdb().cursor(cur)
     def _sql2kv(self,sql):
@@ -374,11 +379,15 @@ class Ontology(_Table):
     def table(cls):
         return 'ontologies'
 
+class Ontology_term(_Table):
+    _columns=['ontology_term_official_id','ontology_term_name',
+              'ontology_term_desc','ontology_term_synonymns',
+              'ontology_term_replacement','ontology_term_subsets',
+              'ontology_term_preferred_name','ontology_id',
+              'ontology_term_addeddate','ontology_term_status',
+              'ontology_term_childcount','ontology_term_parent']
 
-
-    # _columns=['ontology_term_official_id','ontology_term_name',
-    #           'ontology_desc','ontology_term_synonymns',
-    #           'ontology_term_replacement','ontology_term_subsets',
-    #           'ontology_term_preferred_name','ontology_id',
-    #           'ontology_term_addeddate','ontology_term_status',
-    #           'ontology_term_childcount','ontology_term_parent']
+class Ontology_organism(_Table):
+    # leave the other columns out for now so the IMS2 import uses the
+    # default values.
+    _columns=['ontology_id','organism_id']

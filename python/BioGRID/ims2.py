@@ -43,12 +43,13 @@ class _Table(object):
         return 'SELECT * FROM %s' % cls.ims2_table()
     @classmethod
     def slurp(cls):
-        """Does an SQL query of all the stiff in IMS2 and passes it to
+        """Does an SQL query of all the stuff in IMS2 and passes it to
         puke()."""
         sqls=cls.slurp_sql()
         if('str'==type(sqls).__name__):
             sqls=[sqls]
         c=cls.ims2_cursor()
+
 
         # I'm not sure we are ever going to have more then one sql at
         # at time
@@ -56,14 +57,17 @@ class _Table(object):
             c.execute(sql)
             cls.puke(c)
     @classmethod
+    def fetchone(cls,c):
+        return c.fetchone();
+    @classmethod
     def puke(cls,c):
         """Processes all the items in the provided cursor and saves
         them in the database."""
-        raw=c.fetchone()
+        raw=cls.fetchone(c)
         while raw:
             cooked=cls(raw)
             cooked.store()
-            raw=c.fetchone()
+            raw=cls.fetchone(c)
     # def interaction(self,interaction_id=None):
     #     """If the table has an interaction_id returns an Interaction
     #     object."""
@@ -797,6 +801,8 @@ complex_forced_id=%s''',(raw['complex_forced_id'],))
 class Ontology(BioGRID.ims.Ontology,_Table):
     _rename={'ontology_name':'phenotype_ontology_name',
              'ontology_url':'phenotype_ontology_url',
+             # we need to skip ontology_rootid for now as we need an
+             #id from ontology_terms first.
              #'ontology_rootid':'phenotype_ontology_rootid',
              'ontology_addeddate':'phenotype_ontology_addeddate',
              'ontology_lastparsed':'phenotype_ontology_lastparsed',
@@ -804,3 +810,49 @@ class Ontology(BioGRID.ims.Ontology,_Table):
     @classmethod
     def ims2_table(cls):
         return 'phenotypes_ontologies'
+
+class Ontology_term(BioGRID.ims.Ontology_term,_Table):
+    _rename={'ontology_term_official_id':'phenotype_official_id',
+             'ontology_term_name':'phenotype_name',
+             'ontology_term_desc':'phenotype_desc',
+             'ontology_term_synonyms':'phenotype_synonyms',
+             'ontology_term_replacement':'phenotype_replacement',
+             'ontology_term_subsets':'phenotype_subsets',
+             'ontology_term_preferred_name':'phenotype_preferred_name',
+             'ontology_term_addeddate':'phenotype_addeddate',
+             'ontology_term_status':'phenotype_status',
+             'ontology_term_childcount':'phenotype_child_count',
+             'ontology_term_parent':'phenotype_parents'}
+    @classmethod
+    def ims2_table(cls):
+        return 'phenotypes'
+    @classmethod
+    def slurp_sql(cls):
+        ims2_table=cls.ims2_table();
+        return '''SELECT %s.*,ontology_id FROM %s
+JOIN phenotypes_ontologies USING(phenotype_ontology_id)
+JOIN %s.ontologies ON(phenotype_ontology_name=ontology_name)
+''' % (ims2_table,ims2_table,cls.config.imsdb_name())
+
+    @classmethod
+    def fetchone(cls,c):
+        raw=c.fetchone()
+
+        # if raw is false it's the end of the query.
+        if raw:
+            for i in raw:
+                if '-'==raw[i]:
+                    raw[i]=None
+        return raw
+
+class Ontology_organism(BioGRID.ims.Ontology_organism,_Table):
+    # We need to jump through a couple of hoops to get the new
+    # ontology_ids.
+    @classmethod
+    def slurp_sql(cls):
+        return '''SELECT organism_id,ontology_id
+FROM phenotypes_organisms
+JOIN phenotypes_ontologies ON(phenotype_ontology_rootid=phenotype_id)
+JOIN %s.ontologies ON(phenotype_ontology_name=ontology_name)
+''' % (cls.config.imsdb_name())
+
