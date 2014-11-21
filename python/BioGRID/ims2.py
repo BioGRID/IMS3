@@ -60,6 +60,9 @@ class _Table(object):
     def fetchone(cls,c):
         return c.fetchone();
     @classmethod
+    def also(cls):
+        return False
+    @classmethod
     def puke(cls,c):
         """Processes all the items in the provided cursor and saves
         them in the database."""
@@ -836,6 +839,7 @@ JOIN %s.ontologies ON(phenotype_ontology_name=ontology_name)
 
     @classmethod
     def fetchone(cls,c):
+        """Removes peskey '-' and replaces them with None."""
         raw=c.fetchone()
 
         # if raw is false it's the end of the query.
@@ -844,6 +848,26 @@ JOIN %s.ontologies ON(phenotype_ontology_name=ontology_name)
                 if '-'==raw[i]:
                     raw[i]=None
         return raw
+
+
+
+#     @classmethod
+#     def also(cls):
+#         c=cls.ims2_cursor()
+#         ims3_name=cls.config.imsdb_name()
+
+#         # Now we need to go and populate the ontologies.ontology_rootid
+#         another_c=cls.ims2_cursor()        
+#         sql='''UPDATE %s.ontologies,(
+# SELECT ontology_id,ontology_term_id
+# FROM phenotypes_ontologies
+# JOIN phenotypes ON(phenotype_ontology_rootid=phenotype_id)
+# JOIN %s.ontology_terms ON(phenotype_official_id=ontology_term_official_id)
+# )AS foo
+# SET ontology_rootid=ontology_term_id WHERE foo.ontology_id=%s.ontologies.ontology_id
+# ''' % (ims3_name,ims3_name,ims3_name)
+#         another_c.execute(sql)
+#         return True
 
 class Ontology_organism(BioGRID.ims.Ontology_organism,_Table):
     # We need to jump through a couple of hoops to get the new

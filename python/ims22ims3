@@ -42,8 +42,8 @@ ORDER=[
     'Complex_forced_addition',
 
     # Ontology Tables
-    'Ontology','Ontology_term',
-    'Ontology_organism',
+    #'Ontology','Ontology_term',
+    #'Ontology_organism',
 
     # IPLEX tables
     #'Iplex_project',
@@ -63,8 +63,8 @@ if opts.clean:
 
 cfg=BioGRID.ims2.Config(opts.config)
 BioGRID.ims._Table.config=cfg
-ims3=cfg.imsdb()
 
+ims3=cfg.imsdb()
 for job in jobs:
     warnings.warn(doing_fmt % job)
     path=os.path.join(opts.sql_dir,'%s.sql' % job)
@@ -116,9 +116,10 @@ for job in jobs:
         # close os.path.isfile
     else:
         warnings.warn('No file %s' % path)
-                        
+
     if not(opts.clean):
         Table=eval('BioGRID.ims2.%s' % job)
         Table.slurp()
         ims3.commit()
-        
+        if(Table.also()):
+            ims3.commit()
