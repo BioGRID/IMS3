@@ -17,5 +17,8 @@ CREATE TABLE IF NOT EXISTS ontology_terms(
        UNIQUE KEY(ontology_term_id,ontology_term_name)
 );
 
-ALTER TABLE ontologies
-ADD FOREIGN KEY(ontology_rootid)REFERENCES ontology_terms(ontology_term_id);
+
+-- The following is done in ims2.py, it's not done here because the
+-- circular foreign keys confuse mysql durning loading.
+-- ALTER TABLE ontologies
+-- ADD FOREIGN KEY(ontology_rootid)REFERENCES ontology_terms(ontology_term_id);

@@ -36,14 +36,14 @@ ORDER=[
     'Interaction','Interaction_quantitation','Interaction_note',
     'Interaction_history',
 
+    # Ontology Tables
+    'Ontology','Ontology_term',
+    'Ontology_organism',
+
     # Participant tables
     'Participant','Interaction_participant','Complex',
     'Unknown_participant',
     'Complex_forced_addition',
-
-    # Ontology Tables
-    #'Ontology','Ontology_term',
-    #'Ontology_organism',
 
     # IPLEX tables
     #'Iplex_project',

@@ -851,23 +851,27 @@ JOIN %s.ontologies ON(phenotype_ontology_name=ontology_name)
 
 
 
-#     @classmethod
-#     def also(cls):
-#         c=cls.ims2_cursor()
-#         ims3_name=cls.config.imsdb_name()
+    @classmethod
+    def also(cls):
+        c=cls.ims2_cursor()
+        ims3_name=cls.config.imsdb_name()
 
-#         # Now we need to go and populate the ontologies.ontology_rootid
-#         another_c=cls.ims2_cursor()        
-#         sql='''UPDATE %s.ontologies,(
-# SELECT ontology_id,ontology_term_id
-# FROM phenotypes_ontologies
-# JOIN phenotypes ON(phenotype_ontology_rootid=phenotype_id)
-# JOIN %s.ontology_terms ON(phenotype_official_id=ontology_term_official_id)
-# )AS foo
-# SET ontology_rootid=ontology_term_id WHERE foo.ontology_id=%s.ontologies.ontology_id
-# ''' % (ims3_name,ims3_name,ims3_name)
-#         another_c.execute(sql)
-#         return True
+        # Now we need to go and populate the ontologies.ontology_rootid
+        another_c=cls.ims2_cursor()        
+        sql='''UPDATE %s.ontologies,(
+SELECT ontology_id,ontology_term_id
+FROM phenotypes_ontologies
+JOIN phenotypes ON(phenotype_ontology_rootid=phenotype_id)
+JOIN %s.ontology_terms ON(phenotype_official_id=ontology_term_official_id)
+)AS foo
+SET ontology_rootid=ontology_term_id WHERE foo.ontology_id=%s.ontologies.ontology_id
+''' % (ims3_name,ims3_name,ims3_name)
+        another_c.execute(sql)
+
+        # populate ontology_rootid then create the foreign key
+        c.execute('ALTER TABLE %s.ontologies ADD FOREIGN KEY(ontology_rootid)REFERENCES ontology_terms(ontology_term_id)' % (ims3_name));
+
+        return True
 
 class Ontology_organism(BioGRID.ims.Ontology_organism,_Table):
     # We need to jump through a couple of hoops to get the new
