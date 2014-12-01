@@ -893,7 +893,7 @@ class Ontology_relationship(BioGRID.ims.Ontology_relationship,_Table):
              'ontology_relationship_status':'phenotype_relationship_status'}
     @classmethod
     def slurp_sql(cls):
-        limit=500
+        limit=5000
         ims3_name=cls.config.imsdb_name()
         c=cls.ims2_cursor()
         c.execute('SELECT COUNT(*)AS count FROM phenotypes_relationships')
