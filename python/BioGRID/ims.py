@@ -391,3 +391,9 @@ class Ontology_organism(_Table):
     # leave the other columns out for now so the IMS2 import uses the
     # default values.
     _columns=['ontology_id','organism_id']
+
+class Ontology_relationship(_Table):
+    _columns=['ontology_term_id','ontology_parent_id',
+              'ontology_relationship_type',
+              'ontology_relationship_addeddate',
+              'ontology_relationship_status']

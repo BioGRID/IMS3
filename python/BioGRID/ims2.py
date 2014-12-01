@@ -50,10 +50,14 @@ class _Table(object):
             sqls=[sqls]
         c=cls.ims2_cursor()
 
-
+        qs=len(sqls);
+        count=0
         # I'm not sure we are ever going to have more then one sql at
         # at time
         for sql in sqls:
+            if(1!=qs):
+                count+=1
+                print "%5d/%d queries" % (count,qs)
             c.execute(sql)
             cls.puke(c)
     @classmethod
@@ -884,3 +888,32 @@ JOIN phenotypes_ontologies ON(phenotype_ontology_rootid=phenotype_id)
 JOIN %s.ontologies ON(phenotype_ontology_name=ontology_name)
 ''' % (cls.config.imsdb_name())
 
+class Ontology_relationship(BioGRID.ims.Ontology_relationship,_Table):
+    _rename={'ontology_relationship_type':'phenotype_relationship_type',
+             'ontology_relationship_status':'phenotype_relationship_status'}
+    @classmethod
+    def slurp_sql(cls):
+        limit=500
+        ims3_name=cls.config.imsdb_name()
+        c=cls.ims2_cursor()
+        c.execute('SELECT COUNT(*)AS count FROM phenotypes_relationships')
+        total=c.fetchone()
+        total=total['count']
+
+        sql='''SELECT phenotype_relationship_id,phenotype_relationship_type,phenotype_relationship_status,
+ontology_terms.ontology_term_id,op.ontology_term_id AS ontology_parent_id
+FROM phenotypes_relationships
+JOIN phenotypes USING(phenotype_id)
+JOIN %s.ontology_terms ON(phenotypes.phenotype_official_id=ontology_terms.ontology_term_official_id)
+JOIN phenotypes AS pp ON(phenotype_parent_id=pp.phenotype_id)
+JOIN %s.ontology_terms AS op ON(pp.phenotype_official_id=op.ontology_term_official_id)
+''' % (ims3_name,ims3_name)
+
+        offset=0
+        sqls=[]
+        while(offset < total):
+            sqls.append(sql + ' LIMIT %d OFFSET %d' % (limit,offset));
+            offset+=limit
+        print "%d rows broken into %d pieces" % (total,len(sqls))
+        return sqls
+            
