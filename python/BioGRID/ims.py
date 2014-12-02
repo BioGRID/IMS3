@@ -397,3 +397,11 @@ class Ontology_relationship(_Table):
               'ontology_relationship_type',
               'ontology_relationship_addeddate',
               'ontology_relationship_status']
+
+class Interaction_ontology(_Table):
+    _columns=['interaction_id','ontology_term_id',
+              #'user_id',
+              'interaction_ontology_type_id']
+    @classmethod
+    def table(cls):
+        return 'interaction_ontologies'

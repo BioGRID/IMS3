@@ -917,3 +917,22 @@ JOIN %s.ontology_terms AS op ON(pp.phenotype_official_id=op.ontology_term_offici
         print "%d rows broken into %d pieces" % (total,len(sqls))
         return sqls
             
+class Interaction_ontology(BioGRID.ims.Interaction_ontology,_Table):
+    @classmethod
+    def slurp_sql(cls):
+        return '''SELECT interaction_id,ontology_term_id,ot.ontology_term_id,interaction_ontology_type_id
+,interaction_phenotypes.interaction_id AS p_interaction_id
+FROM interaction_phenotypes
+JOIN phenotypes AS pt USING(phenotype_id)
+JOIN %(IMS3)s.ontology_terms AS ot ON(pt.phenotype_official_id=ot.ontology_term_official_id)
+JOIN %(IMS3)s.interaction_ontology_types ON(flag=interaction_ontology_type_shortcode)
+''' % {'IMS3':cls.config.imsdb_name()}
+    def store(self):
+        try:
+            return super(Interaction_ontology,self).store()
+        except _mysql_exceptions.IntegrityError:
+            if 0==self['p_interaction_id']:
+                # There seems to be two items where interaction_phenotypes.interaction_id==0
+                self.warn('skipping where interaction_phenotypes.interaction_id==0')
+            else:
+                raise
