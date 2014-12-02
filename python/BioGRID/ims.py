@@ -405,3 +405,12 @@ class Interaction_ontology(_Table):
     @classmethod
     def table(cls):
         return 'interaction_ontologies'
+
+class Interaction_ontology_qualifier(_Table):
+    _columns=['interaction_ontology_id','ontology_term_id',
+              #'user_id',
+              'interaction_ontology_qualifier_addeddate',
+              'interaction_ontology_qualifier_status']
+    @classmethod
+    def table(cls):
+        return 'interaction_ontologies_qualifiers'

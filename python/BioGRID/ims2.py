@@ -920,7 +920,9 @@ JOIN %s.ontology_terms AS op ON(pp.phenotype_official_id=op.ontology_term_offici
 class Interaction_ontology(BioGRID.ims.Interaction_ontology,_Table):
     @classmethod
     def slurp_sql(cls):
-        return '''SELECT interaction_id,ontology_term_id,ot.ontology_term_id,interaction_ontology_type_id
+        # we keep the same primary key for this table
+        return '''SELECT interaction_phenotypes.interaction_phenotype_id AS interaction_ontology_id,
+interaction_id,ontology_term_id,ot.ontology_term_id,interaction_ontology_type_id
 ,interaction_phenotypes.interaction_id AS p_interaction_id
 FROM interaction_phenotypes
 JOIN phenotypes AS pt USING(phenotype_id)
@@ -934,5 +936,27 @@ JOIN %(IMS3)s.interaction_ontology_types ON(flag=interaction_ontology_type_short
             if 0==self['p_interaction_id']:
                 # There seems to be two items where interaction_phenotypes.interaction_id==0
                 self.warn('skipping where interaction_phenotypes.interaction_id==0')
+            else:
+                raise
+
+class Interaction_ontology_qualifier(BioGRID.ims.Interaction_ontology_qualifier,_Table):
+    @classmethod
+    def slurp_sql(cls):
+        # this one can get a new set of prymary keys
+        return '''SELECT
+interaction_phenotype_id AS interaction_ontology_id,
+ot.ontology_term_id,
+interaction_phenotypes_qualifier_status AS interaction_ontology_qualifier_status,
+interaction_phenotypes_qualifier_addeddate AS interaction_ontology_qualifier_addeddate
+FROM interaction_phenotypes_qualifiers
+JOIN phenotypes AS pt USING(phenotype_id)
+JOIN %(IMS3)s.ontology_terms AS ot ON(pt.phenotype_official_id=ot.ontology_term_official_id)
+''' % {'IMS3':cls.config.imsdb_name()}
+    def store(self):
+        try:
+            return super(Interaction_ontology_qualifier,self).store()
+        except _mysql_exceptions.IntegrityError as x:
+            if 0!=str(x).count("FOREIGN KEY (`interaction_ontology_id`)"):
+                self.warn("Skipping where interaction_phenotpyes_id=%d doesn't exist" % (self['interaction_ontology_id']))
             else:
                 raise
