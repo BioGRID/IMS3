@@ -87,12 +87,12 @@ for job in jobs:
                 try:
                     # should of put dropping table is ims2.py to, but
                     # to deal with circular foreign keys:
-                    # if('ontology_terms'==table):
-                    #     try:
-                    #         warnings.warn('Altering ontologies')
-                    #         ims3.query('ALTER TABLE ontologies DROP FOREIGN KEY ontologies_ibfk_1')
-                    #     except _mysql_exceptions.ProgrammingError:
-                    #         warnings.warn('ontologies likely already removed')
+                    if('ontology_terms'==table):
+                        try:
+                            warnings.warn('Altering ontologies')
+                            ims3.query('ALTER TABLE ontologies DROP FOREIGN KEY ontologies_ibfk_1')
+                        except _mysql_exceptions.ProgrammingError:
+                            warnings.warn('ontologies likely already removed')
                     ims3.query('DROP TABLE %s' % table)
                 except _mysql_exceptions.OperationalError as(errno,msg):
                     if 1051==errno: # Unknown table
