@@ -40,6 +40,7 @@ ORDER=[
     'Interaction','Interaction_quantitation','Interaction_note',
     'Interaction_history',
     'Interaction_ontology',
+    'Interaction_ontology_qualifier',
 
     # Participant tables
     'Participant','Interaction_participant','Complex',
