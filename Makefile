@@ -56,11 +56,14 @@ python-rpms: $(PYTHONPATH)/sql
 
 # Port the IMS2 database to the IMS3 database
 ims3:
-	$(IMS22IMS3)
+	$(IMS22IMS3) --stage=1
+	$(IMS22IMS3) --stage=2
 
-# This should wipe out the IMS3 database, so use wisely
+# This should wipe out the IMS3 database, so use wisely.  Needs to run
+# in reverse order then making it.
 ims3clean:
-	$(IMS22IMS3) --clean
+	$(IMS22IMS3) --stage=2 --clean
+	$(IMS22IMS3) --stage=1 --clean
 
 # Copy the sql directory into the python directory so it can be
 # included in the python RPM

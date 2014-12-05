@@ -5,6 +5,8 @@ import BioGRID.ims
 from time import strftime
 import MySQLdb.cursors
 import _mysql_exceptions
+import warnings
+import time
 
 # This means you should look it up in the quick_participants table.
 global PARTICIPANT_TYPE
@@ -52,14 +54,16 @@ class _Table(object):
 
         qs=len(sqls);
         count=0
-        # I'm not sure we are ever going to have more then one sql at
-        # at time
+        #ims3=cls.config.imsdb()
+
+        # Ontology_relationship returns a list of sql command to puke
         for sql in sqls:
             if(1!=qs):
                 count+=1
-                print "%5d/%d queries" % (count,qs)
+                warnings.warn("%5d/%d queries" % (count,qs))
             c.execute(sql)
             cls.puke(c)
+            #ims3.commit()
     @classmethod
     def fetchone(cls,c):
         return c.fetchone();
@@ -904,18 +908,29 @@ class Ontology_relationship(BioGRID.ims.Ontology_relationship,_Table):
 ontology_terms.ontology_term_id,op.ontology_term_id AS ontology_parent_id
 FROM phenotypes_relationships
 JOIN phenotypes USING(phenotype_id)
-JOIN %s.ontology_terms ON(phenotypes.phenotype_official_id=ontology_terms.ontology_term_official_id)
+JOIN %(IMS3)s.ontology_terms ON(phenotypes.phenotype_official_id=ontology_terms.ontology_term_official_id)
 JOIN phenotypes AS pp ON(phenotype_parent_id=pp.phenotype_id)
-JOIN %s.ontology_terms AS op ON(pp.phenotype_official_id=op.ontology_term_official_id)
-''' % (ims3_name,ims3_name)
+JOIN %(IMS3)s.ontology_terms AS op ON(pp.phenotype_official_id=op.ontology_term_official_id)
+''' % {'IMS3':ims3_name}
 
         offset=0
         sqls=[]
         while(offset < total):
             sqls.append(sql + ' LIMIT %d OFFSET %d' % (limit,offset));
             offset+=limit
-        print "%d rows broken into %d pieces" % (total,len(sqls))
+        warnings.warn("%d rows broken into %d pieces" % (total,len(sqls)))
+
+        sql='''SELECT phenotype_relationship_id,phenotype_relationship_type,phenotype_relationship_status,
+ontology_terms.ontology_term_id,NULL AS ontology_parent_id
+FROM phenotypes_relationships
+JOIN phenotypes USING(phenotype_id)
+JOIN %(IMS3)s.ontology_terms ON(phenotypes.phenotype_official_id=ontology_terms.ontology_term_official_id)
+WHERE phenotype_parent_id=0''' % {'IMS3':ims3_name};
+        sqls.append(sql)
+
         return sqls
+    
+
             
 class Interaction_ontology(BioGRID.ims.Interaction_ontology,_Table):
     @classmethod

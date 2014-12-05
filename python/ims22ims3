@@ -15,6 +15,7 @@ p.add_option('-s','--sql-dir',metavar='PATH',
              # If the default sql-dir changes you should change it in
              # setup.py too
              default=os.path.join(sys.prefix,'share/ims/sql'))
+p.add_option('--stage',type='int')
 (opts,jobs)=p.parse_args()
 
 if not opts.verbose:
@@ -23,41 +24,50 @@ if not opts.verbose:
     warnings.formatwarning=warn_fmt
 
 # The order in which to creat and import tables
-ORDER=[
-    # User Tables
-    'Project','User','Project_user',
+STAGE=[
+    [
+        # User Tables
+        'Project','User','Project_user',
 
-    # Publication Tables
-    'Publication_query','Publication','Project_publication',
-    #'Pubmed_mapping',
+        # Publication Tables
+        'Publication_query','Publication','Project_publication',
+        #'Pubmed_mapping',
 
-    # Ontology Tables
-    'Ontology','Ontology_term',
-    'Ontology_organism','Ontology_relationship',
+        # Ontology Tables
+        'Ontology','Ontology_term',
+        'Ontology_organism','Ontology_relationship',
 
-    # Interaction tables
-    'Interaction_source','Interaction_quantitation_type',
-    'Interaction','Interaction_quantitation','Interaction_note',
-    'Interaction_history',
-    'Interaction_ontology',
-    'Interaction_ontology_qualifier',
+        # Interaction tables
+        'Interaction_source','Interaction_quantitation_type',
+        'Interaction',
+        'Interaction_quantitation','Interaction_note',
+        'Interaction_history',
 
-    # Participant tables
-    'Participant','Interaction_participant','Complex',
-    'Unknown_participant',
-    'Complex_forced_addition',
+        # Participant tables
+        'Participant','Interaction_participant','Complex',
+        'Unknown_participant','Complex_forced_addition',
 
-    # IPLEX tables
-    #'Iplex_project',
+        # IPLEX tables
+        #'Iplex_project',
 
-    # PTM Tales
-    'PTM_source','PTM_modification','PTM','PTM_relationship',
-    'PTM_history','PTM_note',
-]
+        # PTM Tales
+        'PTM_source','PTM_modification','PTM','PTM_relationship',
+        'PTM_history','PTM_note',
+        ],
+    # I don't know why this can't be in stage 1, but it dosen't
+    # work there.  Good thing this only needs to be run once.
+    [
+        'Interaction_ontology','Interaction_ontology_qualifier',
+        ]
+    ]
 
 doing_fmt='Loading %s'
+if opts.stage:
+    jobs=STAGE[opts.stage-1]
+
 if 0==len(jobs):
-    jobs=ORDER
+    warnings.warn('No Jobs')
+    sys.exit(1)
 
 if opts.clean:
     jobs.reverse()
@@ -93,7 +103,7 @@ for job in jobs:
                         try:
                             warnings.warn('Altering ontologies')
                             ims3.query('ALTER TABLE ontologies DROP FOREIGN KEY ontologies_ibfk_1')
-                        except _mysql_exceptions.ProgrammingError:
+                        except (_mysql_exceptions.ProgrammingError,_mysql_exceptions.OperationalError):
                             warnings.warn('ontologies likely already removed')
                     ims3.query('DROP TABLE %s' % table)
                 except _mysql_exceptions.OperationalError as(errno,msg):
