@@ -22,8 +22,16 @@
 	  <select class="quick_organism"></select>
 	  <textarea></textarea>
 	</fieldset>
-	<div class="col-md-4">
-	  <p>Fav ontology terms go here.</p>
+	<div class="col-md-4"><?php
+# This is done here instead in JavaScript because it's conststant
+# across interaction types, column A and B are more dynamic.
+
+require_once('ims/ims.php');
+$cfg=new IMS\config('ims.json');
+$o=new IMS\Ontologies($cfg,['ontology_id'=>1]);
+print $o->fieldset_html();
+
+?>
 	</div>
       </div><!-- .row -->
       <p><button id="commit">Commit</button></p>

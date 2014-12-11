@@ -34,7 +34,7 @@ class PubMedID
       }
     }
     if(1>=count($this->data)){
-      throw new Excetpion("No data fetched for $pmid");
+      throw new Exception('No data fetched for ' . $this->url);
     }
     
   }

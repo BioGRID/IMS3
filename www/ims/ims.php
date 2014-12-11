@@ -41,7 +41,6 @@ function int($val){
   return (int)$val;
 }
 
-
 class config
 {
   private $path;
@@ -169,7 +168,7 @@ class _Table
   }
   
 
-  public function _ineq($tainted,$qm){
+  protected function _ineq($tainted,$qm){
     $vs=explode('|',$tainted);
     if(1==count($vs)){
       return '='.$qm($tainted);
@@ -201,7 +200,7 @@ class _Table
     $s->execute();
   }
 
-  public function _where(){
+  protected function _where(){
     $c=get_called_class();
     $dbh=$this->pdo();
     $where=[];
@@ -462,6 +461,111 @@ class Interaction_participants extends _Table
   const DEFAULT_STATUS='active';
   const INSERT_SQL='INSERT INTO interaction_participants(interaction_id,participant_id,participant_role_id)VALUES(:interaction_id,:participant_id,:participant_role_id)';
 }
+
+class Ontologies extends _Table
+{
+  const TABLE='ontologies';
+  const PRIMARY_KEY='ontology_id';
+  const STATUS_COLUMN='ontology_status';
+  const DEFAULT_STATUS='active';
+
+  # Create fieldset HTML, used for the "Experimental Evidence and
+  # Annotation" on the interactions tab.  Not done in JavaScript to
+  # make loading the HTML template a wee bit easier.  Will be confused
+  # by other ontologies.
+  public function fieldset_html(){
+    $this->query();
+    $o=$this->fetch_only_one('fieldset_html');
+    $legend=$o['ontology_name'];
+    $o_id=$o['ontology_id'];
+
+    $sql='SELECT * FROM ontology_terms JOIN ontology_relationships ' .
+      "USING(ontology_term_id) WHERE ontology_id=$o_id";
+    $s=$this->pdo()->prepare($sql);
+    $s->execute();
+
+    $ots=[];
+    while($ot=$s->fetch(\PDO::FETCH_ASSOC)){
+      $ots[$ot['ontology_term_id']]=$ot;
+    }
+
+    $root;
+    foreach($ots as $ot){
+      $ot_id=$ot['ontology_term_id'];
+      if($ot['ontology_parent_id']){
+	$p_id=$ot['ontology_parent_id'];
+
+	if(array_key_exists('children',$ots[$p_id])){
+	  array_push($ots[$p_id]['children'],$ot_id);
+	}else{
+	  $ots[$p_id]['children']=[$ot_id];
+	}
+      }else{
+	$root=$ot_id;
+      }
+    }
+
+    $otn='ontology_term_name';
+    $cld='children';
+
+    $thead='<tr><th colspan="2">' . $ots[2][$otn] . '</th><th rowspan="2">' . $ots[22][$otn] . '</th></tr>'
+      . '<tr><th>' . $ots[3][$otn] . '</th><th>' . $ots[15][$otn] . '</th></tr>';
+
+    $tbody='';
+    $max=max(count($ots[3][$cld]),count($ots[15][$cld]),count($ots[22][$cld]));
+    $stems=[$ots[3],$ots[15],$ots[22]];
+    
+    for($i=0;$i<$max;$i++){
+      $tbody.='<tr>';
+      foreach($stems as $stem){
+	$tbody.='<td>';
+	if(array_key_exists($i,$stem[$cld])){
+	  $j=$stem[$cld][$i];
+	  $tbody.='<label><input type="radio" name="EEaA" value="'
+	    . $ots[$j]['ontology_term_id']
+	    . '">'
+	    . $ots[$j]['ontology_term_name']
+	    . '</label>';
+	}
+	$tbody.='</td>';
+      }
+      $tbody.='</tr>';
+    }
+
+    /*
+    function select($from,$ids){
+      $out='';
+      foreach($ids as $id){
+	$out .= '<option value="' . $id . '">' . $from[$id]['ontology_term_name'] . '</option>';
+      }
+      return "<select size=11>$out</select>";
+    }
+    
+    $tbody='<tr><td>'
+      . select($ots,$ots[3]['children'])
+      . '</td><td>'
+      . select($ots,$ots[15]['children'])
+      . '</td><td>'
+      . select($ots,$ots[22]['children'])
+      . '</td><tr>';
+    */
+
+    return '<fieldset><legend>' . $legend . '</legend><table border="1px">'
+      . "<thead>$thead</thead>"
+      . "<tbody>$tbody</tbody>"
+      . '</table></fieldset>';
+  }
+}
+
+/*
+class Ontology_terms extends _Table
+{
+  const TABLE='ontology_terms';
+  const PRIMARY_KEY='ontology_term_id';
+  const STATUS_COLUMN='ontology_status';
+  const DEFALUT_STATUS='active';
+}
+*/
 
 class Unknown_participants extends _Table
 {
