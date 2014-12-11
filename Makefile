@@ -1,7 +1,7 @@
 
 # Version Numbers, generally to be passed to RPMBUILD
-VERSION:=0.12
-RELEASE:=6
+VERSION:=0.13
+RELEASE:=0
 
 # Organize phony Targets
 CLEANING_T:=ims3clean mostlyclean clean distclean
@@ -20,7 +20,7 @@ IMS22IMS3=PYTHONPATH=$(PYTHONPATH) $(PYTHONPATH)/ims22ims3 --config=$(IMS_CONFIG
 RPMBUILD=rpmbuild --define '_topdir $(CURDIR)/$(RPMDIR)' \
 	--define '%version $(VERSION)' \
 	--define '%release $(RELEASE)' \
-	--define 'ims_wwwdir /var/www/html/ims' \
+	--define 'ims_wwwdir /usr/share/ims/html' \
 	--define 'ims_phpdir /usr/share/php/ims'
 # /var/www and /usr/share/php gotta be defined is some RPM macro
 # someplace!
@@ -58,10 +58,12 @@ python-rpms: $(PYTHONPATH)/sql
 ims3:
 	$(IMS22IMS3) --stage=1
 	$(IMS22IMS3) --stage=2
+	$(IMS22IMS3) --stage=3
 
 # This should wipe out the IMS3 database, so use wisely.  Needs to run
 # in reverse order then making it.
 ims3clean:
+	$(IMS22IMS3) --stage=3 --clean
 	$(IMS22IMS3) --stage=2 --clean
 	$(IMS22IMS3) --stage=1 --clean
 

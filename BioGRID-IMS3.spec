@@ -90,6 +90,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Thu Dec 18 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.13
+- Now install in /usr/share/ims/html, you provide apache access.
+
 * Mon Nov 17 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.12
 - Added project page.
 
