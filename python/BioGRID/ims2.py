@@ -52,7 +52,7 @@ class _Table(object):
             sqls=[sqls]
         c=cls.ims2_cursor()
 
-        qs=len(sqls);
+        qs=len(sqls)
         count=0
         #ims3=cls.config.imsdb()
 
@@ -66,7 +66,7 @@ class _Table(object):
             #ims3.commit()
     @classmethod
     def fetchone(cls,c):
-        return c.fetchone();
+        return c.fetchone()
     @classmethod
     def also(cls):
         return False
@@ -168,6 +168,7 @@ class Interaction(BioGRID.ims.Interaction,_Table):
     def __init__(self,passthru):
         out=super(Interaction,self).__init__(passthru)
 
+        # Setting this globally for the Interaction class
         if None==Interaction.IGNORE_ID:
             c=self.ims2_cursor()
             c.execute('SELECT tag_category_id AS id FROM tag_categories WHERE tag_category_name=%s',
@@ -230,6 +231,9 @@ class Interaction_history(BioGRID.ims.Interaction_history,_Table):
                 pubmed_id=self.pubmed_id()
                 self.warn("Skipping where pubmed_id=%s and user_id=%d"
                           % (self.pubmed_id(),self['user_id']))
+
+# Classes that just pass the inheritance are generally used by other
+# classes to insert items.
 
 class Interaction_type(BioGRID.ims._Table):
     pass
@@ -407,6 +411,8 @@ class Interaction_participant(BioGRID.ims.Interaction_participant,_Table):
     def __init__(self,passthru):
         out=super(Interaction_participant,self).__init__(passthru)
         if 0==len(Interaction_participant.P2P):
+            global PARTICIPANT_TYPE
+            PARTICIPANT_TYPE=Participant_type.factory('Gene').id()
             c=self.ims_cursor()
             c.execute('''SELECT DISTINCT participant_id,participant_value FROM participants
 WHERE participant_type_id=%s''',(PARTICIPANT_TYPE,))
@@ -638,9 +644,9 @@ class PTM_note(BioGRID.ims.PTM_note,_Table):
 
 class Participant(BioGRID.ims.Participant,_Table):
     def __init__(self,passthru):
-        super(Participant,self).__init__(passthru);
+        super(Participant,self).__init__(passthru)
         global PARTICIPANT_TYPE
-        PARTICIPANT_TYPE=Participant_type.factory('Gene').id();
+        PARTICIPANT_TYPE=Participant_type.factory('Gene').id()
 
     @classmethod
     def slurp_sql(cls):
@@ -674,6 +680,60 @@ class Complex(BioGRID.ims._Table,_Table):
         c.execute("SELECT * FROM complex_qualifications WHERE complex_id=%s",
                   (self['complex_id'],))
         return c.fetchall()
+
+    def ontology(self,i):
+        """Writes complex_phenotypes and
+        complex_phenotypes_qualifitation to the interaction_ontologies
+        and interaction_ontology_qualifiers.  Needs to happend after
+        all normal interactions are loaded as we don't what to change
+        there IDs, but these get new IDs."""
+        c=self.ims2_cursor()
+        ims3_db=self.config.imsdb_name()
+
+        sql='''SELECT complex_phenotype_id,
+ontology_term_id,interaction_ontology_type_id
+FROM complex_phenotypes
+JOIN phenotypes AS pt USING(phenotype_id)
+JOIN %(IMS3)s.ontology_terms AS ot ON(pt.phenotype_official_id=ot.ontology_term_official_id)
+JOIN %(IMS3)s.interaction_ontology_types ON(flag=interaction_ontology_type_shortcode)
+WHERE complex_id=%(ID)s''' % {'IMS3':ims3_db,'ID':self['complex_id']}
+        c.execute(sql)
+        cfts=c.fetchall() # cfts = complex_phenotypes
+        if(0<len(cfts)):
+            self.warn('Adding %s item(s) to interaction_ontology table' % len(cfts))
+            io_ids={} # IMS2.complex_phenotype_id => IMS3.interaction_ontology_id
+            for cft in cfts:
+                io=Interaction_ontology(
+                    {'interaction_id':i.id(),
+                     'ontology_term_id':cft['ontology_term_id'],
+                     'interaction_ontology_type_id':cft['interaction_ontology_type_id']})
+                io.store()
+                io_ids[cft['complex_phenotype_id']]=io.id()
+                #self.warn(io_ids)
+
+                if(0<len(io_ids)):
+                    self.warn('Adding %s item(s) to Interaction_ontology_qualifiers table' % len(io_ids))
+                    for complex_phenotype_id in io_ids:
+                        interaction_ontology_id=io_ids[complex_phenotype_id]
+                        sql='''SELECT
+ot.ontology_term_id,
+complex_phenotypes_qualifier_status AS status,
+complex_phenotypes_qualifier_addeddate AS addeddate
+FROM complex_phenotypes_qualifiers
+JOIN phenotypes AS pt USING(phenotype_id)
+JOIN %(IMS3)s.ontology_terms AS ot ON(pt.phenotype_official_id=ot.ontology_term_official_id)
+WHERE complex_phenotype_id=%(ID)s''' % {'IMS3':ims3_db,'ID':complex_phenotype_id}
+                        #self.warn(sql)
+                        c.execute(sql)
+                        for cptq in c.fetchall():
+                            ioq=Interaction_ontology_qualifier(
+                                {'interaction_ontology_id':interaction_ontology_id,
+                                 'ontology_term_id':cptq['ontology_term_id'],
+                                 'interaction_ontology_qualifier_addeddate':cptq['addeddate'],
+                                 'interaction_ontology_qualifier_status':cptq['status']})
+                            ioq.store()
+
+
     @classmethod
     def table(cls):
         return 'complexes'
@@ -687,10 +747,11 @@ class Complex(BioGRID.ims._Table,_Table):
             i=Interaction(
                 {'publication_id':cpx.pub2pub(),
                  'interaction_type_id':complex_id,
-                 'interaction_source_id':source_id}
-                )
+                 'interaction_source_id':source_id})
             i.store()
             interaction_id=i.id()
+            cpx.ontology(i)
+
             for interactor_id in cpx['complex_participants'].split('|'):
                 #pid=cpx.get_participant_id(bid,PARTICIPANT_TYPE)
                 #pid=cpx.pgid(bid,PARTICIPANT_TYPE)
@@ -839,7 +900,7 @@ class Ontology_term(BioGRID.ims.Ontology_term,_Table):
         return 'phenotypes'
     @classmethod
     def slurp_sql(cls):
-        ims2_table=cls.ims2_table();
+        ims2_table=cls.ims2_table()
         return '''SELECT %s.*,ontology_id FROM %s
 JOIN phenotypes_ontologies USING(phenotype_ontology_id)
 JOIN %s.ontologies ON(phenotype_ontology_name=ontology_name)
@@ -877,7 +938,7 @@ SET ontology_rootid=ontology_term_id WHERE foo.ontology_id=%s.ontologies.ontolog
         another_c.execute(sql)
 
         # populate ontology_rootid then create the foreign key
-        c.execute('ALTER TABLE %s.ontologies ADD FOREIGN KEY(ontology_rootid)REFERENCES ontology_terms(ontology_term_id)' % (ims3_name));
+        c.execute('ALTER TABLE %s.ontologies ADD FOREIGN KEY(ontology_rootid)REFERENCES ontology_terms(ontology_term_id)' % (ims3_name))
 
         return True
 
@@ -916,16 +977,17 @@ JOIN %(IMS3)s.ontology_terms AS op ON(pp.phenotype_official_id=op.ontology_term_
         offset=0
         sqls=[]
         while(offset < total):
-            sqls.append(sql + ' LIMIT %d OFFSET %d' % (limit,offset));
+            sqls.append(sql + ' LIMIT %d OFFSET %d' % (limit,offset))
             offset+=limit
         warnings.warn("%d rows broken into %d pieces" % (total,len(sqls)))
 
+        # Getting root nodes, I guess.
         sql='''SELECT phenotype_relationship_id,phenotype_relationship_type,phenotype_relationship_status,
 ontology_terms.ontology_term_id,NULL AS ontology_parent_id
 FROM phenotypes_relationships
 JOIN phenotypes USING(phenotype_id)
 JOIN %(IMS3)s.ontology_terms ON(phenotypes.phenotype_official_id=ontology_terms.ontology_term_official_id)
-WHERE phenotype_parent_id=0''' % {'IMS3':ims3_name};
+WHERE phenotype_parent_id=0''' % {'IMS3':ims3_name}
         sqls.append(sql)
 
         return sqls
@@ -937,7 +999,7 @@ class Interaction_ontology(BioGRID.ims.Interaction_ontology,_Table):
     def slurp_sql(cls):
         # we keep the same primary key for this table
         return '''SELECT interaction_phenotypes.interaction_phenotype_id AS interaction_ontology_id,
-interaction_id,ontology_term_id,ot.ontology_term_id,interaction_ontology_type_id
+interaction_id,ontology_term_id,interaction_ontology_type_id
 ,interaction_phenotypes.interaction_id AS p_interaction_id
 FROM interaction_phenotypes
 JOIN phenotypes AS pt USING(phenotype_id)

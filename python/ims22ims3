@@ -25,17 +25,27 @@ if not opts.verbose:
 
 # The order in which to creat and import tables
 STAGE=[
+    # Stage 1 - Things that don't need interactions
     [
         # User Tables
         'Project','User','Project_user',
 
         # Publication Tables
         'Publication_query','Publication','Project_publication',
-        #'Pubmed_mapping',
+        'Pubmed_mapping',
 
         # Ontology Tables
         'Ontology','Ontology_term',
         'Ontology_organism','Ontology_relationship',
+
+        # IPLEX tables
+        #'Iplex_project',
+
+        # PTM support tables
+        'PTM_source','PTM_modification'
+        ],
+    # Stage 2 - Interactions, well not complex and forced interactions.
+    [
 
         # Interaction tables
         'Interaction_source','Interaction_quantitation_type',
@@ -43,21 +53,23 @@ STAGE=[
         'Interaction_quantitation','Interaction_note',
         'Interaction_history',
 
-        # Participant tables
-        'Participant','Interaction_participant','Complex',
-        'Unknown_participant','Complex_forced_addition',
-
-        # IPLEX tables
-        #'Iplex_project',
-
-        # PTM Tales
-        'PTM_source','PTM_modification','PTM','PTM_relationship',
-        'PTM_history','PTM_note',
         ],
-    # I don't know why this can't be in stage 1, but it dosen't
-    # work there.  Good thing this only needs to be run once.
+    # Stage 3 - Things that require Interactions
     [
+        # Participant tables
+        'Participant','Interaction_participant',
+
+        # Ontology
         'Interaction_ontology','Interaction_ontology_qualifier',
+
+        'Complex',
+        'Unknown_participant','Complex_forced_addition',
+        ],
+    # Stage 4 - Will likely go into Stage 3 when firished, but to save
+    # a wee bit of time.
+    [
+        # PTM interaction tables
+        'PTM','PTM_relationship','PTM_history','PTM_note',
         ]
     ]
 
