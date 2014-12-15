@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS interaction_ontologies(
        interaction_id                 BIGINT(10)NOT NULL,
        ontology_term_id               BIGINT(10)NOT NULL,
        user_id                        BIGINT(10)NOT NULL DEFAULT 1,
-       interaction_ontology_type_id   BIGINT(10)NOT NULL,
+       interaction_ontology_type_id   BIGINT(10)NULL, -- for experimental_systems
        interaction_ontology_addeddate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
        interaction_ontology_status    ENUM('active','inactive')NOT NULL DEFAULT 'active'
        ,FOREIGN KEY(interaction_id)REFERENCES interactions(interaction_id)

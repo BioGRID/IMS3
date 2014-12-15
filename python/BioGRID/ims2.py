@@ -1063,3 +1063,25 @@ class Dataset_queue(BioGRID.ims.Dataset_queue,_Table):
     _rename={'dataset_queue_filename':'dataset_queue_file',
             'dataset_queue_data':'dataset_queue_processed_data',
             'dataset_queue_interaction_count':'dataset_queue_interactions'}
+
+class Experimental_system(BioGRID.ims._Table,_Table):
+    '''What is really in the IMS2.experimental_systems table is
+    hardcoded in the Ontology_term.sql file.  This exptract items from
+    IMS2.interaction_matrix.experimental_system_id and plops them in
+    the IMS3.interaciton_ontologies table.'''
+    @classmethod
+    def slurp_sql(cls):
+        # Join ims3.interactions just to get get of bogus interactions
+        # in ims.
+        return '''SELECT interaction_id,ontology_term_id,interaction_history_date
+FROM interaction_matrix
+JOIN %(IMS3)s.interactions USING(interaction_id)
+JOIN experimental_systems USING(experimental_system_id)
+JOIN %(IMS3)s.ontology_terms ON(ontology_id=1 AND
+ experimental_system_name=ontology_term_name)''' % {'IMS3':cls.config.imsdb_name()}
+    def store(self):
+        io=Interaction_ontology(
+            {'interaction_id':self['interaction_id'],
+             'ontology_term_id':self['ontology_term_id'],
+             'interaction_ontology_addeddate':self['interaction_history_date']})
+        io.load()
