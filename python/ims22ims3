@@ -61,7 +61,7 @@ STAGE=[
 
         # Ontology
         'Interaction_ontology','Interaction_ontology_qualifier',
-        'experimental_systems',
+        'Experimental_system',
 
         'Complex',
         'Unknown_participant','Complex_forced_addition',
