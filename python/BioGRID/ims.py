@@ -414,3 +414,11 @@ class Interaction_ontology_qualifier(_Table):
     @classmethod
     def table(cls):
         return 'interaction_ontologies_qualifiers'
+
+class Dataset_queue(_Table):
+    _columns=['dataset_queue_filename','dataset_queue_data','dataset_queue_filesize',
+              'user_id','project_id','dataset_queue_interaction_count',
+              'dataset_queue_forced','dataset_queue_addeddate','dataset_queue_status']
+    @classmethod
+    def table(cls):
+        return 'dataset_queue'

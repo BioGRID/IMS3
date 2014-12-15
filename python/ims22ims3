@@ -46,7 +46,7 @@ STAGE=[
         ],
     # Stage 2 - Interactions, well not complex and forced interactions.
     [
-
+        'Dataset_queue',
         # Interaction tables
         'Interaction_source','Interaction_quantitation_type',
         'Interaction',

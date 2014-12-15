@@ -244,6 +244,27 @@ class Participant_type(BioGRID.ims.Participant_type):
 class Participant_role(BioGRID.ims._Table):
     pass
 
+# class Experimental_system_type(BioGRID.ims._Table,_Table):
+#     SYSTEM_NAME='experimental_systems'
+
+#     @classmethod
+#     def puke(cls,c):
+#         o_id=Ontology.factory(cls.SYSTEM_NAME).id()
+#         for row in c.fetchall():
+#             ot=Ontology_term
+#             ({
+#                     'ontology_term_official_id':'%s:type:%s'%(SYSTEM_NAME,row['ontology_term_
+#                     })
+
+# class Experimental_system(BioGRID.ims._Table,_Table):
+#     @classmethod
+#     def table(cls):
+#         return 'experimental_systems'
+#     @classmethod
+#     def puke(cls,c):
+#         o_id=Ontology.factory('experimental_systems').id()
+
+
 class Unknown_participant(BioGRID.ims.Unknown_participant,_Table):
     """This does the interaction_forced_additions, for
     complex_forced_additions see Complex_forced_addition below."""
@@ -1037,3 +1058,8 @@ JOIN %(IMS3)s.ontology_terms AS ot ON(pt.phenotype_official_id=ot.ontology_term_
                 self.warn("Skipping where interaction_phenotpyes_id=%d doesn't exist" % (self['interaction_ontology_id']))
             else:
                 raise
+
+class Dataset_queue(BioGRID.ims.Dataset_queue,_Table):
+    _rename={'dataset_queue_filename':'dataset_queue_file',
+            'dataset_queue_data':'dataset_queue_processed_data',
+            'dataset_queue_interaction_count':'dataset_queue_interactions'}

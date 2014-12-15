@@ -32,9 +32,9 @@ INSERT INTO ontology_terms(ontology_term_id,ontology_term_official_id,ontology_t
 
 ( 3,'BIOGRID_IMS:0000003','In vivo','h2 under Biochemical',1,11),
 ( 4,'BIOGRID_IMS,0000004','Affinity Capture-Luminescence','h3 leaf under In vivo',1,0),
-( 5,'BIOGRID_IMS,0000005','Affinity Capture-MS','h3 leaf under In vivo',1,0),
+( 5,'BIOGRID_IMS,0000005','Affinity Capture-MS','An interaction is inferred when a bait protein is affinity captured from cell extracts by either polyclonal antibody or epitope tag and the associated interaction partner is identified by mass spectrometric methods.',1,0),
 ( 6,'BIOGRID_IMS,0000006','Affinity Capture-RNA','h3 leaf under In vivo',1,0),
-( 7,'BIOGRID_IMS,0000007','Affinity Capture-Western','h3 leaf under In vivo',1,0),
+( 7,'BIOGRID_IMS,0000007','Affinity Capture-Western','An interaction is inferred when a bait protein is affinity captured from cell extracts by either polyclonal antibody or epitope tag and the associated interaction partner identified by Western blot with a specific polyclonal antibody or second epitope tag. This category is also used if an interacting protein is visualized directly by dye stain or radioactivity. Note that this differs from any co-purification experiment involving affinity capture in that the co-purification experiment involves at least one extra purification step to get rid of potential contaminating proteins.',1,0),
 ( 8,'BIOGRID_IMS,0000008','Co-fractionation','h3 leaf under In vivo',1,0),
 ( 9,'BIOGRID_IMS,0000009','Co-localization','h3 leaf under In vivo',1,0),
 (10,'BIOGRID_IMS,0000010','Co-purification','h3 leaf under In vivo',1,0),
