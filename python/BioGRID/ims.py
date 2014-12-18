@@ -4,6 +4,7 @@ import MySQLdb
 import MySQLdb.cursors
 import warnings
 from copy import copy
+from pprint import pprint
 
 def fetch_one(cur,get): # and only one
     row=cur.fetchone()

@@ -62,6 +62,10 @@ INSERT INTO ontology_terms(ontology_term_id,ontology_term_official_id,ontology_t
 (30,'BIOGRID_IMS:0000030','Synthetic Growth Defect','A genetic interaction is inferred when mutations in separate genes, each of which alone causes a minimal phenotype, result in a significant growth defect under a given condition when combined in the same cell.',1,0,'2008-07-30 17:55:32'),
 (31,'BIOGRID_IMS:0000031','Synthetic Haploinsufficiency','A genetic interaction is inferred when mutations or deletions in separate genes, at least one of which is hemizygous, cause a minimal phenotype alone but result in lethality when combined in the same cell under a given condition.',1,0,'2008-09-30 15:39:29'),
 (32,'BIOGRID_IMS:0000032','Synthetic Lethality','A genetic interaction is inferred when mutations or deletions in separate genes, each of which alone causes a minimal phenotype, result in lethality when combined in the same cell under a given condition.',1,0,'2008-07-30 17:57:29'),
-(33,'BIOGRID_IMS:0000033','Synthetic Rescue','A genetic interaction is inferred when mutations or deletions of one gene rescues the lethality or growth defect of a strain mutated or deleted for another gene.',1,0,'2008-07-30 17:58:22');
+(33,'BIOGRID_IMS:0000033','Synthetic Rescue','A genetic interaction is inferred when mutations or deletions of one gene rescues the lethality or growth defect of a strain mutated or deleted for another gene.',1,0,'2008-07-30 17:58:22'),
+
+(34,'Throughput:low','low throughput',NULL,2,0,'2008-06-17'),
+(35,'Throughput:high','high throughput',NULL,2,0,'2008-06-17');
 
 UPDATE ontologies SET ontology_rootid=1 WHERE ontology_id=1;
+-- UPDATE ontologies SET ontology_rootid= WHERE ontology_id=2;

@@ -12,5 +12,6 @@ CREATE TABLE IF NOT EXISTS ontologies(
 -- foreign key created in Ontology_term.sql
 
 -- Insert IMS specific ontology for IMS2.experimental_systems stuff.
-INSERT INTO ontologies(ontology_id,ontology_name)
-VALUES(1,'experimental_systems');
+INSERT INTO ontologies(ontology_id,ontology_name)VALUES
+(1,'experimental_systems'),
+(2,'throughputs');

@@ -8,6 +8,9 @@ import _mysql_exceptions
 import warnings
 import time
 
+import sys
+from pprint import pprint
+
 # This means you should look it up in the quick_participants table.
 global PARTICIPANT_TYPE
 #PARTICIPANT_TYPE=1
@@ -90,6 +93,20 @@ class _Table(object):
     #     row=c.fetchone()
     #     print interaction_id
     #     return Interaction(row)
+
+    @classmethod
+    def pt_id2ot_id(cls,pt_id):
+        c=cls.ims2_cursor()
+        sql='''SELECT ontology_term_id
+FROM %(IMS3)s.ontology_terms AS ot
+JOIN phenotypes AS pt ON(pt.phenotype_official_id=ot.ontology_term_official_id)
+WHERE pt.phenotype_id=%(ID)s''' % {'IMS3':cls.config.imsdb_name(),'ID':pt_id}
+        c.execute(sql)
+        ot_id=c.fetchone()
+        if None==ot_id:
+            return False
+        return ot_id['ontology_term_id']
+
     def pub2pub(self):
         """Convert IMS2.publication_id to IMS3.publication_id."""
         sql='''SELECT publication_id FROM publications WHERE
@@ -208,7 +225,7 @@ AND interaction_id=%s
         return out
     def store(self):
         try:
-            return super(Interaction,self).store()
+            out=super(Interaction,self).store()
         except _mysql_exceptions.IntegrityError:
             pp_id=Interaction_type.factory('Protein-Protein').id()
             if pp_id==self['interaction_type_id']:
@@ -219,8 +236,32 @@ WHERE interaction_id=%s''',(self.id(),))
                 mod_type=BioGRID.ims.fetch_one(c,'modification_type')
                 self.warn('skipping %s where PubMed ID is %s'
                           % (mod_type,pmid))
+                return
             else:
                 raise
+
+        # Now get the throughput
+        c=self.ims2_cursor()
+        sql='''SELECT *
+FROM interaction_tag_mappings
+JOIN tags USING(tag_id)
+JOIN tag_categories USING(tag_category_id)
+WHERE interaction_id=%s
+AND tag_category_name='Throughput'
+''' % (self.id())
+        c.execute(sql)
+        itm=self.fetchone(c)
+        if(itm):
+            ot_id=Ontology_term.factory(itm['tag_name'].lower()).id()
+            io=Interaction_ontology({
+                    'interaction_id':self.id(),
+                    'ontology_term_id':ot_id,
+                    'interaction_ontology_addeddate':itm['interaction_tag_mapping_timestamp'],
+                    'interaction_ontology_status':itm['interaction_tag_mapping_status']})
+            io.load()
+        return out
+
+                    
 
 
 class Interaction_history(BioGRID.ims.Interaction_history,_Table):
@@ -243,26 +284,6 @@ class Participant_type(BioGRID.ims.Participant_type):
 
 class Participant_role(BioGRID.ims._Table):
     pass
-
-# class Experimental_system_type(BioGRID.ims._Table,_Table):
-#     SYSTEM_NAME='experimental_systems'
-
-#     @classmethod
-#     def puke(cls,c):
-#         o_id=Ontology.factory(cls.SYSTEM_NAME).id()
-#         for row in c.fetchall():
-#             ot=Ontology_term
-#             ({
-#                     'ontology_term_official_id':'%s:type:%s'%(SYSTEM_NAME,row['ontology_term_
-#                     })
-
-# class Experimental_system(BioGRID.ims._Table,_Table):
-#     @classmethod
-#     def table(cls):
-#         return 'experimental_systems'
-#     @classmethod
-#     def puke(cls,c):
-#         o_id=Ontology.factory('experimental_systems').id()
 
 
 class Unknown_participant(BioGRID.ims.Unknown_participant,_Table):
@@ -291,6 +312,8 @@ participant_value=%s AND participant_type_id=%s'''
             else:
                 return Participant(fetched)
         
+        global PARTICIPANT_TYPE
+        PARTICIPANT_TYPE=Participant_type.factory('Gene').id()
         # Now we need to actually create an Unknown_participant object!
         up=Unknown_participant(
             {'unknown_participant_identifier':force['interactor_%s_name' % ab],
@@ -323,16 +346,39 @@ participant_value=%s AND participant_type_id=%s'''
 
             c=i.ims2_cursor()
             c.execute('''SELECT * FROM interaction_forced_attributes
+JOIN forced_attributes_types ON(forced_attributes_types_id)
 WHERE interaction_forced_id=%s''',(force['interaction_forced_id'],))
             for attr in c.fetchall():
-                ih=Interaction_history(
-                    {'modification_type':'ACTIVATED',
-                     'interaction_id':i.id(),
-                     'user_id':force['user_id'],
-                     'interaction_history_comment':attr['interaction_forced_attribute_value'],
-                     'interaction_history_date':attr['interaction_forced_attribute_timestamp']}
-                    )
-                ih.store()
+                if 'Phenotype'==attr['forced_attributes_types_name']:
+                    pt_ids=attr['forced_attribute_type_id']
+                    for pt_id in pt_ids.split('|'):
+                        ot_id=cls.pt_id2ot_id(pt_id)
+                        if ot_id:
+                            io=Interaction_ontology(
+                                {'interaction_id':i.id(),
+                                 'ontology_term_id':ot_id,
+                                 'interaction_ontology_type_id':1})
+                            io.load()                    
+                        else:
+                            io.warn('phenotype_id=%s not loaded' % (pt_id))
+                elif('Qualification'==attr['forced_attributes_types_name']):
+                    pass
+                #elif 'Quantitation'==attr['forced_attributes_types_name']:
+                #    pass
+                # if('Tag'==attr['forced_attributes_types_name']):
+                #     pass
+                #else:
+                 #   pprint(attr)
+                  #  sys.exit(1)
+
+            #     ih=Interaction_history(
+            #         {'modification_type':'ACTIVATED',
+            #          'interaction_id':i.id(),
+            #          'user_id':force['user_id'],
+            #          'interaction_history_comment':attr['interaction_forced_attribute_value'],
+            #          'interaction_history_date':attr['interaction_forced_attribute_timestamp']}
+            #         )
+            #     ih.store()
 
             pub_id=i.pub2pub()
             foo=cls.get_participant(force,'A',pub_id)
@@ -1036,6 +1082,9 @@ JOIN %(IMS3)s.interaction_ontology_types ON(flag=interaction_ontology_type_short
                 self.warn('skipping where interaction_phenotypes.interaction_id==0')
             else:
                 raise
+    def __eq__(self,other):
+        '''For now, just return True.'''
+        return True
 
 class Interaction_ontology_qualifier(BioGRID.ims.Interaction_ontology_qualifier,_Table):
     @classmethod
@@ -1058,6 +1107,7 @@ JOIN %(IMS3)s.ontology_terms AS ot ON(pt.phenotype_official_id=ot.ontology_term_
                 self.warn("Skipping where interaction_phenotpyes_id=%d doesn't exist" % (self['interaction_ontology_id']))
             else:
                 raise
+
 
 class Dataset_queue(BioGRID.ims.Dataset_queue,_Table):
     _rename={'dataset_queue_filename':'dataset_queue_file',
