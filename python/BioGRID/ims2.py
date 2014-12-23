@@ -95,7 +95,7 @@ class _Table(object):
     #     return Interaction(row)
 
     @classmethod
-    def pt_id2ot_id(cls,pt_id):
+    def pt_id2ot_id(cls,pt_id,warn=warnings):
         c=cls.ims2_cursor()
         sql='''SELECT ontology_term_id
 FROM %(IMS3)s.ontology_terms AS ot
@@ -104,6 +104,7 @@ WHERE pt.phenotype_id=%(ID)s''' % {'IMS3':cls.config.imsdb_name(),'ID':pt_id}
         c.execute(sql)
         ot_id=c.fetchone()
         if None==ot_id:
+            warn.warn("phenotype_id='%s' has no ontology match" % (pt_id))
             return False
         return ot_id['ontology_term_id']
 
@@ -346,30 +347,70 @@ participant_value=%s AND participant_type_id=%s'''
 
             c=i.ims2_cursor()
             c.execute('''SELECT * FROM interaction_forced_attributes
-JOIN forced_attributes_types ON(forced_attributes_types_id)
+JOIN forced_attributes_types ON(forced_attribute_type_id=forced_attributes_types_id)
 WHERE interaction_forced_id=%s''',(force['interaction_forced_id'],))
             for attr in c.fetchall():
                 if 'Phenotype'==attr['forced_attributes_types_name']:
                     pt_ids=attr['forced_attribute_type_id']
                     for pt_id in pt_ids.split('|'):
-                        ot_id=cls.pt_id2ot_id(pt_id)
+                        ot_id=cls.pt_id2ot_id(pt_id,i)
                         if ot_id:
                             io=Interaction_ontology(
                                 {'interaction_id':i.id(),
                                  'ontology_term_id':ot_id,
                                  'interaction_ontology_type_id':1})
                             io.load()                    
-                        else:
-                            io.warn('phenotype_id=%s not loaded' % (pt_id))
                 elif('Qualification'==attr['forced_attributes_types_name']):
-                    pass
-                #elif 'Quantitation'==attr['forced_attributes_types_name']:
-                #    pass
-                # if('Tag'==attr['forced_attributes_types_name']):
-                #     pass
-                #else:
-                 #   pprint(attr)
-                  #  sys.exit(1)
+                    note__user=attr['interaction_forced_attribute_value'].split('|',2)
+                    note=note__user[0]
+                    note_dict={
+                        'interaction_note_text':note,
+                        'interaction_note_addeddate':attr['interaction_forced_attribute_timestamp'],
+                        'interaction_id':i.id()}
+                    try:
+                        note_dict['user_id']=int(note__user[1])
+                    except IndexError:
+                        note_dict['user_id']=1 # defalut from Interaction_notes.sql
+                        i.warn('no user_id found in qualification, using default.')
+                    inote=BioGRID.ims.Interaction_note(note_dict)
+                    try:
+                        inote.store()
+                    except _mysql_exceptions.IntegrityError:
+                        pprint(attr)
+                        pprint(inote.row)
+                        raise
+                elif 'Quantitation'==attr['forced_attributes_types_name']:
+                    quant__type=attr['interaction_forced_attribute_value'].split('|',2)
+                    quant=quant__type[0]
+                    type_id=quant__type[1]
+                    BioGRID.ims.Interaction_quantitation({
+                            'interaction_quantation_value':quant,
+                            'interaction_quantation_type_id':type_id,
+                            'interaction_quantation_addeddate':attr['interaction_forced_attribute_timestamp'],
+                            'interaction_id':i.id()
+                            })
+                    
+                elif('Tag'==attr['forced_attributes_types_name']):
+                    c.execute('SELECT * FROM tags JOIN tag_categories USING(tag_category_id)'
+                              'WHERE tag_id=%s' % attr['interaction_forced_attribute_value'])
+                    tag=c.fetchone()
+                    if 'Throughput'==tag['tag_category_name']:
+                        ot_id=Ontology_term.factory(tag['tag_name'].lower()).id()
+                        io=Interaction_ontology({
+                                'interaction_id':i.id(),
+                                'ontology_term_id':ot_id,
+                                'interaction_ontology_addeddate':attr['interaction_forced_attribute_timestamp']
+                                })
+                        io.load()
+                    elif 'Ignore Interactions'==tag['tag_category_name']:
+                        i.warn('Ignoring tag: %s' % tag['tag_name'])
+                    else:
+                        pprint(attr)
+                        pprint(tag)
+                        sys.exit(1)
+                else:
+                    pprint(attr)
+                    sys.exit(1)
 
             #     ih=Interaction_history(
             #         {'modification_type':'ACTIVATED',
@@ -429,6 +470,7 @@ JOIN interaction_matrix USING(interaction_id)'''
         return super(Interaction_quantitation,self).__getitem__(name)
 
 class Interaction_quantitation_type(BioGRID.ims.Interaction_quantitation_type,_Table):
+    '''The ids for IMS2 and IMS3 match for this table.'''
     @classmethod
     def ims2_table(cls):
         return cls.__name__.lower()

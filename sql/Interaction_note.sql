@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS interaction_notes(
        interaction_note_id        BIGINT(10)PRIMARY KEY AUTO_INCREMENT,
        interaction_note_text	  TEXT NOT NULL,
-       user_id			  BIGINT(10)NOT NULL,
+       user_id			  BIGINT(10)NOT NULL DEFAULT 1,
        interaction_note_addeddate TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
        interaction_note_status    ENUM('active','inactive'),
        interaction_id		  BIGINT(10)NOT NULL,
