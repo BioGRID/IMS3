@@ -1,4 +1,4 @@
-""""Stuff to convert IMS2 database schema to IMS3.  Hopefully this will
+"""Stuff to convert IMS2 database schema to IMS3.  Hopefully this will
 be the only files with IMS2 information in it."""
 import json
 import BioGRID.ims
@@ -261,6 +261,75 @@ AND tag_category_name='Throughput'
                     'interaction_ontology_status':itm['interaction_tag_mapping_status']})
             io.load()
         return out
+    def force_attributes(self,cls,forced_id):
+
+        c=self.ims2_cursor()
+        c.execute('SELECT * FROM ' + cls.FORCED_ATTRIBUTES +
+' JOIN forced_attributes_types ON(forced_attribute_type_id=forced_attributes_types_id)'
+'WHERE interaction_forced_id=%s',(forced_id,))
+        for attr in c.fetchall():
+            if 'Phenotype'==attr['forced_attributes_types_name']:
+                pt_ids=attr['forced_attribute_type_id']
+                for pt_id in pt_ids.split('|'):
+                    ot_id=cls.pt_id2ot_id(pt_id,self)
+                    if ot_id:
+                        io=Interaction_ontology(
+                            {'interaction_id':self.id(),
+                             'ontology_term_id':ot_id,
+                             'interaction_ontology_type_id':1})
+                        io.load()                    
+            elif('Qualification'==attr['forced_attributes_types_name']):
+                note__user=attr['interaction_forced_attribute_value'].split('|',2)
+                note=note__user[0]
+                note_dict={
+                    'interaction_note_text':note,
+                    'interaction_note_addeddate':attr['interaction_forced_attribute_timestamp'],
+                    'interaction_id':self.id()}
+                try:
+                    # Some have a user_id, others, no so much
+                    note_dict['user_id']=int(note__user[1])
+                except IndexError:
+                    note_dict['user_id']=1 # defalut from Interaction_notes.sql
+                    self.warn('no user_id found in qualification, using default.')
+                    inote=BioGRID.ims.Interaction_note(note_dict)
+                    try:
+                        inote.store()
+                    except _mysql_exceptions.IntegrityError:
+                        pprint(attr)
+                        pprint(inote.row)
+                        raise
+            elif 'Quantitation'==attr['forced_attributes_types_name']:
+                quant__type=attr['interaction_forced_attribute_value'].split('|',2)
+                quant=quant__type[0]
+                type_id=quant__type[1]
+                BioGRID.ims.Interaction_quantitation({
+                        'interaction_quantation_value':quant,
+                        'interaction_quantation_type_id':type_id,
+                        'interaction_quantation_addeddate':attr['interaction_forced_attribute_timestamp'],
+                        'interaction_id':self.id()
+                        })
+                    
+            elif('Tag'==attr['forced_attributes_types_name']):
+                c.execute('SELECT * FROM tags JOIN tag_categories USING(tag_category_id)'
+                          'WHERE tag_id=%s' % attr['interaction_forced_attribute_value'])
+                tag=c.fetchone()
+                if 'Throughput'==tag['tag_category_name']:
+                    ot_id=Ontology_term.factory(tag['tag_name'].lower()).id()
+                    io=Interaction_ontology({
+                            'interaction_id':self.id(),
+                            'ontology_term_id':ot_id,
+                            'interaction_ontology_addeddate':attr['interaction_forced_attribute_timestamp']
+                            })
+                    io.load()
+                elif 'Ignore Interactions'==tag['tag_category_name']:
+                    self.warn('Ignoring tag: %s' % tag['tag_name'])
+                else:
+                    pprint(attr)
+                    pprint(tag)
+                    sys.exit(1)
+            else:
+                pprint(attr)
+                sys.exit(1)
 
                     
 
@@ -290,6 +359,8 @@ class Participant_role(BioGRID.ims._Table):
 class Unknown_participant(BioGRID.ims.Unknown_participant,_Table):
     """This does the interaction_forced_additions, for
     complex_forced_additions see Complex_forced_addition below."""
+
+    FORCED_ATTRIBUTES='interaction_forced_attributes'
 
     @classmethod
     def slurp_sql(cls):
@@ -344,82 +415,7 @@ participant_value=%s AND participant_type_id=%s'''
                 )
             i.row['publication_id']=i.pub2pub()
             i.store()
-
-            c=i.ims2_cursor()
-            c.execute('''SELECT * FROM interaction_forced_attributes
-JOIN forced_attributes_types ON(forced_attribute_type_id=forced_attributes_types_id)
-WHERE interaction_forced_id=%s''',(force['interaction_forced_id'],))
-            for attr in c.fetchall():
-                if 'Phenotype'==attr['forced_attributes_types_name']:
-                    pt_ids=attr['forced_attribute_type_id']
-                    for pt_id in pt_ids.split('|'):
-                        ot_id=cls.pt_id2ot_id(pt_id,i)
-                        if ot_id:
-                            io=Interaction_ontology(
-                                {'interaction_id':i.id(),
-                                 'ontology_term_id':ot_id,
-                                 'interaction_ontology_type_id':1})
-                            io.load()                    
-                elif('Qualification'==attr['forced_attributes_types_name']):
-                    note__user=attr['interaction_forced_attribute_value'].split('|',2)
-                    note=note__user[0]
-                    note_dict={
-                        'interaction_note_text':note,
-                        'interaction_note_addeddate':attr['interaction_forced_attribute_timestamp'],
-                        'interaction_id':i.id()}
-                    try:
-                        note_dict['user_id']=int(note__user[1])
-                    except IndexError:
-                        note_dict['user_id']=1 # defalut from Interaction_notes.sql
-                        i.warn('no user_id found in qualification, using default.')
-                    inote=BioGRID.ims.Interaction_note(note_dict)
-                    try:
-                        inote.store()
-                    except _mysql_exceptions.IntegrityError:
-                        pprint(attr)
-                        pprint(inote.row)
-                        raise
-                elif 'Quantitation'==attr['forced_attributes_types_name']:
-                    quant__type=attr['interaction_forced_attribute_value'].split('|',2)
-                    quant=quant__type[0]
-                    type_id=quant__type[1]
-                    BioGRID.ims.Interaction_quantitation({
-                            'interaction_quantation_value':quant,
-                            'interaction_quantation_type_id':type_id,
-                            'interaction_quantation_addeddate':attr['interaction_forced_attribute_timestamp'],
-                            'interaction_id':i.id()
-                            })
-                    
-                elif('Tag'==attr['forced_attributes_types_name']):
-                    c.execute('SELECT * FROM tags JOIN tag_categories USING(tag_category_id)'
-                              'WHERE tag_id=%s' % attr['interaction_forced_attribute_value'])
-                    tag=c.fetchone()
-                    if 'Throughput'==tag['tag_category_name']:
-                        ot_id=Ontology_term.factory(tag['tag_name'].lower()).id()
-                        io=Interaction_ontology({
-                                'interaction_id':i.id(),
-                                'ontology_term_id':ot_id,
-                                'interaction_ontology_addeddate':attr['interaction_forced_attribute_timestamp']
-                                })
-                        io.load()
-                    elif 'Ignore Interactions'==tag['tag_category_name']:
-                        i.warn('Ignoring tag: %s' % tag['tag_name'])
-                    else:
-                        pprint(attr)
-                        pprint(tag)
-                        sys.exit(1)
-                else:
-                    pprint(attr)
-                    sys.exit(1)
-
-            #     ih=Interaction_history(
-            #         {'modification_type':'ACTIVATED',
-            #          'interaction_id':i.id(),
-            #          'user_id':force['user_id'],
-            #          'interaction_history_comment':attr['interaction_forced_attribute_value'],
-            #          'interaction_history_date':attr['interaction_forced_attribute_timestamp']}
-            #         )
-            #     ih.store()
+            i.force_attributes(cls,force['interaction_forced_id'])
 
             pub_id=i.pub2pub()
             foo=cls.get_participant(force,'A',pub_id)
@@ -894,6 +890,9 @@ WHERE complex_phenotype_id=%(ID)s''' % {'IMS3':ims3_db,'ID':complex_phenotype_id
 class Complex_forced_addition(BioGRID.ims._Table,_Table):
     """Slurps the IMS2 table inte the Interactions and Participants
     table."""
+
+    FORCED_ATTRIBUTES='interaction_forced_attributes'
+
     @classmethod
     def puke(cls,c):
         complex_id=Interaction_type.factory('Complex').id()
@@ -960,19 +959,21 @@ class Complex_forced_addition(BioGRID.ims._Table,_Table):
                          'interaction_participant_status':'active'}
                         )
                     ip.store()
+
+                    i.force_attributes(cls,raw['complex_forced_id'])
                     
-                attrs=i.ims2_cursor()
-                attrs.execute('''SELECT * FROM complex_forced_attributes WHERE
-complex_forced_id=%s''',(raw['complex_forced_id'],))
-                for attr in attrs.fetchall():
-                    ih=Interaction_history(
-                        {'modification_type':'ACTIVATED',
-                         'interaction_id':i.id(),
-                         'user_id':raw['user_id'],
-                         'interaction_history_comment':attr['complex_forced_attribute_value'],
-                         'interaction_history_date':attr['complex_forced_attribute_timestamp']}
-                        )
-                    ih.store()
+#                 attrs=i.ims2_cursor()
+#                 attrs.execute('''SELECT * FROM complex_forced_attributes WHERE
+# complex_forced_id=%s''',(raw['complex_forced_id'],))
+#                 for attr in attrs.fetchall():
+#                     ih=Interaction_history(
+#                         {'modification_type':'ACTIVATED',
+#                          'interaction_id':i.id(),
+#                          'user_id':raw['user_id'],
+#                          'interaction_history_comment':attr['complex_forced_attribute_value'],
+#                          'interaction_history_date':attr['complex_forced_attribute_timestamp']}
+#                         )
+#                     ih.store()
 
             raw=c.fetchone()
             
