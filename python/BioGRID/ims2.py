@@ -64,7 +64,7 @@ class _Table(object):
             if(1!=qs):
                 count+=1
                 warnings.warn("%5d/%d queries" % (count,qs))
-            c.execute(sql)
+5A            c.execute(sql)
             cls.puke(c)
             #ims3.commit()
     @classmethod
@@ -264,9 +264,10 @@ AND tag_category_name='Throughput'
     def force_attributes(self,cls,forced_id):
 
         c=self.ims2_cursor()
-        c.execute('SELECT * FROM ' + cls.FORCED_ATTRIBUTES +
-' JOIN forced_attributes_types ON(forced_attribute_type_id=forced_attributes_types_id)'
-'WHERE interaction_forced_id=%s',(forced_id,))
+        sql='''SELECT * FROM %(TABLE)s_forced_attributes
+JOIN forced_attributes_types ON(forced_attribute_type_id=forced_attributes_types_id)
+WHERE %(TABLE)s_forced_id=%%s''' % { 'TABLE': cls.TABLE_PREFIX }
+        c.execute(sql,(forced_id,))
         for attr in c.fetchall():
             if 'Phenotype'==attr['forced_attributes_types_name']:
                 pt_ids=attr['forced_attribute_type_id']
@@ -279,11 +280,11 @@ AND tag_category_name='Throughput'
                              'interaction_ontology_type_id':1})
                         io.load()                    
             elif('Qualification'==attr['forced_attributes_types_name']):
-                note__user=attr['interaction_forced_attribute_value'].split('|',2)
+                note__user=attr[cls.TABLE_PREFIX+'_forced_attribute_value'].split('|',2)
                 note=note__user[0]
                 note_dict={
                     'interaction_note_text':note,
-                    'interaction_note_addeddate':attr['interaction_forced_attribute_timestamp'],
+                    'interaction_note_addeddate':attr[cls.TABLE_PREFIX+'_forced_attribute_timestamp'],
                     'interaction_id':self.id()}
                 try:
                     # Some have a user_id, others, no so much
@@ -305,20 +306,20 @@ AND tag_category_name='Throughput'
                 BioGRID.ims.Interaction_quantitation({
                         'interaction_quantation_value':quant,
                         'interaction_quantation_type_id':type_id,
-                        'interaction_quantation_addeddate':attr['interaction_forced_attribute_timestamp'],
+                        'interaction_quantation_addeddate':attr[cls.TABLE_PREFIX+'_forced_attribute_timestamp'],
                         'interaction_id':self.id()
                         })
                     
             elif('Tag'==attr['forced_attributes_types_name']):
                 c.execute('SELECT * FROM tags JOIN tag_categories USING(tag_category_id)'
-                          'WHERE tag_id=%s' % attr['interaction_forced_attribute_value'])
+                          'WHERE tag_id=%s' % attr[cls.TABLE_PREFIX+'_forced_attribute_value'])
                 tag=c.fetchone()
                 if 'Throughput'==tag['tag_category_name']:
                     ot_id=Ontology_term.factory(tag['tag_name'].lower()).id()
                     io=Interaction_ontology({
                             'interaction_id':self.id(),
                             'ontology_term_id':ot_id,
-                            'interaction_ontology_addeddate':attr['interaction_forced_attribute_timestamp']
+                            'interaction_ontology_addeddate':attr[cls.TABLE_PREFIX+'_forced_attribute_timestamp']
                             })
                     io.load()
                 elif 'Ignore Interactions'==tag['tag_category_name']:
@@ -360,7 +361,7 @@ class Unknown_participant(BioGRID.ims.Unknown_participant,_Table):
     """This does the interaction_forced_additions, for
     complex_forced_additions see Complex_forced_addition below."""
 
-    FORCED_ATTRIBUTES='interaction_forced_attributes'
+    TABLE_PREFIX='interaction'
 
     @classmethod
     def slurp_sql(cls):
@@ -891,7 +892,7 @@ class Complex_forced_addition(BioGRID.ims._Table,_Table):
     """Slurps the IMS2 table inte the Interactions and Participants
     table."""
 
-    FORCED_ATTRIBUTES='interaction_forced_attributes'
+    TABLE_PREFIX='complex'
 
     @classmethod
     def puke(cls,c):
@@ -962,19 +963,6 @@ class Complex_forced_addition(BioGRID.ims._Table,_Table):
 
                     i.force_attributes(cls,raw['complex_forced_id'])
                     
-#                 attrs=i.ims2_cursor()
-#                 attrs.execute('''SELECT * FROM complex_forced_attributes WHERE
-# complex_forced_id=%s''',(raw['complex_forced_id'],))
-#                 for attr in attrs.fetchall():
-#                     ih=Interaction_history(
-#                         {'modification_type':'ACTIVATED',
-#                          'interaction_id':i.id(),
-#                          'user_id':raw['user_id'],
-#                          'interaction_history_comment':attr['complex_forced_attribute_value'],
-#                          'interaction_history_date':attr['complex_forced_attribute_timestamp']}
-#                         )
-#                     ih.store()
-
             raw=c.fetchone()
             
 
