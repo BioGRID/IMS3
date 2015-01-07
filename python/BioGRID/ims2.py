@@ -64,7 +64,7 @@ class _Table(object):
             if(1!=qs):
                 count+=1
                 warnings.warn("%5d/%d queries" % (count,qs))
-5A            c.execute(sql)
+            c.execute(sql)
             cls.puke(c)
             #ims3.commit()
     @classmethod
@@ -183,6 +183,7 @@ class Project_user(BioGRID.ims.Project_user,_Table):
 
 class Interaction(BioGRID.ims.Interaction,_Table):
     IGNORE_ID=None
+
     def __init__(self,passthru):
         out=super(Interaction,self).__init__(passthru)
 
@@ -241,26 +242,33 @@ WHERE interaction_id=%s''',(self.id(),))
             else:
                 raise
 
-        # Now get the throughput
+        self.throughput()
+        return out
+
+    def throughput(self,ims2_id=False,prefix='interaction'):
+        if not(ims2_id):
+            ims2_id=self.id()
+
         c=self.ims2_cursor()
         sql='''SELECT *
-FROM interaction_tag_mappings
+FROM %(TABLE)s_tag_mappings
 JOIN tags USING(tag_id)
 JOIN tag_categories USING(tag_category_id)
-WHERE interaction_id=%s
+WHERE %(TABLE)s_id=%%s
 AND tag_category_name='Throughput'
-''' % (self.id())
-        c.execute(sql)
+''' % {'TABLE':prefix}
+        c.execute(sql,(ims2_id,))
         itm=self.fetchone(c)
         if(itm):
             ot_id=Ontology_term.factory(itm['tag_name'].lower()).id()
             io=Interaction_ontology({
                     'interaction_id':self.id(),
                     'ontology_term_id':ot_id,
-                    'interaction_ontology_addeddate':itm['interaction_tag_mapping_timestamp'],
-                    'interaction_ontology_status':itm['interaction_tag_mapping_status']})
+                    'interaction_ontology_addeddate':itm[prefix+'_tag_mapping_timestamp'],
+                    'interaction_ontology_status':itm[prefix+'_tag_mapping_status']})
             io.load()
-        return out
+        
+
     def force_attributes(self,cls,forced_id):
 
         c=self.ims2_cursor()
@@ -774,6 +782,8 @@ class Complex(BioGRID.ims._Table,_Table):
     """This table is only in IMS2, not IMS3. Data from it is now
     stored in the Interaction tables."""
 
+    TABLE_PREFIX='complex'
+
     def logs(self):
         """Read items from the IMS2.complex_history table and returns
         them."""
@@ -857,6 +867,7 @@ WHERE complex_phenotype_id=%(ID)s''' % {'IMS3':ims3_db,'ID':complex_phenotype_id
             i.store()
             interaction_id=i.id()
             cpx.ontology(i)
+            i.throughput(cpx.id(),'complex')
 
             for interactor_id in cpx['complex_participants'].split('|'):
                 #pid=cpx.get_participant_id(bid,PARTICIPANT_TYPE)
