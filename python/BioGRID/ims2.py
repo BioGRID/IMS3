@@ -119,7 +119,11 @@ publication_pubmed_id=%s'''
         """Returns the PubMed ID as reported from the IMS2 database, a string.
         Otherwise returns None if current object has no
         'publication_id' item. """
-        pub_id=self['publication_id']
+        try:
+            pub_id=self.row['publication_id']
+        except KeyError:
+            pub_id=self['publication_id']
+            
         if None==pub_id:
             sql='''SELECT publication_pubmed_id FROM interactions
 JOIN publications USING(publication_id) WHERE interaction_id=%s'''
@@ -601,6 +605,25 @@ class Publication(BioGRID.ims.Publication,_Table):
                 super(Publication,self).store()
             except _mysql_exceptions.IntegrityError:
                 self.warn('skipping dup entry where PubMed ID is %d' % pmid)
+
+class Publication_history(BioGRID.ims.Publication_history,_Table):
+    _rename={'modification_type':'progress_type'}
+    @classmethod
+    def ims2_table(cls):
+        return 'progress'
+    def __getitem__(self,name):
+        if 'publication_id'==name:
+            return self.pub2pub()
+        return super(Publication_history,self).__getitem__(name)
+    def store(self):
+        try:
+            return super(Publication_history,self).store()
+        except _mysql_exceptions.OperationalError:
+            pub_id=self.row['publication_id']
+            self.warn('Skipping where PubMed ID is %s' % self.pubmed_id())
+            #self.warn('Skipping where publication_id==%d' % self.row['publication_id'])
+
+
 
 class Publication_query(BioGRID.ims.Publication_query,_Table):
     _rename={'publication_query_value':'pubmed_query_value',

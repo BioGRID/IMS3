@@ -311,6 +311,12 @@ class Publication(_Table):
         'publication_status','publication_addeddate',
         'publication_lastupdated']
 
+class Publication_history(_Table):
+    _columns=['modification_type','publication_id','user_id',
+             'publication_history_comment','publication_history_date']
+    @classmethod
+    def table(cls):
+        return 'publication_history'
 
 class Publication_query(_Table):
     @classmethod

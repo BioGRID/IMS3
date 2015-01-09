@@ -31,7 +31,7 @@ STAGE=[
         'Project','User','Project_user',
 
         # Publication Tables
-        'Publication_query','Publication','Project_publication',
+        'Publication_query','Publication','Project_publication','Publication_history',
         'Pubmed_mapping',
 
         # Ontology Tables
