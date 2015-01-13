@@ -57,7 +57,7 @@ STAGE=[
     # Stage 3 - Things that require Interactions
     [
         # Participant tables
-        'Participant','Interaction_participant',
+        'Participant','Interaction_participant','Participant_tag_type',
 
         # Ontology
         'Interaction_ontology','Interaction_ontology_qualifier',
