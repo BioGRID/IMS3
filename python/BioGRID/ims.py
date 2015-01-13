@@ -379,6 +379,12 @@ class Unknown_participant(_Table):
               'organism_id','publication_id',
               'unknown_participant_addeddate','unknown_participant_status']
 
+class Participant_tag_type(_Table):
+    _columns=['participant_tag_type_name','participant_tag_type_desc',
+              'iplex_project_id',
+              #'participant_tag_type_display',
+              'participant_tag_type_addeddate','participant_tag_type_status']
+
 class Ontology(_Table):
     _columns=['ontology_name','ontology_url','ontology_rootid',
               'ontology_addeddate','ontology_lastparsed','ontology_status']
@@ -429,3 +435,4 @@ class Dataset_queue(_Table):
     @classmethod
     def table(cls):
         return 'dataset_queue'
+

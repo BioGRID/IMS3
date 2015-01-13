@@ -801,6 +801,20 @@ UNION DISTINCT
                 return 'active'
         return out
 
+class Participant_tag_type(BioGRID.ims.Participant_tag_type,_Table):
+    _rename={'participant_tag_type_name':'genetag_type_name',
+             'participant_tag_type_desc':'genetag_type_desc',
+             'participant_tag_type_addeddate':'genetag_type_addeddate',
+             'participant_tag_type_status':'genetag_type_status'}
+    @classmethod
+    def ims2_table(cls):
+        return 'genetag_types'
+    def __getitem__(self,name):
+        if 'iplex_project_id'==name:
+            return 1 # there in only one iplex_project
+        else:
+            return super(Participant_tag_type,self).__getitem__(name)
+
 class Complex(BioGRID.ims._Table,_Table):
     """This table is only in IMS2, not IMS3. Data from it is now
     stored in the Interaction tables."""
@@ -1200,3 +1214,10 @@ JOIN %(IMS3)s.ontology_terms ON(ontology_id=1 AND
              'ontology_term_id':self['ontology_term_id'],
              'interaction_ontology_addeddate':self['interaction_history_date']})
         io.load()
+
+
+# class Iplex_project(_Table):
+#     """Nothing for now as we import nothing."""
+#     @classmethod
+#     def slurp(cls):
+#         pass
