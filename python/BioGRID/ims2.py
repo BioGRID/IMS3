@@ -801,6 +801,18 @@ UNION DISTINCT
                 return 'active'
         return out
 
+class Participant_tag(BioGRID.ims.Participant_tag,_Table):
+    _rename={'participant_tag_shortcode':'genetag_shortcode',
+             'participant_tag_name':'genetag_name',
+             'participant_tag_description':'genetag_description',
+             'participant_tag_type_id':'genetag_type_id',
+             'participant_tag_parent_id':'genetag_parent_id',
+             'participant_tag_addeddate':'geentag_addeddate',
+             'participant_tag_status':'genetag_status'}
+    @classmethod
+    def ims2_table(cls):
+        return 'genetags'
+
 class Participant_tag_type(BioGRID.ims.Participant_tag_type,_Table):
     _rename={'participant_tag_type_name':'genetag_type_name',
              'participant_tag_type_desc':'genetag_type_desc',

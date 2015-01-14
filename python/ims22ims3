@@ -58,6 +58,7 @@ STAGE=[
     [
         # Participant tables
         'Participant','Interaction_participant','Participant_tag_type',
+        'Participant_tag',
 
         # Ontology
         'Interaction_ontology','Interaction_ontology_qualifier',

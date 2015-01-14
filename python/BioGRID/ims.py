@@ -379,6 +379,12 @@ class Unknown_participant(_Table):
               'organism_id','publication_id',
               'unknown_participant_addeddate','unknown_participant_status']
 
+class Participant_tag(_Table):
+    _columns=['participant_tag_shortcode','participant_tag_name',
+              'participant_tag_description','participant_tag_type_id',
+              'participant_tag_parent_id','participant_tag_addeddate',
+              'participant_tag_status']
+
 class Participant_tag_type(_Table):
     _columns=['participant_tag_type_name','participant_tag_type_desc',
               'iplex_project_id',
