@@ -391,6 +391,18 @@ class Participant_tag_type(_Table):
               #'participant_tag_type_display',
               'participant_tag_type_addeddate','participant_tag_type_status']
 
+class Participant_tag_mapping(_Table):
+    _columns=['participant_tag_id','participant_id',
+              'participant_tag_evidence_type_id','participant_tag_evidence_value',
+              'participant_tag_evidence_value_text','participant_tag_mapping_rank',
+              'participant_tag_mapping_addeddate','participant_tag_mapping_status',
+              'user_id']
+
+class Participant_tag_evidence_type(_Table):
+    _columns=['participant_tag_evidence_type_name',
+              'participant_tag_evidence_type_addeddate',
+              'participant_tag_evidence_type_status']
+
 class Ontology(_Table):
     _columns=['ontology_name','ontology_url','ontology_rootid',
               'ontology_addeddate','ontology_lastparsed','ontology_status']

@@ -827,6 +827,55 @@ class Participant_tag_type(BioGRID.ims.Participant_tag_type,_Table):
         else:
             return super(Participant_tag_type,self).__getitem__(name)
 
+class Participant_tag_mapping(BioGRID.ims.Participant_tag_mapping,_Table):
+    _rename={'participant_tag_id':'genetag_id',
+            'participant_tag_evidence_type_id':'genetag_source_id',
+            'participant_tag_evidence_value':'genetag_source_value',
+             'participant_tag_mapping_addeddate':'genetag_mapping_addeddate',
+             'participant_tag_mapping_status':'genetag_mapping_status'}
+    @classmethod
+    def ims2_table(cls):
+        global PARTICIPANT_TYPE
+        PARTICIPANT_TYPE=Participant_type.factory('Gene').id()
+        return 'genetag_mappings'
+    def __getitem__(self,name):
+        if 'participant_id'==name:
+            global PARTICIPANT_TYPE
+            gene_id=self['gene_id']
+            p_id=self.get_participant_id(gene_id,PARTICIPANT_TYPE)
+            if None==p_id:
+                p=Participant({
+                        'participant_value':gene_id,
+                        'participant_type_id':PARTICIPANT_TYPE
+                        })
+                p.store()
+                p_id=p.id()
+                self.warn('New Participant where gene_id=%s -> participant_id=%s' % (gene_id,p_id))
+            return p_id
+        elif 'participant_tag_evidence_value_text'==name:
+            return None
+        elif 'participant_tag_mapping_rank'==name:
+            return None
+        elif 'user_id'==name:
+            return DEFAULT_USER_ID
+        return super(Participant_tag_mapping,self).__getitem__(name)
+    def store(self):
+        try:
+            super(Participant_tag_mapping,self).store()
+        except _mysql_exceptions.OperationalError:
+            #self.warn('gene_id=%s ==> participant_id=%s' % (self['gene_id'],self['participant_id']))
+            pprint(self.row)
+            raise
+
+class Participant_tag_evidence_type(BioGRID.ims.Participant_tag_evidence_type,_Table):
+    _rename={'participant_tag_evidence_type_name':'genetag_source_name',
+             'participant_tag_evidence_type_addeddate':'genetag_source_addeddate',
+             'participant_tag_evidence_type_status':'genetag_source_status'}
+    @classmethod
+    def ims2_table(cls):
+        return 'genetag_sources'
+    
+
 class Complex(BioGRID.ims._Table,_Table):
     """This table is only in IMS2, not IMS3. Data from it is now
     stored in the Interaction tables."""
