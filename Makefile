@@ -51,7 +51,7 @@ $(RPM_FILE): $(TAR_FILE)
 
 # Pass making python RPM file to python
 python-rpms: $(PYTHONPATH)/sql
-	(cd $(PYTHONPATH); python setup.py bdist_rpm)
+	(cd $(PYTHONPATH); python setup.py bdist_rpm --doc-files=README.txt)
 	mv $(PYTHONPATH)/dist/*.rpm .
 
 # Port the IMS2 database to the IMS3 database
