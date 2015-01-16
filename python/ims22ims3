@@ -67,10 +67,12 @@ STAGE=[
 
         'Complex',
         'Unknown_participant','Complex_forced_addition',
-        ],
-    # Stage 4 - Will likely go into Stage 3 when firished, but to save
-    # a wee bit of time.
-    [
+
+#        ],
+#    # Stage 4 - Will likely go into Stage 3 when firished, but to save
+#    # a wee bit of time.
+#    [
+
         # PTM interaction tables
         'PTM','PTM_relationship','PTM_history','PTM_note',
         ]
@@ -88,7 +90,10 @@ if opts.clean:
     jobs.reverse()
     doing_fmt='Cleaning %s'
 
-cfg=BioGRID.ims2.Config(opts.config)
+if(opts.config):
+    cfg=BioGRID.ims2.Config(opts.config)
+else:
+    cfg=BioGRID.ims2.Config()
 BioGRID.ims._Table.config=cfg
 
 ims3=cfg.imsdb()

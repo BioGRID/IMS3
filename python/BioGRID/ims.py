@@ -20,7 +20,8 @@ def fetch_one(cur,get): # and only one
 class Config:
     """Loads stuff from JSON configure file and provides access."""
 
-    def __init__(self,path='ims.json'):
+    def __init__(self,path='/etc/ims.json'):
+        print path
         self.json=json.loads(open(path).read())
         self.dbs={}
     def _db(self,section):

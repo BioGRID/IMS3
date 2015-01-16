@@ -96,6 +96,7 @@ class _Table(object):
 
     @classmethod
     def pt_id2ot_id(cls,pt_id,warn=warnings):
+        """Convert IMS2.phenotype_term_id to IMS3.ontology_term_id."""
         c=cls.ims2_cursor()
         sql='''SELECT ontology_term_id
 FROM %(IMS3)s.ontology_terms AS ot
@@ -274,7 +275,7 @@ AND tag_category_name='Throughput'
         
 
     def force_attributes(self,cls,forced_id):
-
+        """Should work with ether any *_forced_attributes table."""
         c=self.ims2_cursor()
         sql='''SELECT * FROM %(TABLE)s_forced_attributes
 JOIN forced_attributes_types ON(forced_attribute_type_id=forced_attributes_types_id)
@@ -343,8 +344,6 @@ WHERE %(TABLE)s_forced_id=%%s''' % { 'TABLE': cls.TABLE_PREFIX }
             else:
                 pprint(attr)
                 sys.exit(1)
-
-                    
 
 
 class Interaction_history(BioGRID.ims.Interaction_history,_Table):
@@ -859,13 +858,13 @@ class Participant_tag_mapping(BioGRID.ims.Participant_tag_mapping,_Table):
         elif 'user_id'==name:
             return DEFAULT_USER_ID
         return super(Participant_tag_mapping,self).__getitem__(name)
-    def store(self):
-        try:
-            super(Participant_tag_mapping,self).store()
-        except _mysql_exceptions.OperationalError:
-            #self.warn('gene_id=%s ==> participant_id=%s' % (self['gene_id'],self['participant_id']))
-            pprint(self.row)
-            raise
+    # def store(self):
+    #     try:
+    #         super(Participant_tag_mapping,self).store()
+    #     except _mysql_exceptions.OperationalError:
+    #         #self.warn('gene_id=%s ==> participant_id=%s' % (self['gene_id'],self['participant_id']))
+    #         pprint(self.row)
+    #         raise
 
 class Participant_tag_evidence_type(BioGRID.ims.Participant_tag_evidence_type,_Table):
     _rename={'participant_tag_evidence_type_name':'genetag_source_name',
