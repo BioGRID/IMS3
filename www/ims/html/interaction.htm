@@ -28,6 +28,8 @@
 
 require_once('ims/ims.php');
 $cfg=new IMS\config('ims.json');
+
+# ontology_id=1 hard coded in sql/Ontology.sql
 $o=new IMS\Ontologies($cfg,['ontology_id'=>1]);
 print $o->fieldset_html();
 

@@ -1,7 +1,7 @@
 body{
     /* seems to be the easiest way to make twitter bootstrap fontsize
     smaller. */
-    zoom:.5;
+    zoom:.9;
 }
 .container-fluid{
 }
