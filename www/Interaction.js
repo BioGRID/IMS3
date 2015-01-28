@@ -13,6 +13,16 @@ IMS.Interaction.prototype._const={
   html_class:'interactions'
 };
 
+IMS.Interaction.prototype.dd=function(dt){
+  var out=IMS._table.prototype.dd.call(this,dt);
+  if('ontologies'==dt){
+    if(0!==parseInt(out,10)){
+      return '<button data-toggle="modal" data-target="#ontologies">'+out+'</button>';
+    }
+  }
+  return out;
+};
+
 
 /*
  * static
@@ -28,6 +38,7 @@ IMS.Interaction.prototype.dts=function(){
     'interaction_status',
     //'interaction_source_id',
     'interaction_source',
+    'ontologies',
     'modification_type',
   ];
 };

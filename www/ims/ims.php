@@ -251,11 +251,25 @@ class _Table
     return $c::TABLE;
   }
 
+  protected function columns(){
+    return '*';
+  }
+
   // this is seperated to allow overloding, as it is in
   // Project_publications
   public function _select(){
     $c=get_called_class();
-    return 'SELECT * FROM ' . $c::TABLE;
+    return 'SELECT ' . $c::columns() . ' FROM ' . $c::TABLE;
+  }
+
+  public function count(){
+    $c=get_called_class();
+    $sql='SELECT COUNT(*)FROM ' . $c::TABLE . ' WHERE ' . implode(' AND ',$this->_where());
+    $dbh=$this->pdo();
+    $s=$dbh->prepare($sql);
+    $s->execute();
+    $g=$s->fetch(\PDO::FETCH_NUM);
+    return $g[0];
   }
 
   public function sql(){
@@ -416,6 +430,11 @@ class Interactions extends _Table
       $ih->query();
       $mt=$ih->fetch();
       $v['modification_type']=$mt?$mt['modification_type']:false;
+
+      $io=new Interaction_ontologies
+	($this->cfg,['interaction_id'=>$v['interaction_id']]);
+      $v['ontologies']=$io->count();
+
       $this->data[]=$v;
     }
     reset($this->data);
@@ -434,6 +453,14 @@ class Interaction_history extends _Table
   // Not really the status column, as it should not change, but it
   // sortta like a status column.
   const STATUS_COLUMN='modification_type';
+}
+
+class Interaction_ontologies extends _Table
+{
+  const TABLE='interaction_ontologies';
+  const PRIMARY_KEY='interaction_ontology_id';
+  const STATUS_COLUMN='interaction_ontology_status';
+  const DEFAULT_STATUS='active';
 }
 
 class Interaction_sources extends _Table
@@ -557,7 +584,6 @@ class Ontologies extends _Table
   }
 }
 
-/*
 class Ontology_terms extends _Table
 {
   const TABLE='ontology_terms';
@@ -565,7 +591,6 @@ class Ontology_terms extends _Table
   const STATUS_COLUMN='ontology_status';
   const DEFALUT_STATUS='active';
 }
-*/
 
 class Unknown_participants extends _Table
 {
@@ -680,10 +705,22 @@ class Projects extends _Table
   const PRIMARY_KEY='project_id';
 }
 
+/* Used for in ../user.php for auth. */
 class User extends _Table
 {
   const TABLE='users';
   const PRIMARY_KEY='user_id';
+}
+
+/* Doesn't return password related stuff. */
+class Users extends _Table
+{
+  const TABLE='users';
+  const PRIMARY_KEY='user_id';
+
+  protected function columns(){
+    return 'user_id,user_name,user_firstname,user_lastname,user_status';
+  }
 }
 
 // wee but of a buffer so you can't query any table you would like.
@@ -700,16 +737,20 @@ function table_factory($cfg,$qs)
     return new Interactions($cfg,$qs);
   case 'interaction_history':
     return new Interaction_history($cfg,$qs);
+  case 'interaction_ontologies':
+    return new Interaction_ontologies($cfg,$qs);
   case 'interaction_participants':
     return new Interaction_participants($cfg,$qs);
-  case 'participant_roles':
-    return new Participant_roles($cfg,$qs);
   case 'interaction_sources':
     return new Interaction_sources($cfg,$qs);
   case 'interaction_types':
     return new Interaction_types($cfg,$qs);
+  case 'ontology_terms':
+    return new Ontology_terms($cfg,$qs);
   case 'participants':
     return new Participants($cfg,$qs);
+  case 'participant_roles':
+    return new Participant_roles($cfg,$qs);
   case 'participant_types':
     return new Participant_types($cfg,$qs);
   case 'publications':
@@ -730,6 +771,8 @@ function table_factory($cfg,$qs)
     return new Schema($cfg,$qs);
   case 'unknown_participants':
     return new Unknown_participants($cfg,$qs);
+  case 'users':
+    return new Users($cfg,$qs);
   }
   trigger_error("Can't access requested data",E_USER_ERROR);
   return NULL;

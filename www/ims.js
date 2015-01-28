@@ -280,6 +280,7 @@ IMS={
     IMS.pub=pub;
     $("#publication").html(pub.select('publication_abstract'));
 
+    // Now get the interactions
     IMS.query({publication_id:pub.primary_id(),table:'interactions'},
               IMS.update_interactions);
   },
@@ -391,7 +392,7 @@ IMS={
     tbl.on('draw.dt',function(){
       that.update_danger(tbl);
     });
-    this.update_danger(tbl)
+    this.update_danger(tbl);
 
     // return created items
     return out;
@@ -433,7 +434,7 @@ IMS={
   },
 
 
-  click_interaction:function(){
+  click_interaction:function(e){
     // get the IMS.Interaction object of the clicked interaction
     var interaction_id=$(this).find('[itemprop=primary-key]').text();
     var interaction=IMS.pub.interactions[interaction_id];
@@ -443,8 +444,16 @@ IMS={
       // removing highlighting if on is active.
       IMS.pub.interaction._tr.removeClass('active');
     }
+    // set the current active interaction
     IMS.pub.interaction=interaction;
     interaction._tr.addClass('active');
+
+/*
+    // If we click on ontologies we want to pop up a window of some kind.
+    if('ontologies'==e.target.getAttribute('itemprop')){
+      console.log(e.target);
+    }
+*/
 
     if(0<Object.keys(interaction.participants).length){
       // If we already have participants, display them
@@ -613,15 +622,13 @@ IMS._table.prototype={
         clazz='';
         selected=' selected';
       }
-      dd=this.dd(dt);
+      var dd=this.dd(dt);
       divs+='<div class="'+clazz+'" id="'+dt+'">'+dd+'</div>';
       options+='<option'+selected+'>'+dt+'</option>';
     },this);
-
     return '<select onchange="IMS.select(this)">'+options
          +'</select><div>'+divs+'</div>';
   },
-
 
   /*
   clazz:function(dt){
@@ -635,10 +642,8 @@ IMS._table.prototype={
   itemprop:function(dt){
     if(dt==this.primary_col()){
       return ' itemprop="primary-key"';
-    }else if(!this.data[dt]){
-      return ' itemprop="' + dt + '"';
     }
-    return '';
+    return ' itemprop="' + dt + '"';
   },
 
   /*
@@ -653,8 +658,6 @@ IMS._table.prototype={
            .replace(/\{dt\}/g,dt)
            .replace(/\{dd\}/g,this.dd(dt))
            .replace(/\{ip\}/g,this.itemprop(dt));
-
-
     },this);
     return out;
   },
@@ -809,7 +812,19 @@ $(document).ready(function(){
 
 
   /*
-   * Stuff in the project_tab
+   * modify modal
    */
+
+  $('#ontologies').on('show.bs.modal',function(e){
+    var m=$(this);
+    var i=IMS.pub.interaction;
+
+    IMS.query({interaction_id:i.id,table:'interaction_ontologies'},
+              function(r){
+                IMS.redo_table(r,IMS.Interaction_ontology);
+              });
+
+    m.find('.interaction_id').html(i.id);
+  });
 
 }); // ready
