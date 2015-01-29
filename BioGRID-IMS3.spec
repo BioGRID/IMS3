@@ -25,8 +25,10 @@ Requires: php-mysql
 %{__install} -m 755 www/Interaction.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction.js
 %{__install} -m 755 www/Interaction_history.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_history.js
 %{__install} -m 755 www/Interaction_participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_participant.js
+%{__install} -m 755 www/Interaction_ontology.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_ontology.js
 %{__install} -m 755 www/Interaction_source.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_source.js
 %{__install} -m 755 www/Interaction_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_type.js
+%{__install} -m 755 www/Ontology_term.js $RPM_BUILD_ROOT%{ims_wwwdir}/Ontology_term.js
 %{__install} -m 755 www/Participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant.js
 %{__install} -m 755 www/Participant_role.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant_role.js
 %{__install} -m 755 www/Participant_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant_type.js
@@ -64,8 +66,10 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/Interaction.js
 %{ims_wwwdir}/Interaction_history.js
 %{ims_wwwdir}/Interaction_participant.js
+%{ims_wwwdir}/Interaction_ontology.js
 %{ims_wwwdir}/Interaction_source.js
 %{ims_wwwdir}/Interaction_type.js
+%{ims_wwwdir}/Ontology_term.js
 %{ims_wwwdir}/Participant.js
 %{ims_wwwdir}/Participant_role.js
 %{ims_wwwdir}/Participant_type.js
@@ -90,6 +94,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Jan 28 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.14
+- Added first ontology viewer.
+
 * Thu Dec 18 2014 Sven Heinicke <sven@genomics.princeton.edu> - 0.13
 - Now install in /usr/share/ims/html, you provide apache access.
 
