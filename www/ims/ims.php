@@ -447,7 +447,8 @@ class Interaction_history extends _Table
 {
   const TABLE='interaction_history';
   const PRIMARY_KEY='interaction_history_id';
-  const ORDER_BY='interaction_history_date DESC';
+  // Need double ORDER_BY because some history items have the same timestamp.
+  const ORDER_BY='interaction_history_date DESC, interaction_history_id DESC';
   const INSERT_SQL='INSERT INTO interaction_history(modification_type,interaction_id,user_id,interaction_history_comment)VALUES(:modification_type,:interaction_id,:user_id,:interaction_history_comment)';
 
   // Not really the status column, as it should not change, but it
