@@ -271,7 +271,7 @@ AND tag_category_name='Throughput'
                     'ontology_term_id':ot_id,
                     'interaction_ontology_addeddate':itm[prefix+'_tag_mapping_timestamp'],
                     'interaction_ontology_status':itm[prefix+'_tag_mapping_status']})
-            io.load()
+            io.store()
         
 
     def force_attributes(self,cls,forced_id):
@@ -379,6 +379,7 @@ class Unknown_participant(BioGRID.ims.Unknown_participant,_Table):
         return 'SELECT * FROM interaction_forced_additions'
     @classmethod
     def get_participant(cls,force,ab,pub_id):
+        global PARTICIPANT_TYPE
 
         if 'Found'==force['interactor_%s_forced_status' % ab]:
             c=cls.ims_cursor()
@@ -396,7 +397,6 @@ participant_value=%s AND participant_type_id=%s'''
             else:
                 return Participant(fetched)
         
-        global PARTICIPANT_TYPE
         PARTICIPANT_TYPE=Participant_type.factory('Gene').id()
         # Now we need to actually create an Unknown_participant object!
         up=Unknown_participant(
@@ -1199,28 +1199,32 @@ WHERE phenotype_parent_id=0''' % {'IMS3':ims3_name}
         return sqls
     
 
-            
 class Interaction_ontology(BioGRID.ims.Interaction_ontology,_Table):
+
+    @classmethod
+    def ims2_table(cls):
+        return 'interaction_phenotypes'
+
     @classmethod
     def slurp_sql(cls):
-        # we keep the same primary key for this table
-        return '''SELECT interaction_phenotypes.interaction_phenotype_id AS interaction_ontology_id,
-interaction_id,ontology_term_id,interaction_ontology_type_id
-,interaction_phenotypes.interaction_id AS p_interaction_id
-FROM interaction_phenotypes
+        sql=super(Interaction_ontology,cls).slurp_sql() + '''
 JOIN phenotypes AS pt USING(phenotype_id)
 JOIN %(IMS3)s.ontology_terms AS ot ON(pt.phenotype_official_id=ot.ontology_term_official_id)
-JOIN %(IMS3)s.interaction_ontology_types ON(flag=interaction_ontology_type_shortcode)
+JOIN interactions USING(interaction_id)
 ''' % {'IMS3':cls.config.imsdb_name()}
-    def store(self):
-        try:
-            return super(Interaction_ontology,self).store()
-        except _mysql_exceptions.IntegrityError:
-            if 0==self['p_interaction_id']:
-                # There seems to be two items where interaction_phenotypes.interaction_id==0
-                self.warn('skipping where interaction_phenotypes.interaction_id==0')
-            else:
-                raise
+        #print sql
+        return sql
+
+    def __getitem__(self,name):
+        out=super(Interaction_ontology,self).__getitem__(name)
+        if 'interaction_ontology_type_id'==name:
+            try:
+                flag=self.row['flag']
+                out=BioGRID.ims.Interaction_ontology_type.factory(flag).id()
+            except KeyError:
+                pass
+        return out
+
     def __eq__(self,other):
         '''For now, just return True.'''
         return True

@@ -69,6 +69,7 @@ class _Table(object):
     instance of the Config class."""
     _rename={}
     _user_ids=[]
+    _factory_fmt='%s_name'
     def __init__(self,row):
         self.row=row
 #    def __repr__(self):
@@ -99,7 +100,7 @@ class _Table(object):
             return cls.FACTORY[name]
         except KeyError:
             table=cls.table()
-            col_name='%s_name' % cls.__name__
+            col_name=cls._factory_fmt % cls.__name__
             sql="SELECT * FROM %s WHERE %s=%%s" % (table,col_name)
             c=cls.ims_cursor()
             c.execute(sql,(name,))
@@ -437,6 +438,14 @@ class Interaction_ontology(_Table):
     @classmethod
     def table(cls):
         return 'interaction_ontologies'
+
+class Interaction_ontology_type(_Table):
+    _factory_fmt='%s_shortcode'
+    _columns=['interaction_ontology_type_name',
+              'interaction_ontology_type_desc',
+              'interaction_ontology_type_shortcode',
+              'interaction_ontology_type_addeddate',
+              'interaction_ontology_type_status']
 
 class Interaction_ontology_qualifier(_Table):
     _columns=['interaction_ontology_id','ontology_term_id',

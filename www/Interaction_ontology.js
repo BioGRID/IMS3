@@ -17,7 +17,8 @@ IMS.Interaction_ontology.prototype.dts=function(){
     'ontology_term',
     //'user_id',
     'user',
-    'interaction_ontology_type_id',
+    //'interaction_ontology_type_id',
+    'interaction_ontology_type',
     //'interaction_ontology_addeddate',
     'interaction_ontology_status',
   ];

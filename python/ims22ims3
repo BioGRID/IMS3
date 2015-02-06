@@ -42,39 +42,40 @@ STAGE=[
         #'Iplex_project',
 
         # PTM support tables
-        'PTM_source','PTM_modification'
-        ],
+        'PTM_source','PTM_modification',
+        'Dataset_queue',
+       ],
     # Stage 2 - Interactions, well not complex and forced interactions.
     [
-        'Dataset_queue',
         # Interaction tables
         'Interaction_source','Interaction_quantitation_type',
-        'Interaction',
-        'Interaction_quantitation','Interaction_note',
-        'Interaction_history',
-
+        'Interaction','Interaction_history',
+        'Experimental_system',
+        'Interaction_ontology',
+        'Interaction_ontology_qualifier',
         ],
     # Stage 3 - Things that require Interactions
     [
+
+        'Interaction_quantitation','Interaction_note',
+
         # Participant tables
-        'Participant','Interaction_participant','Participant_tag_type',
+        'Participant',
+        'Interaction_participant',
+        'Participant_tag_type',
         'Participant_tag',
         'Participant_tag_evidence_type','Participant_tag_mapping',
 
-        # Ontology
-        'Interaction_ontology','Interaction_ontology_qualifier',
-        'Experimental_system',
 
-        'Complex',
-        'Unknown_participant','Complex_forced_addition',
+        # PTM interaction tables
+        'PTM','PTM_relationship','PTM_history','PTM_note',
 
 #        ],
 #    # Stage 4 - Will likely go into Stage 3 when firished, but to save
 #    # a wee bit of time.
 #    [
-
-        # PTM interaction tables
-        'PTM','PTM_relationship','PTM_history','PTM_note',
+        'Complex',
+        'Unknown_participant','Complex_forced_addition',
         ]
     ]
 
