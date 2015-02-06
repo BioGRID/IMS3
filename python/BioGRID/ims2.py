@@ -1278,10 +1278,3 @@ JOIN %(IMS3)s.ontology_terms ON(ontology_id=1 AND
              'ontology_term_id':self['ontology_term_id'],
              'interaction_ontology_addeddate':self['interaction_history_date']})
         io.load()
-
-
-# class Iplex_project(_Table):
-#     """Nothing for now as we import nothing."""
-#     @classmethod
-#     def slurp(cls):
-#         pass
