@@ -464,6 +464,14 @@ class Interaction_ontologies extends _Table
   const DEFAULT_STATUS='active';
 }
 
+class Interaction_ontology_types extends _Table
+{
+  const TABLE='interaction_ontology_types';
+  const PRIMARY_KEY='interaction_ontology_type_id';
+  const STATUS_COLUMN='interaction_ontology_type_status';
+  const DEFAULT_STATUS='active';
+}
+
 class Interaction_sources extends _Table
 {
   const TABLE='interaction_sources';
@@ -740,6 +748,8 @@ function table_factory($cfg,$qs)
     return new Interaction_history($cfg,$qs);
   case 'interaction_ontologies':
     return new Interaction_ontologies($cfg,$qs);
+  case 'interaction_ontology_types':
+    return new Interaction_ontology_types($cfg,$qs);
   case 'interaction_participants':
     return new Interaction_participants($cfg,$qs);
   case 'interaction_sources':

@@ -306,6 +306,7 @@ IMS={
     tbl.find('.bg-danger').each(function(){
       var tag=$(this);
       var prop=tag.parent().attr('itemprop');
+      //console.log(prop);
 
       // Not sure how portable this is
       var Table=IMS[prop.charAt(0).toUpperCase()+prop.slice(1)];
@@ -602,8 +603,13 @@ IMS._table.prototype={
   dd:function(dt){
     if(this.data[dt]){
       return this.data[dt];
-    }else if(this.data[dt+'_id']){
-      return '<span class="bg-danger">'+this.data[dt+'_id']+'</span>';
+    }else{
+      var dt_id=this.data[dt+'_id'];
+      if(dt_id){
+        return '<span class="bg-danger">'+this.data[dt+'_id']+'</span>';
+      }else if(null===dt_id){
+        return '<i>null</i>';
+      }
     }
     return '<span class="bg-danger">This is a bug &#10233 &#128027</span>';
   },
