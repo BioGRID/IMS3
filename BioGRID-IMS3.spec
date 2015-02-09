@@ -26,6 +26,7 @@ Requires: php-mysql
 %{__install} -m 755 www/Interaction_history.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_history.js
 %{__install} -m 755 www/Interaction_participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_participant.js
 %{__install} -m 755 www/Interaction_ontology.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_ontology.js
+%{__install} -m 755 www/Interaction_ontology_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_ontology_type.js
 %{__install} -m 755 www/Interaction_source.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_source.js
 %{__install} -m 755 www/Interaction_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_type.js
 %{__install} -m 755 www/Ontology_term.js $RPM_BUILD_ROOT%{ims_wwwdir}/Ontology_term.js
@@ -67,6 +68,7 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/Interaction_history.js
 %{ims_wwwdir}/Interaction_participant.js
 %{ims_wwwdir}/Interaction_ontology.js
+%{ims_wwwdir}/Interaction_ontology_type.js
 %{ims_wwwdir}/Interaction_source.js
 %{ims_wwwdir}/Interaction_type.js
 %{ims_wwwdir}/Ontology_term.js
@@ -94,6 +96,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Feb 06 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.15
+- Fixed up displaying interaciton_ontology_types.
+
 * Wed Jan 28 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.14
 - Added first ontology viewer.
 
