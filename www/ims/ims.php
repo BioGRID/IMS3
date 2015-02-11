@@ -462,6 +462,7 @@ class Interaction_ontologies extends _Table
   const PRIMARY_KEY='interaction_ontology_id';
   const STATUS_COLUMN='interaction_ontology_status';
   const DEFAULT_STATUS='active';
+  const INSERT_SQL='INSERT INTO interaction_ontologies(interaction_id,ontology_term_id,interaction_ontology_type_id)VALUES(:interaction_id,:ontology_term_id,:interaction_ontology_type_id)';
 }
 
 class Interaction_ontology_types extends _Table
@@ -557,6 +558,7 @@ class Ontologies extends _Table
 	$tbody.='<td>';
 	if(array_key_exists($i,$stem[$cld])){
 	  $j=$stem[$cld][$i];
+	  # EEaA is used in Interaction_type.js
 	  $tbody.='<label><input type="radio" name="EEaA" value="'
 	    . $ots[$j]['ontology_term_id']
 	    . '">'

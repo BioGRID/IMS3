@@ -28,6 +28,9 @@ $user_id=$user['user_id'];
 $dbh=(new IMS\_Table($cfg,[]))->pdo();
 $dbh->beginTransaction();
 
+//var_dump($_POST);
+//exit(1);
+
 foreach($_POST as $publication_id => $interactions){
   # For now we will assume the passed publication_id is accurate.
   foreach($interactions as $interaction){
@@ -50,6 +53,18 @@ foreach($_POST as $publication_id => $interactions){
 	]);
     $ih->insert();
     
+    foreach($interaction['ontologies'] as $ontology){
+      $args=['interaction_id'=>$interaction_id,
+	     'ontology_term_id'=>$ontology['term_id']];
+      if(array_key_exists('type_id',$ontology)){
+	$args['interaction_ontology_type_id']=$ontology['type_id'];
+      }else{
+	$args['interaction_ontology_type_id']=null;
+      }
+      $io=new IMS\Interaction_ontologies($cfg,$args);
+      $io->insert();
+    }
+
     foreach($interaction['participants'] as $participant){
       $participant_role_id=$participant['role_id'];
       $participant_type_id=$participant['participant_type_id'];

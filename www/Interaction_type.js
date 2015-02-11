@@ -123,20 +123,29 @@ IMS.Interaction_type.prototype.organize=function(){
   //    'organiszm_id':###
   //    'quick_participant_value':aaa
   //   }.. ]
-  //   'ontologies':???
+  //   'ontologies':[
+  //    'term_id':####
+  //    'type_id':####
+  //   ]
   // ]..
 
   var part_type_id=1; // Gene, will worry about forced later
 
   // see ims/ims.php if you want to change EEaA
-  //var es=$('input:radio[name=EEaA]:checked').val();
-  //console.log(es);
+  var es_id=$('input:radio[name=EEaA]:checked').val();
+  // Should be an ontology_term_id that points to an Experimental
+  // system.
+  if(!es_id){
+    alert('No experimental systems selected');
+    return false;
+  }
+  var ontologies=[{'term_id':es_id}];
 
   var type_id=this.primary_id();
   if('Complex'==this.data.interaction_type_name){
     // Here we only ever return one interaction, with who knowns how
     // many participants.
-    out[0]=[type_id,{}];
+    out[0]=[type_id,{'ontologies':ontologies}];
     var role_id=this.roles[0].primary_id();
     var org_id=got.A.shift();
     var parts=[];
@@ -176,7 +185,8 @@ IMS.Interaction_type.prototype.organize=function(){
           quick_participant_value:b_part_value,
         };
 
-        var i=[type_id,{'participants':[a,b]}];
+        var i=[type_id,{'participants':[a,b],
+                        'ontologies':ontologies}];
         out.push(i);
       }
     }else if(1==got.A.length){
@@ -195,7 +205,8 @@ IMS.Interaction_type.prototype.organize=function(){
             organism_id:b_org_id,
             quick_participant_value:b_part_value,
         }
-        var i=[type_id,{'participants':[a,b]}];
+        var i=[type_id,{'participants':[a,b],
+                        'ontologies':ontologies}];
         out.push(i);
       }
     }else if(1==got.B.length){
@@ -214,7 +225,8 @@ IMS.Interaction_type.prototype.organize=function(){
             organism_id:b_org_id,
             quick_participant_value:a_part_value,
         };
-        var i=[type_id,{'participants':[a,b]}];
+        var i=[type_id,{'participants':[a,b],
+                        'ontologies':ontologies}];
         out.push(i);
       }
     }
