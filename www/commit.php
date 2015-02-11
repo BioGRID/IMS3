@@ -4,12 +4,11 @@
     Takes POST input like:
     { publicaton_id =>
      [
-      [ interaction_type_id,
-       {'role_id':role_id,'participant_type_id':participant_type_id,...}
-       {'role_id':role_id,'participant_type_id':participant_type_id,...}
-       ...
-      ],
-      ...
+      [ interaction_type_id,{
+        'participants':[
+         {'role_id':role_id,'participant_type_id':participant_type_id,...}...
+        ],
+      }
      ],
       publication_id => ...
     }
@@ -28,12 +27,12 @@ $user_id=$user['user_id'];
 
 $dbh=(new IMS\_Table($cfg,[]))->pdo();
 $dbh->beginTransaction();
-#var_dump($_POST);
 
 foreach($_POST as $publication_id => $interactions){
   # For now we will assume the passed publication_id is accurate.
   foreach($interactions as $interaction){
     $interaction_type_id=array_shift($interaction);
+    $interaction=$interaction[0];
 
     $i=new IMS\Interactions
       ($cfg,
@@ -51,7 +50,7 @@ foreach($_POST as $publication_id => $interactions){
 	]);
     $ih->insert();
     
-    foreach($interaction as $participant){
+    foreach($interaction['participants'] as $participant){
       $participant_role_id=$participant['role_id'];
       $participant_type_id=$participant['participant_type_id'];
 

@@ -111,9 +111,16 @@ IMS.Interaction_type.prototype.organize=function(){
   var got=this.verify_counts();
   var out=[]; // List of really raw interactions
   // out=[
-  // [ type_id, [ role_id, org_id, part ], [ role_id, org_id, part ].. ]
-  // [ type_id, [ role_id, org_id, part ], [ role_id, org_id, part ].. ]
-  // ]
+  // [ type_id, {
+  //   'participants':[
+  //   {
+  //    'role_id':###
+  //    'participant_type_id':###
+  //    'organiszm_id':###
+  //    'quick_participant_value':aaa
+  //   }.. ]
+  //   'ontologies':???
+  // ]..
 
   var part_type_id=1; // Gene, will worry about forced later
 
@@ -121,9 +128,11 @@ IMS.Interaction_type.prototype.organize=function(){
   if('Complex'==this.data.interaction_type_name){
     // Here we only ever return one interaction, with who knowns how
     // many participants.
-    out[0]=[type_id];
+    out[0]=[type_id,{}];
     var role_id=this.roles[0].primary_id();
     var org_id=got.A.shift();
+    var parts=[];
+
     for(var i in got.A){
       var part={
           role_id:role_id,
@@ -131,8 +140,9 @@ IMS.Interaction_type.prototype.organize=function(){
           organism_id:org_id,
           quick_participant_value:got.A[i],
       };
-      out[0].push(part);
+      parts.push(part);
     }
+    out[0][1]['participants']=parts;
   }else{
     var type_id=this.primary_id();
     var a_org_id=got.A.shift();
@@ -157,7 +167,8 @@ IMS.Interaction_type.prototype.organize=function(){
           organism_id:b_org_id,
           quick_participant_value:b_part_value,
         };
-        var i=[type_id,a,b];
+
+        var i=[type_id,{'participants':[a,b]}];
         out.push(i);
       }
     }else if(1==got.A.length){
@@ -176,7 +187,7 @@ IMS.Interaction_type.prototype.organize=function(){
             organism_id:b_org_id,
             quick_participant_value:b_part_value,
         }
-        var i=[type_id,a,b];
+        var i=[type_id,{'participants':[a,b]}];
         out.push(i);
       }
     }else if(1==got.B.length){
@@ -195,7 +206,7 @@ IMS.Interaction_type.prototype.organize=function(){
             organism_id:b_org_id,
             quick_participant_value:a_part_value,
         };
-        var i=[type_id,a,b];
+        var i=[type_id,{'participants':[a,b]}];
         out.push(i);
       }
     }
