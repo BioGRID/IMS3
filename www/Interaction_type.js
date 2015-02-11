@@ -109,6 +109,10 @@ IMS.Interaction_type.prototype.roles_forEach=function(act){
 
 IMS.Interaction_type.prototype.organize=function(){
   var got=this.verify_counts();
+  if(!got){
+    return false;
+  }
+
   var out=[]; // List of really raw interactions
   // out=[
   // [ type_id, {
@@ -123,6 +127,10 @@ IMS.Interaction_type.prototype.organize=function(){
   // ]..
 
   var part_type_id=1; // Gene, will worry about forced later
+
+  // see ims/ims.php if you want to change EEaA
+  //var es=$('input:radio[name=EEaA]:checked').val();
+  //console.log(es);
 
   var type_id=this.primary_id();
   if('Complex'==this.data.interaction_type_name){

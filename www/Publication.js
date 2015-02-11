@@ -43,6 +43,10 @@ IMS.Publication.prototype.commit=function(){
   IMS.Interaction_type.async(function(){
     // get a list of valid interaction pairs
     var got=this.organize();
+    if(!got){
+      // It's up to Interaction_type.js to gripe if something is wrong.
+      return;
+    }
     var data={};
     data[pub_id]=got;
     var request={
