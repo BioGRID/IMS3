@@ -314,14 +314,28 @@ class _Table
   public function fetch_only_one($error_hint){
     $c=get_called_class();
     $got=[];
+
+    // Uniqueify the results by primary key.  Quick items don't have
+    // unique primary keys, but when the same they refer to the same
+    // item.
+
     while($v=$this->fetch()){
       $got[$v[$c::PRIMARY_KEY]]=$v;
       # Have some kind of max number of fetches here?
     }
-    if(1 != count($got)){
+    switch(count($got)){
+    case 0:
       throw New \Exception
-	(sprintf("Expecting 1 result got %d for '%s'",
-		 count($got), $error_hint));
+	(sprintf("Expecting 1 result none for '%s'",$error_hint));
+    case 1:
+      return array_values($got)[0];
+    default: // >1
+      if(method_exists($c,'find')){
+	return $c::find($error_hint,array_values($got));
+      }
+      throw New \Exception
+	(sprintf("Expecting 1 result many for '%s'",
+		 $error_hint));
     }
     return array_values($got)[0];
   }
@@ -392,6 +406,20 @@ class Quick_identifiers extends _Quick
   const TABLE='quick_identifiers';
   const PRIMARY_KEY='gene_id'; // not unique
   const SEARCH_COLUMN='quick_identifier_value';
+
+  // static function
+  public function find($needle,$haystack){
+    // Not using needle, yet.
+    foreach($haystack as $straw){
+      if($straw['quick_identifier_type']=='OFFICIAL SYMBOL'){
+	return $straw;
+      }
+    }
+
+    throw New \Exception
+      (sprintf("Can't pick '%s' from %d results.",
+	       $needle,count($haystack)));
+  }
 }
 
 class Quick_identifier_types extends _Quick
