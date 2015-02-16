@@ -1,6 +1,6 @@
 
 # Version Numbers, generally to be passed to RPMBUILD
-VERSION:=0.15
+VERSION:=0.16
 RELEASE:=0
 
 # Organize phony Targets

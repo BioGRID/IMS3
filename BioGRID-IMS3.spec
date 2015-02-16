@@ -96,6 +96,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Fri Feb 13 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.16
+- Input of experimental systems should now work.
+- Some logic is now used if multiple quick identifiers are found to
+  picke one.
+
 * Fri Feb 06 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.15
 - Fixed up displaying interaciton_ontology_types.
 
