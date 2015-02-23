@@ -306,12 +306,13 @@ class _Table
   }
 
   public function fetch(){
-    return $this->statement->fetch(\PDO::FETCH_ASSOC);
+    $out=$this->statement->fetch(\PDO::FETCH_ASSOC);
+    $this->row=$out;
+    return $out;
   }
 
-  # Group results by primary_key id (usually unique, but not in all
-  # the quick database tables, the carps if we don't only have one.
-  public function fetch_only_one($error_hint){
+  # Fetch one, but zero is ok too.
+  public function fetch_one($error_hist){
     $c=get_called_class();
     $got=[];
 
@@ -323,12 +324,13 @@ class _Table
       $got[$v[$c::PRIMARY_KEY]]=$v;
       # Have some kind of max number of fetches here?
     }
+    
     switch(count($got)){
     case 0:
-      throw New \Exception
-	(sprintf("Expecting 1 result none for '%s'",$error_hint));
+      return null;
     case 1:
-      return array_values($got)[0];
+      //return array_values($got)[0];
+      break;
     default: // >1
       if(method_exists($c,'find')){
 	return $c::find($error_hint,array_values($got));
@@ -337,9 +339,23 @@ class _Table
 	(sprintf("Expecting 1 result many for '%s'",
 		 $error_hint));
     }
+    $this->row=array_values($got)[0];
     return array_values($got)[0];
   }
 
+  # Group results by primary_key id (usually unique, but not in all
+  # the quick database tables, the carps if we don't only have one.
+  public function fetch_only_one($error_hint){
+    $out=$this->fetch_one($error_hint);
+    if(null==$out){
+      throw New \Exception
+	(sprintf("Expecting 1 result none for '%s'",$error_hint));
+
+    }
+    return $out;
+  }
+
+  
   public function message($row,$msg){
     $c=get_called_class();
     return sprintf('Where %s=%d %s',$c::PRIMARY_KEY,$row[$c::PRIMARY_KEY],
@@ -365,7 +381,6 @@ class _Table
     }
     return $dbh->lastInsertId();
   }
-
 
 } // _Table
 
@@ -527,101 +542,7 @@ class Interaction_participants extends _Table
   const INSERT_SQL='INSERT INTO interaction_participants(interaction_id,participant_id,participant_role_id)VALUES(:interaction_id,:participant_id,:participant_role_id)';
 }
 
-class Ontologies extends _Table
-{
-  const TABLE='ontologies';
-  const PRIMARY_KEY='ontology_id';
-  const STATUS_COLUMN='ontology_status';
-  const DEFAULT_STATUS='active';
-
-  # Create fieldset HTML, used for the "Experimental Evidence and
-  # Annotation" on the interactions tab.  Not done in JavaScript to
-  # make loading the HTML template a wee bit easier.  Will be confused
-  # by other ontologies.
-  public function fieldset_html(){
-    $this->query();
-    $o=$this->fetch_only_one('fieldset_html');
-    $legend=$o['ontology_name'];
-    $o_id=$o['ontology_id'];
-
-    $sql='SELECT * FROM ontology_terms JOIN ontology_relationships ' .
-      "USING(ontology_term_id) WHERE ontology_id=$o_id";
-    $s=$this->pdo()->prepare($sql);
-    $s->execute();
-
-    $ots=[];
-    while($ot=$s->fetch(\PDO::FETCH_ASSOC)){
-      $ots[$ot['ontology_term_id']]=$ot;
-    }
-
-    $root;
-    foreach($ots as $ot){
-      $ot_id=$ot['ontology_term_id'];
-      if($ot['ontology_parent_id']){
-	$p_id=$ot['ontology_parent_id'];
-
-	if(array_key_exists('children',$ots[$p_id])){
-	  array_push($ots[$p_id]['children'],$ot_id);
-	}else{
-	  $ots[$p_id]['children']=[$ot_id];
-	}
-      }else{
-	$root=$ot_id;
-      }
-    }
-
-    $otn='ontology_term_name';
-    $cld='children';
-
-    $thead='<tr><th colspan="2">' . $ots[2][$otn] . '</th><th rowspan="2">' . $ots[22][$otn] . '</th></tr>'
-      . '<tr><th>' . $ots[3][$otn] . '</th><th>' . $ots[15][$otn] . '</th></tr>';
-
-    $tbody='';
-    $max=max(count($ots[3][$cld]),count($ots[15][$cld]),count($ots[22][$cld]));
-    $stems=[$ots[3],$ots[15],$ots[22]];
-    
-    for($i=0;$i<$max;$i++){
-      $tbody.='<tr>';
-      foreach($stems as $stem){
-	$tbody.='<td>';
-	if(array_key_exists($i,$stem[$cld])){
-	  $j=$stem[$cld][$i];
-	  # EEaA is used in Interaction_type.js
-	  $tbody.='<label><input type="radio" name="EEaA" value="'
-	    . $ots[$j]['ontology_term_id']
-	    . '">'
-	    . $ots[$j]['ontology_term_name']
-	    . '</label>';
-	}
-	$tbody.='</td>';
-      }
-      $tbody.='</tr>';
-    }
-
-    /*
-    function select($from,$ids){
-      $out='';
-      foreach($ids as $id){
-	$out .= '<option value="' . $id . '">' . $from[$id]['ontology_term_name'] . '</option>';
-      }
-      return "<select size=11>$out</select>";
-    }
-    
-    $tbody='<tr><td>'
-      . select($ots,$ots[3]['children'])
-      . '</td><td>'
-      . select($ots,$ots[15]['children'])
-      . '</td><td>'
-      . select($ots,$ots[22]['children'])
-      . '</td><tr>';
-    */
-
-    return '<fieldset><legend>' . $legend . '</legend><table border="1px">'
-      . "<thead>$thead</thead>"
-      . "<tbody>$tbody</tbody>"
-      . '</table></fieldset>';
-  }
-}
+require_once('Ontologies.php');
 
 class Ontology_terms extends _Table
 {
@@ -629,6 +550,57 @@ class Ontology_terms extends _Table
   const PRIMARY_KEY='ontology_term_id';
   const STATUS_COLUMN='ontology_status';
   const DEFALUT_STATUS='active';
+
+  // Use only on small ontologies!
+  public function tree(){
+    $this->query();
+    $ot=$this->fetch();
+
+    $ors=new Ontology_relationships($this->cfg,['ontology_term_id'=>$ot['ontology_term_id']]);
+    $ors->query();
+    $or=$ors->fetch();
+
+    //  If no relationships just return a list of items. 
+    if(null==$or){
+      $out=[];
+      while($ot){
+	array_push($out,$ot);
+	$ot=$this->fetch();
+      }
+      return $out;
+    }
+
+    // else, if we have relationships
+    $out=[];
+    while($ot){
+      $op_id=$or['ontology_parent_id'];
+      if(null==$op_id){
+	$out['root']=$ot;
+      }else{
+	if(array_key_exists($op_id,$out)){
+	  array_push($out[$op_id],$ot);
+	}else{
+	  $out[$op_id]=[$ot];
+	}
+      }
+      
+      $ot=$this->fetch();
+      if($ot){
+	$ors=new Ontology_relationships($this->cfg,['ontology_term_id'=>$ot['ontology_term_id']]);
+	$ors->query();
+	$or=$ors->fetch_one('tree');
+      }
+    }
+    return $out;
+  }
+}
+
+class Ontology_relationships extends _Table
+{
+  const TABLE='ontology_relationships';
+  const PRIMARY_KEY='ontology_relationship_id';
+  const STATUS_COLUMN='ontology_relationship_status';
+  const DEFAULT_STATUS='active';
 }
 
 class Unknown_participants extends _Table

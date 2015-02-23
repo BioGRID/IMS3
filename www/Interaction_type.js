@@ -130,16 +130,20 @@ IMS.Interaction_type.prototype.organize=function(){
   // ]..
 
   var part_type_id=1; // Gene, will worry about forced later
-
-  // see ims/ims.php if you want to change EEaA
-  var es_id=$('input:radio[name=EEaA]:checked').val();
-  // Should be an ontology_term_id that points to an Experimental
-  // system.
-  if(!es_id){
-    alert('No experimental systems selected');
-    return false;
+  var ontologies=[];
+  var names=['experimental_systems','throughputs'];
+  for(var i in names){
+    var name=names[i];
+    // see ims/ims.php if you want to change EEaA
+    var es_id=$('input:radio[name=' + name + ']:checked').val();
+    // Should be an ontology_term_id that points to an Experimental
+    // system.
+    if(!es_id){
+      alert('No ' + name + ' selected');
+      return false;
+    }
+    ontologies.push({'term_id':es_id});
   }
-  var ontologies=[{'term_id':es_id}];
 
   var type_id=this.primary_id();
   if('Complex'==this.data.interaction_type_name){

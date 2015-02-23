@@ -3,7 +3,15 @@ body{
     smaller. */
     zoom:.9;
 }
+/*
 .container-fluid{
+}
+*/
+.ontology{
+    font-size:smaller;
+}
+.ontology label{
+    font-weight:normal;
 }
 #publication_abstract,#publication_meshterms{
     font-size:smaller;

@@ -10,19 +10,19 @@
 
     <div class="container-fluid hidden user">
       <div class="row">
-	<fieldset class="col-md-4 interactions colA">
+	<fieldset class="col-md-3 interactions colA">
 	  <legend>Column A</legend>
 	  <input type="hidden" name="role">
 	  <select class="quick_organism"></select>
 	  <textarea></textarea>
 	</fieldset>
-	<fieldset class="col-md-4 interactions colB" disabled>
+	<fieldset class="col-md-3 interactions colB" disabled>
 	  <legend>Column B</legend>
 	  <input type="hidden" name="role">
 	  <select class="quick_organism"></select>
 	  <textarea></textarea>
 	</fieldset>
-	<div class="col-md-4"><?php
+	<div class="col-md-6"><?php
 # This is done here instead in JavaScript because it's conststant
 # across interaction types, column A and B are more dynamic.
 
@@ -31,8 +31,14 @@ $cfg=new IMS\config('ims.json');
 
 # ontology_id=1 hard coded in sql/Ontology.sql
 $o=new IMS\Ontologies($cfg,['ontology_id'=>1]);
-print $o->fieldset_html();
+print $o->fieldset_radio_html();
 
+?>
+	</div>
+      </div><div class="row">
+	<div class="col-md-6"><?php
+$o=new IMS\Ontologies($cfg,['ontology_id'=>2]);
+print $o->fieldset_radio_html();
 ?>
 	</div>
       </div><!-- .row -->
