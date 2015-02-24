@@ -55,6 +55,7 @@ foreach($_POST as $publication_id => $interactions){
     
     foreach($interaction['ontologies'] as $ontology){
       $args=['interaction_id'=>$interaction_id,
+	     'user_id'=>$ontology['user_id'],
 	     'ontology_term_id'=>$ontology['term_id']];
       if(array_key_exists('type_id',$ontology)){
 	$args['interaction_ontology_type_id']=$ontology['type_id'];

@@ -125,7 +125,8 @@ IMS.Interaction_type.prototype.organize=function(){
   //   }.. ]
   //   'ontologies':[
   //    'term_id':####
-  //    'type_id':####
+  //    'type_id':#### // optional
+  //    'user_id':####
   //   ]
   // ]..
 
@@ -142,7 +143,8 @@ IMS.Interaction_type.prototype.organize=function(){
       alert('No ' + name + ' selected');
       return false;
     }
-    ontologies.push({'term_id':es_id});
+    ontologies.push({'term_id':es_id,
+                     'user_id':IMS.user.id});
   }
 
   var type_id=this.primary_id();

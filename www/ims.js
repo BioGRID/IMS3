@@ -4,6 +4,7 @@ IMS={
 
   // Stores the current IMS.Publication object
   pub:null,
+  user:null,
 
   /*
    * First, a bunch af utilities.
@@ -74,9 +75,10 @@ IMS={
 
   // Just delete the cookies.
   logout:function(){
-    date=new Date();
+    IMS.user=null;
+    var date=new Date();
     date.setTime(0);
-    expires='=; expires='+date.toGMTString();
+    var expires='=; expires='+date.toGMTString();
     document.cookie='auth'+expires;
     document.cookie='name'+expires;
 
@@ -106,6 +108,7 @@ IMS={
   // This should only get run if we are sure we are logged it.
   loggedin_html:function(raw){
     var user=new IMS.User(raw);
+    IMS.user=user;
 
     // The JavaScript cookie interface really sucks.
     //var c='; '+document.cookie;

@@ -505,7 +505,7 @@ class Interaction_ontologies extends _Table
   const PRIMARY_KEY='interaction_ontology_id';
   const STATUS_COLUMN='interaction_ontology_status';
   const DEFAULT_STATUS='active';
-  const INSERT_SQL='INSERT INTO interaction_ontologies(interaction_id,ontology_term_id,interaction_ontology_type_id)VALUES(:interaction_id,:ontology_term_id,:interaction_ontology_type_id)';
+  const INSERT_SQL='INSERT INTO interaction_ontologies(interaction_id,ontology_term_id,interaction_ontology_type_id,user_id)VALUES(:interaction_id,:ontology_term_id,:interaction_ontology_type_id,:user_id)';
 }
 
 class Interaction_ontology_types extends _Table
