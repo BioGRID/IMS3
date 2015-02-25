@@ -20,6 +20,11 @@ class Ontologies extends _Table
   //  $kids: output ontology_terms::tree
   protected function t2t($x,$kids,$n,&$out){
     $ys=$kids[$x];
+
+    // How much space to put over a new column.  Not sure I
+    // generalized this or not, but it works for experimental_systems.
+    $gap=0;
+
     foreach($ys as $ot){
       $y=$ot['ontology_term_id'];
       
@@ -30,19 +35,23 @@ class Ontologies extends _Table
 	$html=$this->radio_term($ot);
       }
 
-      if(array_key_exists($n,$out)){
-	array_push($out[$n],$html);
-      }else{
-	$out[$n]=[$html];
+      if(!array_key_exists($n,$out)){
+	$out[$n]=[];
+
+	for($g=0 ; $g < $gap ; ++$g){
+	  array_push($out[$n],'');
+	}
+	$gap--;
       }
+      array_push($out[$n],$html);
       
       // 
       if($kidsp){
 	$n=$this->t2t($y,$kids,$n,$out);
-	$n++;
+	$gap++;
       }
     }
-    return $n;
+    return $n+1;
   }
 
 
