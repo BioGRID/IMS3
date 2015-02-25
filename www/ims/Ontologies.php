@@ -80,10 +80,27 @@ class Ontologies extends _Table
       for($i=0;$i < $row_count;$i++){
 	$tds=[];
 	foreach(array_keys($rows) as $j){
+
+	  // Again, feels a little hacky, but hopefully it works with
+	  // more then just Experimental_systems
+	  $colspan=1;
+	  while(array_key_exists($j+$colspan,$rows) and
+		array_key_exists($i,$rows[$j+$colspan]) and
+		''==$rows[$j+$colspan][$i]){
+	    $colspan++;
+	  }
+
+	  $td='<td>';
+	  if($colspan > 1){
+	    $td="<td colspan=\"$colspan\">";
+	  }
+
 	  if(array_key_exists($i,$rows[$j])){
-	    array_push($tds,'<td>' . $rows[$j][$i] . '</td>');
+	    if(''!=$rows[$j][$i]){
+	      array_push($tds,$td . $rows[$j][$i] . '</td>');
+	    }
 	  }else{
-	    array_push($tds,'<td></td>');
+	    array_push($tds,$td . '</td>');
 	  }
 	}
 	array_push($trs,'<tr>' . implode('',$tds) . '</tr>');
