@@ -43,6 +43,7 @@ Requires: php-mysql
 %{__install} -m 755 www/ims.css $RPM_BUILD_ROOT%{ims_wwwdir}/ims.css
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{ims_phpdir}
 %{__install} -m 755 www/ims/ims.php $RPM_BUILD_ROOT%{ims_phpdir}/ims.php
+%{__install} -m 755 www/ims/Ontologies.php $RPM_BUILD_ROOT%{ims_phpdir}/Ontologies.php
 %{__install} -m 755 www/ims/version.php $RPM_BUILD_ROOT%{ims_phpdir}/version.php
 %{__install} -m 755 www/ims/pubmed.php $RPM_BUILD_ROOT%{ims_phpdir}/pubmed.php
 %{__install} -m 755 -d $RPM_BUILD_ROOT%{ims_phpdir}/html
@@ -85,6 +86,7 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/ims.css
 %{ims_phpdir}
 %{ims_phpdir}/ims.php
+%{ims_phpdir}/Ontologies.php
 %{ims_phpdir}/version.php
 %{ims_phpdir}/pubmed.php
 %{ims_phpdir}/html
@@ -96,6 +98,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Feb 23 2025 Sven Heinicke <sven@genomics.princeton.edu> - 0.17
+- Though ugly, both experimental systems and throughtput can be input.
+
 * Fri Feb 13 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.16
 - Input of experimental systems should now work.
 - Some logic is now used if multiple quick identifiers are found to
