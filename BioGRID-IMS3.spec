@@ -98,7 +98,11 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
-* Mon Feb 23 2025 Sven Heinicke <sven@genomics.princeton.edu> - 0.17
+* Thu Feb 27 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.18
+- A little less ugly.
+- Recordes user with both experimental systems and throught.
+
+* Mon Feb 23 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.17
 - Though ugly, both experimental systems and throughtput can be input.
 
 * Fri Feb 13 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.16
