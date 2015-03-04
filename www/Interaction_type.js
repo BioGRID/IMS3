@@ -127,7 +127,8 @@ IMS.Interaction_type.prototype.organize=function(){
   //    'term_id':####
   //    'type_id':#### // optional
   //    'user_id':####
-  //   ]
+  //   ],
+  //   'notes':[aaa,...]
   // ]..
 
   var part_type_id=1; // Gene, will worry about forced later
@@ -147,11 +148,19 @@ IMS.Interaction_type.prototype.organize=function(){
                      'user_id':IMS.user.id});
   }
 
+  var note=$('textarea[name=interaction_note]').val().trim();
+  if(note){
+    note=[note];
+  }else{
+    note=[];
+  }
+
   var type_id=this.primary_id();
   if('Complex'==this.data.interaction_type_name){
     // Here we only ever return one interaction, with who knowns how
     // many participants.
-    out[0]=[type_id,{'ontologies':ontologies}];
+    out[0]=[type_id,{'ontologies':ontologies,
+                     'notes':note}];
     var role_id=this.roles[0].primary_id();
     var org_id=got.A.shift();
     var parts=[];
@@ -192,7 +201,8 @@ IMS.Interaction_type.prototype.organize=function(){
         };
 
         var i=[type_id,{'participants':[a,b],
-                        'ontologies':ontologies}];
+                        'ontologies':ontologies,
+                        'notes':note}];
         out.push(i);
       }
     }else if(1==got.A.length){
@@ -212,7 +222,8 @@ IMS.Interaction_type.prototype.organize=function(){
             quick_participant_value:b_part_value,
         }
         var i=[type_id,{'participants':[a,b],
-                        'ontologies':ontologies}];
+                        'ontologies':ontologies,
+                        'notes':note}];
         out.push(i);
       }
     }else if(1==got.B.length){
@@ -232,7 +243,8 @@ IMS.Interaction_type.prototype.organize=function(){
             quick_participant_value:a_part_value,
         };
         var i=[type_id,{'participants':[a,b],
-                        'ontologies':ontologies}];
+                        'ontologies':ontologies,
+                       'notes':note}];
         out.push(i);
       }
     }

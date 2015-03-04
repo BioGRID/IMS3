@@ -32,6 +32,7 @@ $dbh->beginTransaction();
 //exit(1);
 
 foreach($_POST as $publication_id => $interactions){
+
   # For now we will assume the passed publication_id is accurate.
   foreach($interactions as $interaction){
     $interaction_type_id=array_shift($interaction);
@@ -52,7 +53,20 @@ foreach($_POST as $publication_id => $interactions){
 	'interaction_history_comment'=>'IMS3 Created',
 	]);
     $ih->insert();
-    
+
+    // Insert any notes we might have
+    if(array_key_exists('notes',$interaction)){
+      foreach($interaction['notes'] as $note){
+	$in=new IMS\Interaction_notes
+	  ($cfg,
+	   ['interaction_note_text'=>$note,
+	    'interaction_id'=>$interaction_id,
+	    'user_id'=>$user_id,
+	    ]);
+	$in->insert();
+      }
+    }
+
     foreach($interaction['ontologies'] as $ontology){
       $args=['interaction_id'=>$interaction_id,
 	     'user_id'=>$ontology['user_id'],

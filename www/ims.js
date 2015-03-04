@@ -315,17 +315,26 @@ IMS={
       var Table=IMS[prop.charAt(0).toUpperCase()+prop.slice(1)];
 
       if(Table){
-        var col=Table.prototype.primary_col();
         var val=tag.text();
-        if(Table.prototype.ok(col,val,tag)){
-          // Stuff we can figure out without actually accessing the
-          // object in scope.
-          var primary_col=col;
-          var request={table:Table.prototype.table()};
-          request[primary_col]=val;
-          IMS.cache(request,function(raw){
-            tag.replaceWith(new Table(raw[0]).html());
-          },primary_col);
+
+        // blank value means we have nothing to do.
+        if(val){
+
+          var col=Table.prototype.primary_col();
+          if(Table.prototype.ok(col,val,tag)){
+            // Stuff we can figure out without actually accessing the
+            // object in scope.
+            var primary_col=col;
+            var request={table:Table.prototype.table()};
+            request[primary_col]=val.replace(',','|');
+            IMS.cache(request,function(raw){
+              var cooked=[];
+              for(i in raw){
+                cooked.push(new Table(raw[i]).html());
+              }
+              tag.replaceWith(cooked.join(', '));
+            },primary_col);
+          }
         }
       }
 

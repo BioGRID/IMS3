@@ -40,6 +40,7 @@ IMS.Interaction.prototype.dts=function(){
     'interaction_source',
     'ontologies',
     'modification_type',
+    'interaction_note',
   ];
 };
 

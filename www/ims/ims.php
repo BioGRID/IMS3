@@ -311,6 +311,20 @@ class _Table
     return $out;
   }
 
+  public function id(){
+    $c=get_called_class();
+    return $this->row[$c::PRIMARY_KEY];
+  }
+
+  public function ids(){
+    $out=[];
+    $this->query();
+    while($this->fetch()){
+      array_push($out,$this->id());
+    }
+    return $out;
+  }
+
   # Fetch one, but zero is ok too.
   public function fetch_one($error_hist){
     $c=get_called_class();
@@ -478,6 +492,11 @@ class Interactions extends _Table
 	($this->cfg,['interaction_id'=>$v['interaction_id']]);
       $v['ontologies']=$io->count();
 
+      # Now get interaction_notes
+      $in=new Interaction_notes
+	($this->cfg,['interaction_id'=>$v['interaction_id']]);
+      $v['interaction_note_id']=$in->ids();
+
       $this->data[]=$v;
     }
     reset($this->data);
@@ -522,6 +541,15 @@ class Interaction_sources extends _Table
   const PRIMARY_KEY='interaction_source_id';
   const STATUS_COLUMN='interaction_source_status';
   const DEFAULT_STATUS='active';
+}
+
+class Interaction_notes extends _Table
+{
+  const TABLE='interaction_notes';
+  const PRIMARY_KEY='interaction_note_id';
+  const STATUS_COLUMN='interaction_note_status';
+  const DEFUALT_STATUS='active';
+  const INSERT_SQL='INSERT INTO interaction_notes(interaction_note_text,interaction_id,user_id)VALUES(:interaction_note_text,:interaction_id,:user_id)';
 }
 
 class Interaction_types extends _Table
@@ -756,6 +784,8 @@ function table_factory($cfg,$qs)
     return new Interaction_participants($cfg,$qs);
   case 'interaction_sources':
     return new Interaction_sources($cfg,$qs);
+  case 'interaction_notes':
+    return new Interaction_notes($cfg,$qs);
   case 'interaction_types':
     return new Interaction_types($cfg,$qs);
   case 'ontology_terms':
