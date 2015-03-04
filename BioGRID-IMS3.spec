@@ -28,6 +28,7 @@ Requires: php-mysql
 %{__install} -m 755 www/Interaction_ontology.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_ontology.js
 %{__install} -m 755 www/Interaction_ontology_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_ontology_type.js
 %{__install} -m 755 www/Interaction_source.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_source.js
+%{__install} -m 755 www/Interaction_note.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_note.js
 %{__install} -m 755 www/Interaction_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_type.js
 %{__install} -m 755 www/Ontology_term.js $RPM_BUILD_ROOT%{ims_wwwdir}/Ontology_term.js
 %{__install} -m 755 www/Participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant.js
@@ -71,6 +72,7 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/Interaction_ontology.js
 %{ims_wwwdir}/Interaction_ontology_type.js
 %{ims_wwwdir}/Interaction_source.js
+%{ims_wwwdir}/Interaction_note.js
 %{ims_wwwdir}/Interaction_type.js
 %{ims_wwwdir}/Ontology_term.js
 %{ims_wwwdir}/Participant.js
@@ -98,6 +100,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Wed Mar 04 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.19
+- Now saves and displays interaction_notes.
+
 * Thu Feb 27 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.18
 - A little less ugly.
 - Recordes user with both experimental systems and throught.
