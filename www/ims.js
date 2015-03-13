@@ -305,14 +305,14 @@ IMS={
     return pk;
   },
 
+  get_class:function(prop){
+    return IMS[prop.charAt(0).toUpperCase()+prop.slice(1)];
+  },
+
   update_danger:function(tbl){
     tbl.find('.bg-danger').each(function(){
       var tag=$(this);
-      var prop=tag.parent().attr('itemprop');
-      //console.log(prop);
-
-      // Not sure how portable this is
-      var Table=IMS[prop.charAt(0).toUpperCase()+prop.slice(1)];
+      var Table=IMS.get_class(tag.parent().attr('itemprop'));
 
       if(Table){
         var val=tag.text();
@@ -327,6 +327,7 @@ IMS={
             var primary_col=col;
             var request={table:Table.prototype.table()};
             request[primary_col]=val.replace(',','|');
+            // fetch danger items, may be cached
             IMS.cache(request,function(raw){
               var cooked=[];
               for(i in raw){
@@ -621,6 +622,11 @@ IMS._table.prototype={
         return '<span class="bg-danger">'+this.data[dt+'_id']+'</span>';
       }else if(null===dt_id){
         return '<i>null</i>';
+        /*
+      }else{
+        //console.log(this.data,dt);
+        return '<span class="bg-danger">'+this.html()+'</span>';
+         */
       }
     }
     return '<span class="bg-danger">This is a bug &#10233 &#128027</span>';

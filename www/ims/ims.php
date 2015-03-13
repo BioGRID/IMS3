@@ -133,7 +133,7 @@ class _Table
   const TABLE=null;          // The of the SQL table
   const PRIMARY_KEY=null;    // The primary key of the SQL table
   const STATUS_COLUMN=null;  // The status column of the SQL table
-  const DEFAULT_STATUS=null; // The default status of the SQL table
+  const DEFAULT_STATUS='active'; // The default status of the SQL table
   const ORDER_BY=null;       // If the table needs to be sorted
 
   public function __construct($cfg,$qs){
@@ -471,12 +471,13 @@ class Interactions extends _Table
   const STATUS_COLUMN='interaction_status';
   const DEFAULT_STATUS='normal';
   const INSERT_SQL='INSERT INTO interactions(publication_id,interaction_type_id,interaction_source_id)VALUES(:publication_id,:interaction_type_id,1)';
-  
+
   public function fetch(){
     $out=current($this->data);
     next($this->data);
     return $out;
   }
+
 
   public function query(){
     $r=parent::query();
@@ -525,6 +526,35 @@ class Interaction_ontologies extends _Table
   const STATUS_COLUMN='interaction_ontology_status';
   const DEFAULT_STATUS='active';
   const INSERT_SQL='INSERT INTO interaction_ontologies(interaction_id,ontology_term_id,interaction_ontology_type_id,user_id)VALUES(:interaction_id,:ontology_term_id,:interaction_ontology_type_id,:user_id)';
+
+  // Resetting fetch to full from an array rather then form the SQL object
+  public function fetch(){
+    $out=current($this->data);
+    next($this->data);
+    return $out;
+  }
+
+  public function query(){
+    $r=parent::query();
+    $this->data=[];
+
+    while($v=$this->statement->fetch(\PDO::FETCH_ASSOC)){
+      $ioq=new Interaction_ontologies_qualifiers
+	($this->cfg,['interaction_ontology_id'=>$v['interaction_ontology_id']]);
+      $v['interaction_ontology_qualifier_id']=$ioq->ids();
+      $this->data[]=$v;
+    }
+    reset($this->data);
+    return $this->data;
+  }
+
+}
+
+class Interaction_ontologies_qualifiers extends _Table
+{
+  const TABLE='interaction_ontologies_qualifiers';
+  const PRIMARY_KEY='interaction_ontology_qualifier_id';
+  const STATUS_COLUMN='interaction_ontology_qualifier_status';
 }
 
 class Interaction_ontology_types extends _Table
@@ -778,6 +808,8 @@ function table_factory($cfg,$qs)
     return new Interaction_history($cfg,$qs);
   case 'interaction_ontologies':
     return new Interaction_ontologies($cfg,$qs);
+  case 'interaction_ontologies_qualifiers':
+    return new Interaction_ontologies_qualifiers($cfg,$qs);
   case 'interaction_ontology_types':
     return new Interaction_ontology_types($cfg,$qs);
   case 'interaction_participants':
