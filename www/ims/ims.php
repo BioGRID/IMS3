@@ -291,6 +291,7 @@ class _Table
       $sql.=" LIMIT $limit ";
     }
 
+    #var_dump($sql);
     return $sql;
   }
 

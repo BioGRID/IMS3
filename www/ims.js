@@ -326,7 +326,7 @@ IMS={
             // object in scope.
             var primary_col=col;
             var request={table:Table.prototype.table()};
-            request[primary_col]=val.replace(',','|');
+            request[primary_col]=val.replace(/,/g,'|');
             // fetch danger items, may be cached
             IMS.cache(request,function(raw){
               var cooked=[];
