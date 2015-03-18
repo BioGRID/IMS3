@@ -53,12 +53,11 @@ STAGE=[
         'Experimental_system',
         'Interaction_ontology',
         'Interaction_ontology_qualifier',
+
+        'Interaction_quantitation','Interaction_note',
         ],
     # Stage 3 - Things that require Interactions
     [
-
-        'Interaction_quantitation','Interaction_note',
-
         # Participant tables
         'Participant',
         'Interaction_participant',

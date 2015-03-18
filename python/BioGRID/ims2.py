@@ -939,7 +939,7 @@ WHERE complex_phenotype_id=%(ID)s''' % {'IMS3':ims3_db,'ID':complex_phenotype_id
                         #self.warn(sql)
                         c.execute(sql)
                         for cptq in c.fetchall():
-                            ioq=Interaction_ontology_qualifier(
+                            ioq=BioGRID.ims.Interaction_ontology_qualifier(
                                 {'interaction_ontology_id':interaction_ontology_id,
                                  'ontology_term_id':cptq['ontology_term_id'],
                                  'interaction_ontology_qualifier_addeddate':cptq['addeddate'],
@@ -1198,6 +1198,8 @@ WHERE phenotype_parent_id=0''' % {'IMS3':ims3_name}
 
         return sqls
     
+global p_id2o_id
+p_id2o_id={}
 
 class Interaction_ontology(BioGRID.ims.Interaction_ontology,_Table):
 
@@ -1207,12 +1209,12 @@ class Interaction_ontology(BioGRID.ims.Interaction_ontology,_Table):
 
     @classmethod
     def slurp_sql(cls):
-        sql=super(Interaction_ontology,cls).slurp_sql() + '''
+        sql='''SELECT *
+FROM %(table)s
 JOIN phenotypes AS pt USING(phenotype_id)
 JOIN %(IMS3)s.ontology_terms AS ot ON(pt.phenotype_official_id=ot.ontology_term_official_id)
 JOIN interactions USING(interaction_id)
-''' % {'IMS3':cls.config.imsdb_name()}
-        #print sql
+''' % {'table':cls.ims2_table(),'IMS3':cls.config.imsdb_name()}
         return sql
 
     def __getitem__(self,name):
@@ -1225,6 +1227,11 @@ JOIN interactions USING(interaction_id)
                 pass
         return out
 
+    def store(self):
+        out=super(Interaction_ontology,self).store()
+        p_id2o_id[self['interaction_phenotype_id']]=self.id();
+        return out;
+
     def __eq__(self,other):
         '''For now, just return True.'''
         return True
@@ -1232,9 +1239,9 @@ JOIN interactions USING(interaction_id)
 class Interaction_ontology_qualifier(BioGRID.ims.Interaction_ontology_qualifier,_Table):
     @classmethod
     def slurp_sql(cls):
-        # this one can get a new set of prymary keys
+        # this one gets a new set of prymary keys
         return '''SELECT
-interaction_phenotype_id AS interaction_ontology_id,
+interaction_phenotype_id,
 ot.ontology_term_id,
 interaction_phenotypes_qualifier_status AS interaction_ontology_qualifier_status,
 interaction_phenotypes_qualifier_addeddate AS interaction_ontology_qualifier_addeddate
@@ -1243,6 +1250,13 @@ JOIN phenotypes AS pt USING(phenotype_id)
 JOIN %(IMS3)s.ontology_terms AS ot ON(pt.phenotype_official_id=ot.ontology_term_official_id)
 ''' % {'IMS3':cls.config.imsdb_name()}
     def store(self):
+        try:
+            self.row['interaction_ontology_id']=p_id2o_id[self.row['interaction_phenotype_id']]
+        except KeyError:
+            self.warn("Skipping interaction_phenotype_id=%d not in interaction_phenotypes" %
+                      self.row['interaction_phenotype_id']);
+            return
+
         try:
             return super(Interaction_ontology_qualifier,self).store()
         except _mysql_exceptions.IntegrityError as x:
