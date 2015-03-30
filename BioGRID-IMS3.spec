@@ -102,6 +102,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Mar 30 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.21
+- Now displays bait and hit items in Interaction table.
+
 * Thu Mar 19 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.20
 - Now displays interaction_ontologies_qualifiers.
 
