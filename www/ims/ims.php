@@ -556,6 +556,11 @@ class Interaction_ontologies_qualifiers extends _Table
   const TABLE='interaction_ontologies_qualifiers';
   const PRIMARY_KEY='interaction_ontology_qualifier_id';
   const STATUS_COLUMN='interaction_ontology_qualifier_status';
+
+  public function _select(){
+    $c=get_called_class();
+    return 'SELECT * FROM ' . $c::TABLE . ' JOIN ontology_terms USING(ontology_term_id)';
+  }
 }
 
 class Interaction_ontology_types extends _Table
@@ -599,6 +604,14 @@ class Interaction_participants extends _Table
   const STATUS_COLUMN='interaction_participant_status';
   const DEFAULT_STATUS='active';
   const INSERT_SQL='INSERT INTO interaction_participants(interaction_id,participant_id,participant_role_id)VALUES(:interaction_id,:participant_id,:participant_role_id)';
+
+  // This was the resulting value can be use as a Participant too.
+  public function _select(){
+    $c=get_called_class();
+    return 'SELECT * FROM ' . $c::TABLE .
+      ' JOIN participant_roles USING(participant_role_id)' .
+      ' JOIN participants USING(participant_id)';
+  }
 }
 
 require_once('Ontologies.php');

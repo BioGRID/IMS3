@@ -21,8 +21,14 @@ IMS.Participant.prototype.ok=function(col,val,tag){
 }
 */
 
+// Returns a value unique to this object, and suitable to be used in a
+// HTML class attribute.
+IMS.Participant.prototype.clazz=function(){
+  return 'id'+this.data.participant_id+'type'+this.data.participant_type_id;
+}
+
 IMS.Participant.prototype.html=function(){
-  var clazz='id'+this.data.participant_id+'type'+this.data.participant_type_id;
+  var clazz=this.clazz();
   var that=this;
 
   switch(this.data.participant_type_id){

@@ -31,6 +31,7 @@ IMS.Interaction.prototype.dd=function(dt){
 IMS.Interaction.prototype.dts=function(){
   return [
     'interaction_id',
+    'bait','hit',  // see also
     //'participant_hash',
     //'publication_id',
     //'interaction_type_id',
@@ -71,13 +72,12 @@ IMS.Interaction.prototype.add_row=function(){
 }
 
 /*
-IMS.Interaction.prototype.data_summary=function(){
-  out=this.data;
-  out.participants=[];
-  for(var ip_id in this.participants){
-    ip=this.participants[ip_id];
-    out.participants.push(ip.data);
+ * Overide the default also finction to to something with bait and hit
+ * entries.
+ */
+IMS.Interaction.prototype.also=function(dt){
+  if(-1!=['bait','hit']){
+    return '<span class="bg-danger">'+dt+'</span>';
   }
-  return out;
+  return false;
 }
-*/

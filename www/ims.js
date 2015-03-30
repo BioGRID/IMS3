@@ -337,6 +337,35 @@ IMS={
             },primary_col);
           }
         }
+      }else{
+        var tr=tag.parent().parent();
+
+        // should probably chuck this into a static function of
+        // Interaction, but for now this is good.
+        if('Interaction'==tr.attr('itemtype')){
+          var i_id=tr.find('[itemprop=primary-key]').text();
+          //var i=IMS.pub.interactions[i_id];
+          var r={
+              table:'interaction_participants',
+              participant_role_name:tag.text(),
+              interaction_id:i_id,
+          };
+          IMS.query(r,function(raw){
+            if(raw[0]){
+              var p=new IMS.Participant(raw[0]);
+              tag.attr('class',p.clazz())
+              p.html();
+
+              // need to do something if we get more then one item
+              // back.
+            }else{
+              // What we display if we found nothing.
+              tag.replaceWith('-');
+            }
+            // Update the pager.
+            tbl.trigger('update');
+          });
+        }
       }
 
     });
@@ -354,7 +383,7 @@ IMS={
   },
 
   // Abstracted was to dump results from query.php into an HTML table.
-  redo_table:function(results,Table){
+  redo_table:function(results,Table,callback){
     // get the HTML table
     var tbl=Table.prototype.$('table');
 
@@ -384,6 +413,9 @@ IMS={
       }
       IMS.add_row(thead,tbody,i);
       out[i.id]=i;
+      if(callback){
+        callback(i);
+      }
     }
 
     // So we can use some CSS to align the numbers right but still
@@ -492,13 +524,10 @@ IMS={
   },
 
   update_interactions:function(results){
-    var inter=IMS.redo_table(results,IMS.Interaction);
-    for(var action in inter){
-      var i=inter[action];
-      IMS.pub.interactions[i.id]=i;
-      i._tr.click(IMS.click_interaction);
-    }
-
+    var inter=IMS.redo_table(results,IMS.Interaction,function(i){
+                IMS.pub.interactions[i.id]=i;
+                i._tr.click(IMS.click_interaction);
+              });
   },
 
 
@@ -581,6 +610,10 @@ IMS._table.prototype={
    * instance specific functions.
    */
 
+  also:function(){
+    return false;
+  },
+
   type:function(){
     table=this.table();
     return table.charAt(0).toUpperCase()+table.slice(1);
@@ -622,11 +655,11 @@ IMS._table.prototype={
         return '<span class="bg-danger">'+this.data[dt+'_id']+'</span>';
       }else if(null===dt_id){
         return '<i>null</i>';
-        /*
       }else{
-        //console.log(this.data,dt);
-        return '<span class="bg-danger">'+this.html()+'</span>';
-         */
+        var also=this.also(dt);
+        if(also){
+          return also;
+        }
       }
     }
     return '<span class="bg-danger">This is a bug &#10233 &#128027</span>';
