@@ -6,6 +6,8 @@ IMS.Publication=function(data){
 
   this.interactions={};  // list of interactions, including new ones
   this.interaction=null; // current selected interaction
+  this.modification_type='ACTIVATED'; // current type of modificatinos being displayed
+  this.modification_types={};
 
   // Move this up to IMS._table if we need to use select2 for a
   // different items other then publication.
@@ -63,4 +65,39 @@ IMS.Publication.prototype.commit=function(){
       IMS.reset_publication();
     });
   });
+}
+
+/*
+ * non-static
+ */
+
+/*
+IMS.Publication.prototype.current=function(interaction){
+  return interaction.data.modification_type==this.modification_type;
+}
+*/
+
+IMS.Publication.prototype.remember=function(i){
+  this.interactions[i.id]=i;
+  var mt=i.data.modification_type;
+  if(this.modification_types[mt]){
+    this.modification_types[mt].push(i);
+  }else{
+    this.modification_types[mt]=[i];
+  }
+}
+
+IMS.Publication.prototype.fetch_interactions=function(){
+  var pub=this;
+  IMS.query({publication_id:this.primary_id(),table:'interactions'},
+            function(results){
+              var inter=IMS.redo_table(results,IMS.Interaction,function(i){
+                          pub.remember(i);
+                          if(i._tr){
+                            i._tr.click(IMS.click_interaction);
+                          }
+                        });
+            }
+
+           );
 }

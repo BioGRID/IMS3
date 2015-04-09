@@ -62,6 +62,10 @@ IMS.Interaction.prototype.new_interaction_participant=function(role_id,participa
   return ip;
 }
 
+IMS.Interaction.prototype.current=function(){
+  return IMS.pub.modification_type==this.data.modification_type;
+}
+
 IMS.Interaction.prototype.add_row=function(){
   var tbl=this.$('table');
   var thead=tbl.find('thead');

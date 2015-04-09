@@ -282,10 +282,7 @@ IMS={
 
     IMS.pub=pub;
     $("#publication").html(pub.select('publication_abstract'));
-
-    // Now get the interactions
-    IMS.query({publication_id:pub.primary_id(),table:'interactions'},
-              IMS.update_interactions);
+    pub.fetch_interactions();
   },
 
   reset_publication:function(){
@@ -411,7 +408,9 @@ IMS={
       if(!i.table){
         i=new Table(results[row]);
       }
-      IMS.add_row(thead,tbody,i);
+      if(i.current()){
+        IMS.add_row(thead,tbody,i);
+      }
       out[i.id]=i;
       if(callback){
         callback(i);
@@ -523,14 +522,6 @@ IMS={
 
   },
 
-  update_interactions:function(results){
-    var inter=IMS.redo_table(results,IMS.Interaction,function(i){
-                IMS.pub.interactions[i.id]=i;
-                i._tr.click(IMS.click_interaction);
-              });
-  },
-
-
   /*
    * Functions I think should be in other libraries.
    */
@@ -609,6 +600,11 @@ IMS._table.prototype={
   /*
    * instance specific functions.
    */
+
+  // Overidded by Interaction.js
+  current:function(){
+    return true;
+  },
 
   also:function(){
     return false;
