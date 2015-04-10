@@ -279,6 +279,7 @@ IMS={
     $(".participants thead").html('');
     $(".participants tbody").html('');
     $(".participants .footnotes *").addClass('hide');
+    $("#modification_type label").empty().remove(); // gets added in Publication.js
 
     IMS.pub=pub;
     $("#publication").html(pub.select('publication_abstract'));

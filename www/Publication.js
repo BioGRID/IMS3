@@ -85,6 +85,31 @@ IMS.Publication.prototype.remember=function(i){
   }else{
     this.modification_types[mt]=[i];
   }
+
+  var mtt=$('#modification_type'); // mt tag
+  var name='name="modification_type"';
+  var value='value="' + mt + '"';
+  var r=mtt.find('[' + name + '][' + value +']');
+
+  if(0==r.length){
+    var checked='';
+    if(this.modification_type==mt){
+      checked=' checked';
+    }
+
+    var label=$('<label><input type="radio" '
+               + name + ' ' + value + checked + '>'
+               + mt + ' (<span>1</span>)</label>');
+    mtt.append(label);
+    var pub=this;
+    label.change(function(){
+      var i=$(this).find('input');
+      pub.modification_type=i.val();
+      IMS.reset_publication();
+    });
+  }else{
+    mtt.find('span').text(this.modification_types[mt].length);
+  }
 }
 
 IMS.Publication.prototype.fetch_interactions=function(){
