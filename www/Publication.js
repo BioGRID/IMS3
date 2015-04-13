@@ -80,11 +80,10 @@ IMS.Publication.prototype.current=function(interaction){
 IMS.Publication.prototype.remember=function(i){
   this.interactions[i.id]=i;
   var mt=i.data.modification_type;
-  if(this.modification_types[mt]){
-    this.modification_types[mt].push(i);
-  }else{
-    this.modification_types[mt]=[i];
+  if(!this.modification_types[mt]){
+    this.modification_types[mt]={};
   }
+  this.modification_types[mt][i.id]=i;
 
   var mtt=$('#modification_type'); // mt tag
   var name='name="modification_type"';
@@ -108,7 +107,7 @@ IMS.Publication.prototype.remember=function(i){
       IMS.reset_publication();
     });
   }else{
-    mtt.find('span').text(this.modification_types[mt].length);
+    mtt.find('span').text(Object.keys(this.modification_types[mt]).length);
   }
 }
 
