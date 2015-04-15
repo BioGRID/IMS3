@@ -102,6 +102,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon Apr 13 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.22
+- Has modification_type radio boxes.
+
 * Mon Mar 30 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.21
 - Now displays bait and hit items in Interaction table.
 
