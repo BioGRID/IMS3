@@ -4,7 +4,8 @@ IMS.Interaction_ontology_type=function(data){
 IMS.Interaction_ontology_type.prototype=new IMS._table();
 IMS.Interaction_ontology_type.prototype._const={
   table:'interaction_ontology_types',
-  primary_col:'interaction_ontology_type_id'
+  primary_col:'interaction_ontology_type_id',
+  html_class:'interaction_ontology_types'
 }
 
 IMS.Interaction_ontology_type.prototype.html=function(){

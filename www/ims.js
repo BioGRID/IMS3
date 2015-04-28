@@ -450,15 +450,20 @@ IMS={
   populate_select:function(Table,named){
     var selected;
     var callback;
+    var query={};
     if(named){
       selected=named['selected'];
       callback=named['callback'];
+      if(named['query']){
+        query=named['query'];
+      }
     }
 
     var sel=Table.prototype.$('select');
+    query['table']=Table.prototype.table();
 
     IMS.query
-    ({table:Table.prototype.table()},
+    (query,
      function(results){
        IMS._storeItems(results,Table.prototype.primary_col());
 
@@ -468,6 +473,7 @@ IMS={
          opts+=result.option_html(selected);
        }
        if(0==sel.length){
+         // report error if we have nothing to populate it with
          alert('Unable to populate ' + Table.prototype._const.table);
        }else{
          sel.html('').append(opts);
@@ -633,12 +639,15 @@ IMS._table.prototype={
     return this.primary_col()+'='+this.primary_id();
   },
   option_html:function(selected){
-    //var sel=(this._const.default==this.id)?' SELECTED':'';
-    var sel=(selected==this.id)?' SELECTED':'';
+    var sel='';
+    if(selected && (selected==this.id)){
+      sel=' SELECTED';
+    }
 
-    return '<option' + sel
+    var out='<option' + sel
          + ' value="' + this.primary_id() + '">'
          + this.html() + '</option>';
+    return out;
   },
 
   // Return a list of definition term names, that then can be fed to
@@ -796,12 +805,14 @@ $(document).ready(function(){
       $('.ifpub').removeClass('hidden');
       return pub.format_item();
     },
+
     /*
     initSelection:function(e,c){
       console.log(e);
       console.log(c);
     },
      */
+
     ajax:IMS.ajax_query(
       function(term,page){
         return{
@@ -822,6 +833,36 @@ $(document).ready(function(){
     ) // ajax_query
   }); // select2
 
+  // Set up select2 ontology search.
+  $("#ontology_terms").select2({
+    minimumInputLength:3,
+    formatResult:function(o){
+      return o.format_item();
+    },
+    formatSelection:function(o){
+      return o.format_item();
+    },
+    ajax:IMS.ajax_query(
+      function(term,page){
+        return{
+          limit:10,
+          ontology_id:$('#interaction_ontology').val(),
+          table:'ontology_terms',
+          q:term
+        }
+      },{
+        results:function(data){
+          IMS.report_messages(data.messages);
+          var out=[];
+          for(var row in data.results){
+            out.push(new IMS.Ontology_term(data.results[row]));
+          }
+          return {results:out};
+        }
+      }
+    )
+  }); // select2
+
   /*
    * Stuff for creating new Interactions and Participants
    */
@@ -830,6 +871,10 @@ $(document).ready(function(){
   IMS.populate_select(IMS.Participant_role);
   IMS.populate_select(IMS.Participant_type);
    */
+
+  IMS.populate_select(IMS.Ontology,{query:{ontology_status:'active'}});
+  IMS.populate_select(IMS.Interaction_ontology_type);
+
   IMS.populate_select(
     IMS.Interaction_type,
     {callback:IMS.Interaction_type.fieldsets}).
@@ -883,5 +928,74 @@ $(document).ready(function(){
 
     m.find('.interaction_id').html(i.id);
   });
+
+  $('button.ontology_selector').click(function(){
+    var oto=IMS.Ontology_term; // ot object
+    var name=oto.prototype.table();
+    var ot_id=$('#' + name).val();
+
+    var append=$('#selected_ontologies');
+    var qualifiers='<ul class="qualifiers"></ul>';
+
+    if('add_qualifier'==this.id){
+      var si=$('input[name='.concat(name,']:checked'));
+      if(0==si.length){
+        alert('No Ontology Term Checked');
+        return;
+      }
+      name='qualifier';
+      qualifiers='';
+      append=si.parent().parent().find('.qualifiers');
+    }
+
+    if(ot_id){
+      var r={table:oto.prototype.table()};
+      r[oto.prototype.primary_col()]=ot_id;
+
+      IMS.cache(r,function(o){
+        var ot=new IMS.Ontology_term(o[0]);
+
+        // We only want the latest addition to be easily undooable
+        $('input.last[name='.concat(name,']')).removeClass('last');
+
+        append.append(
+          '<li><label><input type="checkbox" class="last sot" name="'.concat
+          (name,
+           '" value="',
+           ot.id,
+           '">',
+           ot.html(),
+           '</label>',
+           qualifiers,
+           '</ul></li>'));
+      },ot_id);
+
+      return;
+    }
+    alert('No Ontology Term Picked');
+  });
+
+  // For removing stuff in the "Selected Ontology Terms" section.
+  $('button.sot').click(function(){
+    var action=this.classList[1];
+    var removeMe=[];
+    switch(action){
+      case('clear_all'):
+      removeMe=$('input.sot');
+      break;
+      case('clear_checked'):
+      removeMe=$('input.sot:checked');
+      break;
+      case('undo_last'):
+      removeMe=$('input.sot.last');
+      break;
+    }
+    if(0<removeMe.length){
+      // Up to the enclosing <li>
+      removeMe.parent().parent().remove();
+    }
+
+  });
+
 
 }); // ready

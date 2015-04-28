@@ -45,10 +45,26 @@ print $o->fieldset_radio_html();
 	  <legend>Note</legend>
 	  <textarea name="interaction_note"></textarea>
 	</fieldset>
+      </div><div class="row">
+	<fieldset class="col-md-6">
+	  <legend>Ontology Selector</legend>
+	  <input type="hidden" id="ontology_terms" style="width:100%">
+	  <select id="interaction_ontology" class="ontologies"></select>
+	  <select class="interaction_ontology_types"></select>
+	  <button id="add_ontology" class="ontology_selector">Add Ontology</button>
+	  <button id="add_qualifier" class="ontology_selector">Add Qualifier</button>
+	</fieldset><fieldset class="col-md-6">
+	  <legend>Selected Ontology Terms</legend>
+	  <button class="sot clear_all">Clear All</button>
+	  <button class="sot clear_checked">Clear Checked</button>
+	  <button class="sot undo_last">Undo Last</button>
+	  <ul id="selected_ontologies"></ul>
+	</fieldset>
       </div><!-- .row -->
+
       <p><button id="commit">Commit</button></p>
     </div>
-      
+    
     <h2>Interactions</h2>
     <fieldset id="modification_type">
       <legend>Modification Type Selection</legend>

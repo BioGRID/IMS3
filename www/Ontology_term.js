@@ -8,6 +8,11 @@ IMS.Ontology_term.prototype._const={
   primary_col:'ontology_term_id',
 }
 
+IMS.Ontology_term.prototype.format_item=function(){
+  return '<strong>' + this.data.ontology_term_official_id + '</strong>:' +
+    this.data.ontology_term_name;
+}
+
 IMS.Ontology_term.prototype.html=function(){
   var name=this.data.ontology_term_name;
   var desc=this.data.ontology_term_desc;

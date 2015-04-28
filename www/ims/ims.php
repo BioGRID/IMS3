@@ -200,6 +200,11 @@ class _Table
     $s->execute();
   }
 
+  public function like_sql($v){
+    $dbh=$this->pdo();
+    return ' LIKE ' . $dbh->quote($v.'%');
+  }
+
   protected function _where(){
     $c=get_called_class();
     $dbh=$this->pdo();
@@ -210,7 +215,7 @@ class _Table
       case 'limit':
 	break;
       case 'q':
-	$where[]=$c::SEARCH_COLUMN.' LIKE '.$dbh->quote($v.'%');
+	$where[]=$c::SEARCH_COLUMN . $this->like_sql($v);
 	break;
       case 'status':
 	if($c::STATUS_COLUMN){
@@ -622,6 +627,12 @@ class Ontology_terms extends _Table
   const PRIMARY_KEY='ontology_term_id';
   const STATUS_COLUMN='ontology_status';
   const DEFALUT_STATUS='active';
+  const SEARCH_COLUMN='ontology_term_name';
+
+  public function like_sql($v){
+    $dbh=$this->pdo();
+    return ' LIKE ' . $dbh->quote('%'.$v.'%');
+  }
 
   // Use only on small ontologies!
   public function tree(){
@@ -834,6 +845,8 @@ function table_factory($cfg,$qs)
     return new Interaction_notes($cfg,$qs);
   case 'interaction_types':
     return new Interaction_types($cfg,$qs);
+  case 'ontologies':
+    return new Ontologies($cfg,$qs);
   case 'ontology_terms':
     return new Ontology_terms($cfg,$qs);
   case 'participants':

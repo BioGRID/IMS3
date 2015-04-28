@@ -13,6 +13,7 @@ $ims=new IMS\config('ims.json');
 <script src="Interaction.js"></script>
 <script src="Interaction_history.js"></script>
 <script src="Interaction_ontology.js"></script>
+<script src="Ontology.js"></script>
 <script src="Ontology_term.js"></script> 
 <script src="Interaction_ontology_qualifier.js"></script><? # inherits Ontoolgy_term ?>
 <script src="Interaction_ontology_type.js"></script>
