@@ -77,6 +77,13 @@ class config
     return time()+$this->config->expires;
   }
 
+  function ontology_types($ontology_name){
+    if(isset($this->config->ontology_types->$ontology_name)){
+      return $this->config->ontology_types->$ontology_name;
+    }
+    return ['P'];
+  }
+
   function html_head(){
     $out=[];
     foreach($this->config->css as $css){

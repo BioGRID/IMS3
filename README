@@ -19,6 +19,9 @@ developement.
 
 Note, no comments are allowed in JSON files.
 
+** title
+Whet to display on the top of the IMS3 page
+
 ** dbs
 Accessing databases. Hopefully this will be the only section you will
 need edit to use this package.
@@ -42,6 +45,10 @@ List of JavaScript files to be incuded.  See non-RPM rqueires above.
 An ISO 8601 date. Publications that have been updated before this date
 will be refreshed by queries to PubMed.
 
-** limit
-Limit the number of items a call to query.php will return if not
-specified.
+** expries
+How long to let somebody be logged on.
+
+** ontology_types
+ontologies.ontology_name to array of
+interaction_ontology_types.interaction_ontology_type_shortcode
+entries.  If none specified defaults to ["P"].

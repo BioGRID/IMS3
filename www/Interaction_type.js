@@ -133,6 +133,8 @@ IMS.Interaction_type.prototype.organize=function(){
 
   var part_type_id=1; // Gene, will worry about forced later
   var ontologies=[];
+
+  // First get the hard coded ontologies
   var names=['experimental_systems','throughputs'];
   for(var i in names){
     var name=names[i];
@@ -148,6 +150,19 @@ IMS.Interaction_type.prototype.organize=function(){
                      'user_id':IMS.user.id});
   }
 
+  // Get ontologies from the ontology selector.
+  var lis=$('#selected_ontologies li.term');
+  lis.each(function(){
+    var li=$(this);
+    ontologies.push({
+      'user_id':IMS.user.id,
+      'term_id':li.find('input[name=ontology_terms]').val(),
+      'type_id':li.find('input[type=hidden]').val()
+    })
+    // forget the qualifier for now.
+  });
+
+  // Get the interaction onte
   var note=$('textarea[name=interaction_note]').val().trim();
   if(note){
     note=[note];
@@ -155,6 +170,7 @@ IMS.Interaction_type.prototype.organize=function(){
     note=[];
   }
 
+  // Finally, check the interactors.
   var type_id=this.primary_id();
   if('Complex'==this.data.interaction_type_name){
     // Here we only ever return one interaction, with who knowns how

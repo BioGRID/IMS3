@@ -31,5 +31,15 @@
     "/select2/select2.js"
   ],
   "pubmed_update":"2014-06-17",
-  "expires":86400
+  "expires":86400,
+  "ontology_types":{
+    "Phenotypic Qualities (PATO) Ontology":["P","EV"],
+    "Zebrafish Anatomical and Developmental Ontology":["P","DV","TS"],
+    "BRENDA tissue":["P","TS","DV","CL","CT"],
+    "ChEBI":["CH"],
+    "Cell type":["CT"],
+    "GO Ontologies":["CC","WP"],
+    "Fungal anatomy ontology":["P","DV","TS"],
+    "Uberon":["P","DV","TS"]
+  }
 }

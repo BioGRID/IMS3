@@ -872,7 +872,12 @@ $(document).ready(function(){
   IMS.populate_select(IMS.Participant_type);
    */
 
-  IMS.populate_select(IMS.Ontology,{query:{ontology_status:'active'}});
+  IMS.populate_select(
+    IMS.Ontology,
+    {query:{ontology_status:'active'},
+     callback:IMS.Ontology.fieldsets}).
+    change(IMS.Ontology.fieldsets);
+
   IMS.populate_select(IMS.Interaction_ontology_type);
 
   IMS.populate_select(
@@ -937,7 +942,11 @@ $(document).ready(function(){
     var append=$('#selected_ontologies');
     var qualifiers='<ul class="qualifiers"></ul>';
 
+    var li_class=' class="term"';
+    var iot=''; // interaction_ontology_type
     if('add_qualifier'==this.id){
+      li_class='';
+
       var si=$('input[name='.concat(name,']:checked'));
       if(0==si.length){
         alert('No Ontology Term Checked');
@@ -946,6 +955,19 @@ $(document).ready(function(){
       name='qualifier';
       qualifiers='';
       append=si.parent().parent().find('.qualifiers');
+    }else{
+      var tag=$('.interaction_ontology_types');
+      var iot_id=$('.interaction_ontology_types').val();
+      if(null===iot_id){
+        alert('No Interaction Ontology Type selected');
+        return;
+      }
+
+      var txt=tag.find('[value='.concat(iot_id,']')).attr('class').replace('iot_','');
+
+
+      iot='<input type="hidden" value="'.
+        concat(iot_id,'">',txt,':');
     }
 
     if(ot_id){
@@ -956,18 +978,21 @@ $(document).ready(function(){
         var ot=new IMS.Ontology_term(o[0]);
 
         // We only want the latest addition to be easily undooable
-        $('input.last[name='.concat(name,']')).removeClass('last');
+        $('input.last').removeClass('last');
 
         append.append(
-          '<li><label><input type="checkbox" class="last sot" name="'.concat
-          (name,
-           '" value="',
-           ot.id,
-           '">',
-           ot.html(),
-           '</label>',
-           qualifiers,
-           '</ul></li>'));
+          '<li'.concat(
+            li_class,
+            '><label><input type="checkbox" class="last sot" name="',
+            name,
+            '" value="',
+            ot.id,
+            '">',
+            iot,
+            ot.html(),
+            '</label>',
+            qualifiers,
+            '</ul></li>'));
       },ot_id);
 
       return;

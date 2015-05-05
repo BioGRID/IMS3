@@ -7,6 +7,20 @@ class Ontologies extends _Table
   const STATUS_COLUMN='ontology_status';
   const DEFAULT_STATUS='active';
 
+  public function fetch(){
+    $out=parent::fetch();
+    if(!$out){
+      // Don't do anything if it's the final call to fetch.
+      return $out;
+    }
+
+    if('active'==$this->row['ontology_status']){
+      $out['interaction_ontology_type_shortcodes']=
+	$this->cfg->ontology_types($out['ontology_name']);
+    }
+    return $out;
+  }
+
   protected function radio_term($ot){
     $name=$this->row['ontology_name'];
     //print "<h1>$name</h1>";

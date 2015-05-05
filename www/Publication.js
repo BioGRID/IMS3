@@ -41,14 +41,19 @@ IMS.Publication.prototype.pmid=function(){
 IMS.Publication.prototype.commit=function(){
   // first we get the interaction_type
   var it_id=$('.interaction_types').val();
-  var pub_id=this.primary_id(); // not pmid
+
+  // now the publication_id, not the pmid_id.
+  var pub_id=this.primary_id();
+
   IMS.Interaction_type.async(function(){
-    // get a list of valid interaction pairs
+
+    // get a list of valid interaction pairs, with ontologies.
     var got=this.organize();
     if(!got){
       // It's up to Interaction_type.js to gripe if something is wrong.
       return;
     }
+
     var data={};
     data[pub_id]=got;
     var request={
