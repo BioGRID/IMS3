@@ -31,6 +31,7 @@ Requires: php-mysql
 %{__install} -m 755 www/Interaction_source.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_source.js
 %{__install} -m 755 www/Interaction_note.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_note.js
 %{__install} -m 755 www/Interaction_type.js $RPM_BUILD_ROOT%{ims_wwwdir}/Interaction_type.js
+%{__install} -m 755 www/Ontology.js $RPM_BUILD_ROOT%{ims_wwwdir}/Ontology.js
 %{__install} -m 755 www/Ontology_term.js $RPM_BUILD_ROOT%{ims_wwwdir}/Ontology_term.js
 %{__install} -m 755 www/Participant.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant.js
 %{__install} -m 755 www/Participant_role.js $RPM_BUILD_ROOT%{ims_wwwdir}/Participant_role.js
@@ -76,6 +77,7 @@ rm -rf $RPM_BUILD_ROOT
 %{ims_wwwdir}/Interaction_source.js
 %{ims_wwwdir}/Interaction_note.js
 %{ims_wwwdir}/Interaction_type.js
+%{ims_wwwdir}/Ontology.js
 %{ims_wwwdir}/Ontology_term.js
 %{ims_wwwdir}/Participant.js
 %{ims_wwwdir}/Participant_role.js
@@ -102,6 +104,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon May 05 2015 Sven Heinicke <heinicke@princeton.edu> - 0.23
+- Can now enter Ontologies
+
 * Mon Apr 13 2015 Sven Heinicke <sven@genomics.princeton.edu> - 0.22
 - Has modification_type radio boxes.
 
