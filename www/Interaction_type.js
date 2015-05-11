@@ -127,6 +127,7 @@ IMS.Interaction_type.prototype.organize=function(){
   //    'term_id':####
   //    'type_id':#### // optional
   //    'user_id':####
+  //    'qualifier_ids':[###,...] // optional
   //   ],
   //   'notes':[aaa,...]
   // ]..
@@ -157,7 +158,8 @@ IMS.Interaction_type.prototype.organize=function(){
     ontologies.push({
       'user_id':IMS.user.id,
       'term_id':li.find('input[name=ontology_terms]').val(),
-      'type_id':li.find('input[type=hidden]').val()
+      'type_id':li.find('input[type=hidden]').val(),
+      'qualifier_ids':li.find('.qualifiers input[name=qualifier]').map(function(){return $(this).val()}).get()
     })
     // forget the qualifier for now.
   });
