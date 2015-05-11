@@ -615,13 +615,19 @@ class Publication_history(BioGRID.ims.Publication_history,_Table):
             return self.pub2pub()
         return super(Publication_history,self).__getitem__(name)
     def store(self):
+        if(0==self.row['user_id']):
+            self.row['user_id']=DEFAULT_USER_ID
+            self.warn('Setting user_id=0 to %s' % DEFAULT_USER_ID)
+
         try:
             return super(Publication_history,self).store()
         except _mysql_exceptions.OperationalError:
             pub_id=self.row['publication_id']
             self.warn('Skipping where PubMed ID is %s' % self.pubmed_id())
             #self.warn('Skipping where publication_id==%d' % self.row['publication_id'])
-
+        except _mysql_exceptions.IntegrityError:
+            pprint(self.row);
+            sys.exit(1)
 
 
 class Publication_query(BioGRID.ims.Publication_query,_Table):

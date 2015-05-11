@@ -64,4 +64,3 @@ CREATE TABLE IF NOT EXISTS interaction_ontologies(
        ,FOREIGN KEY(user_id)REFERENCES users(user_id)
        ,FOREIGN KEY(interaction_ontology_type_id)REFERENCES interaction_ontology_types(interaction_ontology_type_id)
 );
-
