@@ -71,13 +71,29 @@ foreach($_POST as $publication_id => $interactions){
       $args=['interaction_id'=>$interaction_id,
 	     'user_id'=>$ontology['user_id'],
 	     'ontology_term_id'=>$ontology['term_id']];
+
+      // As type_id in optional we make sure it exists before using it
       if(array_key_exists('type_id',$ontology)){
 	$args['interaction_ontology_type_id']=$ontology['type_id'];
       }else{
 	$args['interaction_ontology_type_id']=null;
       }
       $io=new IMS\Interaction_ontologies($cfg,$args);
-      $io->insert();
+      $interaction_ontology_id=$io->insert();
+
+      // Again, as qualifier_id is option we don't want to try to
+      // insert anything unless we have something to insert.
+      if(array_key_exists('qualifier_ids',$ontology)){
+	foreach($ontology['qualifier_ids'] as $qualifier_id){
+	  $ioq=new IMS\Interaction_ontologies_qualifiers
+	    ($cfg,
+	     ['interaction_ontology_id'=>$interaction_ontology_id,
+	      'ontology_term_id'=>$qualifier_id,
+	      'user_id'=>$user_id
+	      ]);
+	  $ioq->insert();
+	}
+      }
     }
 
     foreach($interaction['participants'] as $participant){

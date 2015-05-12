@@ -402,7 +402,7 @@ class _Table
     }
     if(!$sth->execute($ip)){
       $dbh->rollBack();
-      print "Error inserting inte $c::TABLE";
+      print "Error inserting into $c::TABLE";
       exit(1);
       #return false;
     }
@@ -568,6 +568,7 @@ class Interaction_ontologies_qualifiers extends _Table
   const TABLE='interaction_ontologies_qualifiers';
   const PRIMARY_KEY='interaction_ontology_qualifier_id';
   const STATUS_COLUMN='interaction_ontology_qualifier_status';
+  const INSERT_SQL='INSERT INTO interaction_ontologies_qualifiers(interaction_ontology_id,ontology_term_id,user_id)VALUES(:interaction_ontology_id,:ontology_term_id,:user_id)';
 
   public function _select(){
     $c=get_called_class();
