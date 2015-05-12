@@ -104,6 +104,9 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %changelog
+* Mon May 12 2015 Sven Heinicke <heinicke@princeton.edu> - 0.24
+- Ontology qualifiers are now stored.
+
 * Mon May 05 2015 Sven Heinicke <heinicke@princeton.edu> - 0.23
 - Can now enter Ontologies
 
