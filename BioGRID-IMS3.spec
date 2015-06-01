@@ -60,7 +60,7 @@ rm -rf $RPM_BUILD_ROOT
 
 
 %files
-%doc README
+%doc README.md
 %config %{_sysconfdir}/ims.json
 %{ims_wwwdir}
 %{ims_wwwdir}/home.php
