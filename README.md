@@ -1,3 +1,8 @@
+# Inactive Repository
+This project has been replaced by https://github.com/BioGRID/IMS and is maintained for legacy purposes only.
+
+-----------------------------------
+
 # Introduction
 Source Code for future versions of BioGRID IMS, see:
        http://wiki.thebiogrid.org/doku.php/interaction_management_system
